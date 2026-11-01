@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::engine::rules::{is_valid_id, parse_clock};
 use crate::geometry::{DockMode, DockPosition, DockSize};
 
-pub const SETTINGS_VERSION: u32 = 4;
+pub const SETTINGS_VERSION: u32 = 5;
 pub const MAX_PINNED_APPS: usize = 24;
 
 fn default_true() -> bool {
@@ -30,6 +30,16 @@ pub enum DockStyle {
     Neon,
     /// Opaque and high contrast.
     Ink,
+}
+
+/// Gap between dock items. Independent of icon size.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum DockSpacing {
+    Tight,
+    #[default]
+    Even,
+    Roomy,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
@@ -75,6 +85,8 @@ pub struct DockSettings {
     pub theme: Theme,
     #[serde(default)]
     pub style: DockStyle,
+    #[serde(default)]
+    pub spacing: DockSpacing,
     #[serde(default)]
     pub monitor_id: Option<String>,
     pub item_order: Vec<String>,
@@ -236,6 +248,7 @@ impl Default for AppSettings {
                 mode: DockMode::Pill,
                 theme: Theme::Dark,
                 style: DockStyle::Glass,
+                spacing: DockSpacing::Even,
                 monitor_id: None,
                 item_order: DEFAULT_ITEM_ORDER.iter().map(|s| s.to_string()).collect(),
                 clock24h: false,
@@ -256,8 +269,8 @@ impl AppSettings {
     /// Upgrades an older settings document in place. Returns true if anything changed.
     pub fn migrate(value: &mut serde_json::Value) -> bool {
         let version = value.get("version").and_then(|v| v.as_u64());
-        // Version 4 only added dock styles, so version 3 documents are already valid.
-        if version == Some(3) {
+        // Version 4 added dock styles. Version 5 adds spacing, which defaults to even.
+        if matches!(version, Some(3) | Some(4)) {
             value["version"] = serde_json::json!(SETTINGS_VERSION);
             return true;
         }
@@ -442,11 +455,32 @@ mod tests {
         let mut value = original.clone();
         assert!(AppSettings::migrate(&mut value));
         let settings = parse(&value).unwrap();
-        assert_eq!(settings.version, 4);
+        assert_eq!(settings.version, 5);
         assert_eq!(settings.dock.style, DockStyle::Midnight);
+        assert_eq!(settings.dock.spacing, DockSpacing::Even);
         assert!(!settings.onboarded);
-        original["version"] = serde_json::json!(4);
+        original["version"] = serde_json::json!(5);
         assert_eq!(value, original);
+        assert!(!AppSettings::migrate(&mut value));
+    }
+
+    #[test]
+    fn migrates_version_four_and_defaults_spacing() {
+        let mut value = serde_json::json!({
+            "version": 4,
+            "dock": {
+                "position": "left", "size": "l", "mode": "full", "theme": "light",
+                "style": "ink", "monitorId": null,
+                "itemOrder": ["clock"],
+                "clock24h": true, "launchAtStartup": false
+            }
+        });
+        assert!(AppSettings::migrate(&mut value));
+        let settings = parse(&value).unwrap();
+        assert_eq!(settings.version, 5);
+        assert_eq!(settings.dock.style, DockStyle::Ink);
+        assert_eq!(settings.dock.spacing, DockSpacing::Even);
+        assert_eq!(settings.dock.position, crate::geometry::DockPosition::Left);
         assert!(!AppSettings::migrate(&mut value));
     }
 

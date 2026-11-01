@@ -48,9 +48,10 @@ describe("appSettingsSchema", () => {
         launchAtStartup: false,
       },
     });
-    expect(migrated.version).toBe(4);
+    expect(migrated.version).toBe(5);
     expect(migrated.dock.position).toBe("top");
     expect(migrated.dock.style).toBe("glass");
+    expect(migrated.dock.spacing).toBe("even");
     expect(migrated.taskbar.mode).toBe("normal");
     expect(migrated.dock.itemOrder).toEqual(["apps", "clock", "add-widget"]);
     expect(migrated.onboarded).toBe(true);
@@ -81,7 +82,28 @@ describe("appSettingsSchema", () => {
   it("migrates version 3 documents without changing them", () => {
     const v3 = { ...defaultAppSettings, version: 3, onboarded: false, dock: { ...defaultAppSettings.dock, style: "midnight" } };
     const migrated = migrateAppSettings(v3);
-    expect(migrated).toEqual({ ...v3, version: 4 });
+    expect(migrated).toEqual({ ...v3, version: 5 });
+  });
+
+  it("migrates version 4 documents and defaults spacing", () => {
+    const migrated = migrateAppSettings({
+      version: 4,
+      dock: {
+        position: "left",
+        size: "l",
+        mode: "full",
+        theme: "light",
+        style: "ink",
+        monitorId: null,
+        itemOrder: ["clock"],
+        clock24h: true,
+        launchAtStartup: false,
+      },
+    });
+    expect(migrated.version).toBe(5);
+    expect(migrated.dock.style).toBe("ink");
+    expect(migrated.dock.spacing).toBe("even");
+    expect(migrated.dock.position).toBe("left");
   });
 
   it("greets new installs", () => {

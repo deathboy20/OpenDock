@@ -1,6 +1,6 @@
 .dock-shell {
   --tile-h: 44px;
-  --tile-gap: 6px;
+  --tile-gap: var(--od-gap-even);
   position: relative;
   display: flex;
   align-items: center;
@@ -16,14 +16,20 @@
 
 .dock-shell.size-s {
   --tile-h: 36px;
-  --tile-gap: 4px;
   font-size: 12.5px;
 }
 
 .dock-shell.size-l {
   --tile-h: 54px;
-  --tile-gap: 8px;
   font-size: 14.5px;
+}
+
+.dock-shell.spacing-tight {
+  --tile-gap: var(--od-gap-tight);
+}
+
+.dock-shell.spacing-roomy {
+  --tile-gap: var(--od-gap-roomy);
 }
 
 .dock-shell.mode-full {
