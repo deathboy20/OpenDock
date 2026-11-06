@@ -1,62 +1,219 @@
 name: Release build
 
 on:
+  push:
+    tags: ['v*.*.*']
   workflow_dispatch:
     inputs:
-      tag:
-        description: Version tag of an existing draft release
+      dry_run:
+        description: Build all platform artifacts without publishing a release
         required: true
+        type: boolean
+        default: true
+      ref:
+        description: Branch or tag to build for a dry run
+        required: false
+        type: string
+        default: main
+      tag:
+        description: Existing version tag to publish when dry_run is false
+        required: false
         type: string
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  guard:
+    runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+      build_ref: ${{ steps.release.outputs.build_ref }}
+      dry_run: ${{ steps.release.outputs.dry_run }}
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && inputs.ref || github.event_name == 'workflow_dispatch' && inputs.tag && format('refs/tags/{0}', inputs.tag) || github.ref }}
+          fetch-depth: 0
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Guard version, tag ancestry, and changelog
+        id: release
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_REF: ${{ github.ref }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          INPUT_REF: ${{ inputs.ref }}
+          INPUT_TAG: ${{ inputs.tag }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          version="$(node -e 'const fs=require("node:fs"); const p=JSON.parse(fs.readFileSync("package.json","utf8")); const t=JSON.parse(fs.readFileSync("apps/desktop/src-tauri/tauri.conf.json","utf8")); const c=fs.readFileSync("apps/desktop/src-tauri/Cargo.toml","utf8").match(/^version\s*=\s*"([^"]+)"/m); if (!c) throw Error("Cargo.toml package version not found"); if (p.version !== t.version || p.version !== c[1]) throw Error(`Version mismatch: package.json=${p.version}, Cargo.toml=${c[1]}, tauri.conf.json=${t.version}`); process.stdout.write(p.version)')"
+          dry_run=false
+          tag=""
+          build_ref="$EVENT_REF"
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            dry_run="$INPUT_DRY_RUN"
+            if [[ "$dry_run" == "true" ]]; then
+              build_ref="$INPUT_REF"
+            else
+              tag="$INPUT_TAG"
+              [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo 'A valid tag is required when dry_run is false.'; exit 1; }
+              build_ref="refs/tags/$tag"
+            fi
+          else
+            tag="${EVENT_REF#refs/tags/}"
+          fi
+          if [[ "$dry_run" != "true" ]]; then
+            [[ "$tag" == "v$version" ]] || { echo "Tag $tag does not match version $version"; exit 1; }
+            git fetch origin main --no-tags
+            tag_commit="$(git rev-parse "refs/tags/$tag^{commit}")"
+            main_commit="$(git rev-parse FETCH_HEAD)"
+            git merge-base --is-ancestor "$tag_commit" "$main_commit" || { echo 'Release tag commit is not on origin/main.'; exit 1; }
+            grep -Eq "^## \\[$version\\]([[:space:]]|$)" CHANGELOG.md || { echo "CHANGELOG.md has no section for $version"; exit 1; }
+          fi
+          printf 'version=%s\ntag=%s\nbuild_ref=%s\ndry_run=%s\n' "$version" "$tag" "$build_ref" "$dry_run" >> "$GITHUB_OUTPUT"
+          printf 'Validated %s from %s (dry_run=%s) in %s\n' "$version" "$build_ref" "$dry_run" "$REPOSITORY"
+
+  verify:
+    needs: guard
     runs-on: ubuntu-22.04
     steps:
-      - name: Validate release tag and draft
-        env:
-          TAG: ${{ inputs.tag }}
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || exit 1
-          test "$(gh release view "$TAG" --json isDraft --jq .isDraft)" = true
-      - name: Checkout release tag
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Checkout source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: refs/tags/${{ inputs.tag }}
-      - name: Check installer version matches tag
-        env:
-          TAG: ${{ inputs.tag }}
-        run: node -e "const c=require('./apps/desktop/src-tauri/tauri.conf.json'); if ('v'+c.version !== process.env.TAG) throw Error('Tag does not match installer version')"
+          ref: ${{ needs.guard.outputs.build_ref }}
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        uses: ./.github/actions/install-linux-deps
+
+      - name: Locate pnpm store
+        id: pnpm-store
+        shell: bash
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+      - name: Cache pnpm store
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: apps/desktop/src-tauri
+          key: ${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('apps/desktop/src-tauri/Cargo.lock') }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Vitest
+        run: pnpm test
+      - name: Rust tests
+        run: cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --all-targets --locked
+      - name: Clippy
+        run: cargo clippy --manifest-path apps/desktop/src-tauri/Cargo.toml --all-targets --locked -- -D warnings
+      - name: Rust format
+        run: pnpm fmt:check
+
   packages:
-    needs: validate
+    needs: [guard, verify]
+    permissions:
+      contents: read
     uses: ./.github/workflows/desktop-packages.yml
     with:
-      ref: refs/tags/${{ inputs.tag }}
-  attach:
-    needs: packages
+      ref: ${{ needs.guard.outputs.build_ref }}
+    secrets: inherit
+
+  checksums:
+    needs: [guard, packages]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download all platform artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: artifacts
+      - name: Generate combined SHA256SUMS.txt
+        run: |
+          set -euo pipefail
+          mkdir -p release-artifacts
+          while IFS= read -r -d '' file; do
+            name="$(basename "$file")"
+            if [[ "$name" == SHA256SUMS-* || "$name" == SIGNING_STATUS.txt ]]; then
+              if [[ "$name" == SIGNING_STATUS.txt ]]; then cp -- "$file" "release-artifacts/$name"; fi
+              continue
+            fi
+            if [[ -e "release-artifacts/$name" ]]; then
+              echo "Duplicate release asset filename: $name"
+              exit 1
+            fi
+            cp -- "$file" "release-artifacts/$name"
+          done < <(find artifacts -type f -print0 | sort -z)
+          (cd release-artifacts && find . -type f ! -name SHA256SUMS.txt ! -name SIGNING_STATUS.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+      - name: Upload combined release bundle
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: opendock-release-bundle
+          path: release-artifacts/
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    needs: [guard, checksums]
+    if: needs.guard.outputs.dry_run != 'true'
     runs-on: ubuntu-22.04
     permissions:
       contents: write
       actions: read
-    env:
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
-      TAG: ${{ inputs.tag }}
-      RUN_ID: ${{ github.run_id }}
     steps:
-      - name: Download Windows and Linux build artifacts
+      - name: Checkout release source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.guard.outputs.build_ref }}
+      - name: Download combined release bundle
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: opendock-release-bundle
+          path: release-artifacts
+      - name: Create draft prerelease from changelog
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.guard.outputs.version }}
+          TAG: ${{ needs.guard.outputs.tag }}
+        shell: bash
         run: |
-          gh run download "$RUN_ID" --name opendock-windows-x64 --dir artifacts/windows
-          gh run download "$RUN_ID" --name opendock-linux-x64 --dir artifacts/linux
-      - name: Verify checksums
-        run: |
-          (cd artifacts/windows && sha256sum -c SHA256SUMS-windows-x64.txt)
-          (cd artifacts/linux && sha256sum -c SHA256SUMS-linux-x64.txt)
-      - name: Attach complete package set to draft
-        run: |
-          test "$(gh release view "$TAG" --json isDraft --jq .isDraft)" = true
-          gh release upload "$TAG" artifacts/windows/* artifacts/linux/*
+          set -euo pipefail
+          awk -v version="$VERSION" '$0 ~ "^## \\[" version "\\]([[:space:]]|$)" { found=1; next } found && /^## \[/ { exit } found { print }' CHANGELOG.md > release-notes.md
+          test -s release-notes.md
+          cat >> release-notes.md <<'NOTES'
+
+          Windows: supported.
+          Linux (AppImage, deb, rpm) and macOS (dmg): experimental. The dock does not replace the system shell on these platforms yet.
+          Builds are unsigned unless stated otherwise. Verify SHA256SUMS.txt.
+          NOTES
+          if grep -q '^signed and notarized$' release-artifacts/SIGNING_STATUS.txt; then
+            printf '\nmacOS DMG: code-signed and notarized.\n' >> release-notes.md
+          else
+            printf '\nmacOS DMG: unsigned and unnotarized; follow the Gatekeeper instructions in the installation guide.\n' >> release-notes.md
+          fi
+          gh release create "$TAG" --draft --prerelease --title "OpenDock $VERSION" --notes-file release-notes.md
+          find release-artifacts -type f ! -name SHA256SUMS.txt ! -name SIGNING_STATUS.txt -print0 | xargs -0 gh release upload "$TAG" --clobber
+          gh release upload "$TAG" release-artifacts/SHA256SUMS.txt --clobber

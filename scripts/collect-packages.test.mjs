@@ -9,7 +9,7 @@ import { collectPackages } from './collect-packages.mjs';
 function fixture(t) {
   const root = mkdtempSync(join(tmpdir(), 'opendock-packages-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
-  for (const [dir, ext] of [['nsis', 'exe'], ['msi', 'msi'], ['deb', 'deb'], ['rpm', 'rpm'], ['appimage', 'AppImage']]) {
+  for (const [dir, ext] of [['nsis', 'exe'], ['msi', 'msi'], ['deb', 'deb'], ['rpm', 'rpm'], ['appimage', 'AppImage'], ['dmg', 'dmg']]) {
     mkdirSync(join(root, dir));
     const filename = (version) => ext === 'rpm' ? `OpenDock-${version}-1.x86_64.rpm` : `OpenDock_${version}_x64.${ext}`;
     writeFileSync(join(root, dir, filename('0.2.0')), 'package');
@@ -18,7 +18,12 @@ function fixture(t) {
   return { version: '0.2.0', bundleDir: root, outputDir: join(root, 'out') };
 }
 
-for (const [platform, count] of [['windows-x64', 2], ['linux-x64', 3]]) {
+for (const [platform, count] of [
+  ['windows-x64', 2],
+  ['linux-x64', 3],
+  ['linux-arm64', 3],
+  ['macos-universal', 1],
+]) {
   test(`collects only current ${platform} packages with verifiable checksums`, (t) => {
     const input = fixture(t);
     const files = collectPackages({ ...input, platform });

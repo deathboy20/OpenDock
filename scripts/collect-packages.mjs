@@ -7,6 +7,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const formats = {
   'windows-x64': [['nsis', '.exe'], ['msi', '.msi']],
   'linux-x64': [['deb', '.deb'], ['rpm', '.rpm'], ['appimage', '.AppImage']],
+  'linux-arm64': [['deb', '.deb'], ['rpm', '.rpm'], ['appimage', '.AppImage']],
+  'macos-universal': [['dmg', '.dmg']],
 };
 
 export function collectPackages({ platform, version, bundleDir, outputDir }) {
@@ -36,8 +38,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   const config = JSON.parse(readFileSync(join(tauriDir, 'tauri.conf.json'), 'utf8'));
   const metadata = JSON.parse(execFileSync('cargo', ['metadata', '--format-version', '1', '--no-deps', '--locked', '--manifest-path', join(tauriDir, 'Cargo.toml')], { encoding: 'utf8' }));
   const platform = process.argv[2];
-  if (!Object.hasOwn(formats, platform)) throw new Error('Use windows-x64 or linux-x64');
+  if (!Object.hasOwn(formats, platform)) throw new Error('Use windows-x64, linux-x64, linux-arm64, or macos-universal');
+  const target = process.argv[3];
+  if (target && target !== 'universal-apple-darwin') throw new Error(`Unsupported target: ${target}`);
   mkdirSync(join(root, 'release'), { recursive: true });
-  const result = collectPackages({ platform, version: config.version, bundleDir: join(metadata.target_directory, 'release/bundle'), outputDir: join(root, 'release', platform) });
+  const bundleDir = target
+    ? join(metadata.target_directory, target, 'release/bundle')
+    : join(metadata.target_directory, 'release/bundle');
+  const result = collectPackages({ platform, version: config.version, bundleDir, outputDir: join(root, 'release', platform) });
   console.log(JSON.stringify({ platform, version: config.version, packages: result }, null, 2));
 }
