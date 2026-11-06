@@ -150,6 +150,7 @@ pub fn app_icon_data_url(path: &str) -> Option<String> {
 
 /// Fits a `source` sized image inside `slot` (left, top, right, bottom), centred, never
 /// scaled up.
+#[cfg(windows)]
 pub fn fit_rect(source: (i32, i32), slot: [i32; 4]) -> [i32; 4] {
     let [left, top, right, bottom] = slot;
     let (slot_w, slot_h) = ((right - left).max(1), (bottom - top).max(1));
@@ -387,6 +388,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[cfg(windows)]
     fn fit_keeps_aspect_and_centres() {
         assert_eq!(fit_rect((1600, 900), [0, 0, 320, 200]), [0, 10, 320, 190]);
         assert_eq!(fit_rect((100, 50), [10, 10, 330, 210]), [120, 85, 220, 135]);
