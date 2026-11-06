@@ -8,7 +8,7 @@ All notable changes to OpenDock are documented here. The format is based on [Kee
 
 - Dock settings opens on a live dock. Drag it to an edge, change style, shape, icon size and spacing, and use Undo or Reset. Arrow keys move the dock, Space picks up a widget, and the spacing bar takes arrow keys too. Settings version 5 stores spacing (tight, even or roomy). Older files gain even spacing.
 
-- Native Windows and Linux package workflow with DEB, RPM and AppImage build targets, per-platform checksums, and draft release attachment after both platforms succeed. Linux runtime support remains subject to the documented distro/session acceptance matrix.
+- Release pipeline configuration for Windows installers, Linux x64/arm64 AppImage/DEB/RPM packages and a universal macOS DMG, with a combined checksum manifest and draft prerelease publishing. Linux and macOS remain experimental build-only artifacts; CI/runtime results are not yet established.
 - The homepage has a dock you can use in the browser: open apps, search from Start, change the volume, switch skins, and turn widgets on and off.
 - Now playing opens from the dock, not a separate block. Previous and next switch between *Just 2 Minutes of Fusion Jazz!* by Giulio Carmassi and *Tokyo* by Toshiki Soejima. YouTube loads only while that widget is open.
 - Contributor branches now run `develop` → `staging` → `main`.

@@ -1,6 +1,6 @@
-# Linux builds and package verification
+# Linux experimental builds and package verification
 
-Linux packages are being prepared for the combined desktop release. A successful build is not a claim of Windows shell feature parity: non-Windows shell functions currently use fallbacks. Check the release acceptance record before describing a distro or compositor as supported.
+Linux x64 and arm64 packages are experimental build-only artifacts. Passing compilation, packaging or install smoke checks does not prove graphical runtime behavior. Windows taskbar replacement, window previews and screen-edge reservation are not available on Linux.
 
 ## Build
 
@@ -16,22 +16,24 @@ node scripts/collect-packages.mjs linux-x64
 
 The collector requires a fresh release/linux-x64 directory, exactly one current-version package of each format, and writes SHA256SUMS-linux-x64.txt. It refuses partial or ambiguous output. Build directories from earlier runs must not be reused as release evidence.
 
-The Desktop packages GitHub Actions workflow runs tests, Clippy, builds and package inspections on Windows and Linux. It can be dispatched without creating or publishing a release. Download its opendock-linux-x64 artifact to review DEB, RPM and AppImage files.
+The release workflow builds Linux packages as part of a cross-platform draft prerelease. A manual dispatch with `dry_run=true` builds artifacts without publishing a release. The install smoke test checks package installation, installed files and dynamic-library resolution only; it does not test the UI or desktop-session behavior.
 
 ## Distribution acceptance
 
 DEB targets compatible Debian/Ubuntu installations; RPM targets compatible Fedora-family installations; AppImage targets compatible glibc systems. These formats do not guarantee support for every distro. Record the exact OS version, architecture, desktop environment, display server, WebKitGTK and glibc versions in the release results.
 
-For each advertised distro, verify checksums, install, launch, single-instance behaviour, settings persistence, app launching, keychain persistence, offline behaviour, upgrade and uninstall. Test X11 and Wayland independently, including GNOME, KDE Plasma and any advertised wlroots compositor. Do not disable WebKit's sandbox to make a smoke test pass.
+For any future runtime-support claim, verify checksums, install, launch, single-instance behaviour, settings persistence, app launching, keychain persistence, offline behaviour, upgrade and uninstall on each advertised distro. Test X11 and Wayland independently. Do not disable WebKit's sandbox to make a smoke test pass.
 
 ```sh
-sha256sum -c SHA256SUMS-linux-x64.txt
+sha256sum -c SHA256SUMS.txt
 dpkg-deb --info OpenDock_*.deb
 rpm -qip OpenDock-*.rpm
 rpm -qp --requires OpenDock-*.rpm
 ```
 
-Graphical session and installed-package tests must be recorded separately from headless compilation and package metadata checks. Linux currently has no recorded runtime acceptance results.
+The release's combined `SHA256SUMS.txt` is the published checksum file. Per-platform checksum files are also kept with workflow artifacts. Record graphical session and installed-build results separately from package installability checks. Linux has no recorded runtime acceptance results.
+
+Flatpak manifest and `flatpak-builder` CI are a TODO. Do not publish a Flatpak or claim Flatpak support until that path builds and is tested cleanly.
 
 ## References
 
