@@ -1,3 +1,4 @@
+import { isTauri } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { getHubPage, on, type HubPage } from "../../services/ipc";
 import { Icon, type IconName } from "../widgets/icons";
@@ -21,8 +22,16 @@ const NAV: { page: HubPage; label: string; icon: IconName; group: "Make" | "Sett
   { page: "privacy", label: "Privacy ledger", icon: "shield", group: "Settings" },
 ];
 
+const HUB_PAGES: readonly HubPage[] = ["welcome", "apps", "widgets", "automations", "activity", "dock", "calendars", "privacy"];
+
+function pageFromLocation(): HubPage {
+  if (isTauri() || typeof window === "undefined") return "widgets";
+  const requested = new URLSearchParams(window.location.search).get("page");
+  return HUB_PAGES.includes(requested as HubPage) ? (requested as HubPage) : "widgets";
+}
+
 export function HubApp() {
-  const [page, setPage] = useState<HubPage>("widgets");
+  const [page, setPage] = useState<HubPage>(pageFromLocation);
 
   useEffect(() => {
     void getHubPage()

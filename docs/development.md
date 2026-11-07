@@ -1,6 +1,6 @@
 # Development setup
 
-This guide gets a Windows machine ready to build and run OpenDock from source. It takes about 20 minutes, most of it downloads.
+This guide gets a Windows or Linux machine ready to build and run OpenDock from source. It takes about 20 minutes, most of it downloads.
 
 ## Prerequisites
 
@@ -12,6 +12,25 @@ This guide gets a Windows machine ready to build and run OpenDock from source. I
 | [Node.js](https://nodejs.org) | 22 (`.nvmrc` and `engines` in `package.json`) | Frontend tooling |
 | [pnpm](https://pnpm.io) | 10.34.4 (`packageManager` in `package.json`) | Workspace package manager |
 | WebView2 runtime | Evergreen | Renders the UI; preinstalled on Windows 11 |
+
+### Linux (experimental build checks)
+
+Linux is supported here as a build and test environment, not as a claim that OpenDock's Windows shell features work on Linux. Use Ubuntu 22.04 or newer or Debian 12 or newer. In Codespaces, `.devcontainer/devcontainer.json` installs these packages during container creation.
+
+```sh
+sudo apt-get update
+sudo apt-get install -y build-essential curl wget file patchelf pkg-config \
+	libssl-dev libgtk-3-dev libwebkit2gtk-4.1-dev \
+	libayatana-appindicator3-dev librsvg2-dev libxdo-dev
+```
+
+Use Node 22 from `.nvmrc`, pnpm from `packageManager` in `package.json`, and Rust stable from `rust-toolchain.toml`. Verify the Linux development metadata with:
+
+```sh
+pkg-config --modversion gdk-3.0 webkit2gtk-4.1 ayatana-appindicator3-0.1 librsvg-2.0
+```
+
+CI's Linux package jobs install these dependencies before Rust checks or Tauri bundling. Passing compilation or install smoke checks does not prove that the graphical app works on a Linux desktop session.
 
 ### Install with winget
 

@@ -208,7 +208,7 @@ export function DockBar() {
 
   return (
     <div
-      className={`dock-shell size-${dock.size} mode-${dock.mode} style-${dock.style} position-${dock.position} ${vertical ? "vertical" : "horizontal"}`}
+      className={`dock-shell size-${dock.size} spacing-${dock.spacing} mode-${dock.mode} style-${dock.style} position-${dock.position} ${vertical ? "vertical" : "horizontal"}`}
       role="toolbar"
       aria-label="OpenDock"
       aria-orientation={vertical ? "vertical" : "horizontal"}

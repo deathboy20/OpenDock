@@ -6,6 +6,9 @@ All notable changes to OpenDock are documented here. The format is based on [Kee
 
 ### Added
 
+- Dock settings opens on a live dock. Drag it to an edge, change style, shape, icon size and spacing, and use Undo or Reset. Arrow keys move the dock, Space picks up a widget, and the spacing bar takes arrow keys too. Settings version 5 stores spacing (tight, even or roomy). Older files gain even spacing.
+
+- Release pipeline configuration for Windows installers, Linux x64/arm64 AppImage/DEB/RPM packages and a universal macOS DMG, with a combined checksum manifest and draft prerelease publishing. Linux and macOS remain experimental build-only artifacts; CI/runtime results are not yet established.
 - The homepage has a dock you can use in the browser: open apps, search from Start, change the volume, switch skins, and turn widgets on and off.
 - Now playing opens from the dock, not a separate block. Previous and next switch between *Just 2 Minutes of Fusion Jazz!* by Giulio Carmassi and *Tokyo* by Toshiki Soejima. YouTube loads only while that widget is open.
 - Contributor branches now run `develop` → `staging` → `main`.
@@ -15,6 +18,10 @@ All notable changes to OpenDock are documented here. The format is based on [Kee
 
 - The website and the README describe taskbar restore as the exits OpenDock can see, including the gap when Windows kills OpenDock and the guard together. The manual results are in `docs/testing-matrix.md`.
 - The footer link that said Pricing now says Free. There is no paid plan.
+
+### Fixed
+
+- Taskbar replacement now requires a running recovery guard, restores the original state after a partial failure, and retains recovery data until restoration succeeds. Secondary taskbars are included in visibility checks. Startup failures open Dock settings with an error, and the dock is shown after initial layout.
 
 ## [0.2.0] - 2026-10-21
 

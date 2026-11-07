@@ -95,6 +95,13 @@
   --od-radius-md: 14px;
   --od-radius-lg: 20px;
   --od-radius-xl: 26px;
+  --od-space-xs: 4px;
+  --od-space-sm: 8px;
+  --od-space-md: 12px;
+  --od-space-lg: 18px;
+  --od-gap-tight: 2px;
+  --od-gap-even: 6px;
+  --od-gap-roomy: 14px;
   --od-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --od-fast: 140ms;
   --od-slow: 260ms;
