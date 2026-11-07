@@ -4,8 +4,11 @@ All notable changes to OpenDock are documented here. The format is based on [Kee
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-07
+
 ### Added
 
+- Merging `staging` into `main` now starts the release build and creates a draft prerelease with the combined platform bundle when a new version and matching changelog section are ready.
 - Dock settings opens on a live dock. Drag it to an edge, change style, shape, icon size and spacing, and use Undo or Reset. Arrow keys move the dock, Space picks up a widget, and the spacing bar takes arrow keys too. Settings version 5 stores spacing (tight, even or roomy). Older files gain even spacing.
 
 - Release pipeline configuration for Windows installers, Linux x64/arm64 AppImage/DEB/RPM packages and a universal macOS DMG, with a combined checksum manifest and draft prerelease publishing. Linux and macOS remain experimental build-only artifacts; CI/runtime results are not yet established.
@@ -65,6 +68,7 @@ The first release that can stand in for the Windows taskbar.
 - Settings stored in `settings.json`, validated in Rust and with Zod.
 - Marketing website.
 
-[Unreleased]: https://github.com/isaacobenzy/OpenDock/compare/v0.2.0...develop
+[Unreleased]: https://github.com/isaacobenzy/OpenDock/compare/v0.3.0...develop
+[0.3.0]: https://github.com/isaacobenzy/OpenDock/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/isaacobenzy/OpenDock/compare/v0.1.0-milestone-2...v0.2.0
 [0.1.0-milestone-2]: https://github.com/isaacobenzy/OpenDock/releases/tag/v0.1.0-milestone-2

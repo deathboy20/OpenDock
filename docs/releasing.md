@@ -49,42 +49,26 @@ pnpm bundle:desktop
 
 Record the results of the matrix, and the Windows versions you tested on, in the pull request.
 
-## 3. Merge and tag
+## 3. Promote, dry-run, and tag
 
-1. Squash-merge the release pull request into `staging`, then merge `staging` into `main`.
-2. Tag the merge commit and push the tag:
+1. Merge the version-bump PR into `develop`, then promote `develop` to `staging` and `staging` to `main` through pull requests. Wait for required checks at each stage.
+2. Dispatch the **Release build** workflow on `main` with `dry_run=true`. Confirm all platform builds, package inspections, checksums and install smoke jobs pass. The dry run builds artifacts but publishes nothing.
+3. Only after the dry run is green, tag the current `main` commit and push that tag:
 
-   ```powershell
+   ```sh
    git switch main
-   git pull
+   git pull --ff-only
    git tag -a v0.3.0 -m "OpenDock 0.3.0"
    git push origin v0.3.0
    ```
 
-3. Merge `main` back into `staging` and `develop` so the version bump and any release fixes are kept:
+   The tag workflow verifies the version fields, changelog section and tag ancestry before building. It creates a draft prerelease with the combined artifacts and checksum manifest. If a tag already exists or a guard fails, stop and resolve it; do not overwrite a release.
+4. Open promotion PRs from `main` back into `staging` and `develop` so the version bump and release fixes stay synchronized.
 
-   ```powershell
-   git switch staging
-   git merge --no-ff main
-   git push
-   git switch develop
-   git merge --no-ff main
-   git push
-   ```
+## 4. Review and publish
 
-## 4. Publish
-
-1. Create a **draft** release for the tag, with the changelog section as its notes:
-
-   ```powershell
-   gh release create v0.3.0 --draft --verify-tag --title "OpenDock 0.3.0" --notes-file notes.md
-   ```
-
-2. Attach the installers. Either:
-   - run the **Release build** workflow (`.github/workflows/release.yml`) with the tag as input. It verifies the draft/tag version, calls **Desktop packages** on clean Windows and Ubuntu 22.04 runners, runs the checks, and uploads EXE/MSI/DEB/RPM/AppImage packages only when both builds succeed. Each platform has its own checksum file (`SHA256SUMS-windows-x64.txt` and `SHA256SUMS-linux-x64.txt`). Existing assets are not overwritten. This is preferred, because the build doesn't depend on a maintainer's machine; or
-   - upload the files you built and tested locally: `gh release upload v0.3.0 (Get-ChildItem release -File).FullName`.
-3. Download the packages from the draft, check their platform checksum files, and test the installed Windows build and every advertised Linux distro/session. See [Linux acceptance](linux.md). Package compilation alone does not establish Linux shell support.
-4. Publish the release. For a pre-release version (`-beta.1` and so on), mark it as a pre-release.
+1. Download the packages from the generated draft, check `SHA256SUMS.txt`, and test the installed Windows build and every advertised Linux distro/session. See [Linux acceptance](linux.md). Package compilation alone does not establish Linux shell support.
+2. Publish the draft release. For a pre-release version (`-beta.1` and so on), keep it marked as a pre-release.
 
 ## 5. Announce
 

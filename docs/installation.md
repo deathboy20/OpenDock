@@ -25,7 +25,7 @@ Get the latest version from [GitHub Releases](https://github.com/isaacobenzy/Ope
 In PowerShell, in your Downloads folder:
 
 ```powershell
-Get-FileHash .\OpenDock_0.2.0_x64-setup.exe -Algorithm SHA256
+Get-FileHash .\OpenDock_0.3.0_x64-setup.exe -Algorithm SHA256
 ```
 
 The hash must match the line for that file in `SHA256SUMS.txt` (letter case doesn't matter).
