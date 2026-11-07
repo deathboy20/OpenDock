@@ -10,7 +10,7 @@ The dock sits on one edge of your screen. Everything on it is a **widget**, and 
 - **Right-click a widget** to remove it or open its settings.
 - **Click a widget** to open its panel, for example the month view from the clock or the full forecast from the weather.
 
-Change the edge, shape (pill or full width), size and theme in **Dock settings**. During fullscreen games, videos and presentations the dock hides itself; turn that off in **Dock settings → Behaviour**.
+**Dock settings → Appearance** shows the dock on a desk. Drag it to an edge, or focus the desk and use the arrow keys. Space picks up a widget so the arrow keys can reorder it. The bar at the end of the dock sets spacing (tight, even or roomy), separate from icon size. Style, shape, icon size, theme and the 24-hour clock apply straight away. **Undo** and **Reset** stay at the top of that section. During fullscreen games, videos and presentations the dock hides itself; turn that off in **Dock settings → Behaviour**.
 
 ## Apps and windows
 

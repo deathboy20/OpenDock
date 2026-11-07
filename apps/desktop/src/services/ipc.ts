@@ -1,6 +1,6 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
-import type { AppSettings, Rule, RuleAction } from "@opendock/config-schema";
+import { defaultAppSettings, parseAppSettings, type AppSettings, type Rule, type RuleAction } from "@opendock/config-schema";
 
 // ---------- shapes returned by the Rust side ----------
 
@@ -114,6 +114,7 @@ export type TaskbarStatus = {
   autohide: boolean | null;
   visible: boolean | null;
   originalAutohide: boolean | null;
+  error: string | null;
 };
 
 export type FlyoutRequest = { kind: string; target?: string | null; anchor: number };
@@ -163,9 +164,17 @@ export type DataTopic = "todos" | "notes" | "calendar" | "rules" | "activity";
 
 // ---------- settings and dock ----------
 
-export const getSettings = () => invoke<AppSettings>("get_settings");
-export const saveSettings = (settings: AppSettings) =>
-  invoke<AppSettings>("save_settings", { settings });
+/** Browser preview keeps settings in memory. The installed app uses the settings file. */
+let browserSettings = defaultAppSettings;
+
+export const getSettings = () => (isTauri() ? invoke<AppSettings>("get_settings") : Promise.resolve(browserSettings));
+export const saveSettings = (settings: AppSettings) => {
+  if (!isTauri()) {
+    browserSettings = parseAppSettings(settings);
+    return Promise.resolve(browserSettings);
+  }
+  return invoke<AppSettings>("save_settings", { settings });
+};
 export const applyDockLayout = () => invoke<void>("apply_dock_layout_command");
 export const setDockLength = (length: number) =>
   invoke<void>("set_dock_length", { length: Math.round(length) });

@@ -1,0 +1,105 @@
+---
+description: Design process and quality bar for any UI work in apps/desktop and apps/web
+globs: apps/desktop/src/**/*.{ts,tsx,css}, apps/web/src/**/*.{ts,tsx,css,astro}
+alwaysApply: false
+---
+
+# Design quality rules
+
+You are the design lead for a desktop dock product used on Windows, macOS and Linux.
+The goal is a product that feels made by one careful studio, not assembled from defaults.
+Follow this process for every UI task. Do not skip the plan.
+
+## 1. Ground the design in the product
+
+- Subject: a customizable dock, hub and widget system. Users arrange their own interface.
+- Audience: people who care how their desktop looks and feels (power users, designers, developers).
+- Primary job: make personalization feel direct, reversible and safe.
+- Real content only. Use real widget names, real settings, real calendar events. No lorem ipsum, no "Feature 1".
+
+## 2. Plan before code (required, short)
+
+Before writing any component, write a plan of at most 25 lines:
+
+1. Tokens: which existing tokens in `apps/desktop/src/styles/tokens.css` you reuse, and any new ones (name, value, purpose). Never hardcode a color, radius, spacing or duration that has a token.
+2. Type: roles (UI, numeric/tabular, title) and the scale you use. Reuse the existing families. Do not add a font without saying why.
+3. Layout: one-sentence description and an ASCII wireframe of the screen at its narrowest and widest.
+4. The one memorable thing: pick one element that gets the boldness (for example the live dock preview in the appearance editor). Everything around it stays quiet.
+5. States: loading, empty, error, disabled, unsupported-on-this-OS.
+
+Then review the plan: if any part is what you would produce for any dock or settings page, change it and say what you changed.
+
+## 3. Visual system
+
+- One token source. Desktop and `apps/web` read the same tokens so the site and the app match.
+- Use a deliberate radius scale (for example 6 / 10 / 16 / pill) tied to hierarchy. Do not put one radius on everything.
+- Elevation has meaning: dock above windows, flyouts above dock, dialogs above all. Use at most three shadow levels, defined as tokens.
+- Do not use gradient washes as decoration, identical rounded cards for every section, or glow on everything.
+- Avoid template tells: ALL-CAPS tracked eyebrow labels above every heading, "WORD — fragment" labels, middle-dot meta strings, arrows appended to every button, single-word accent color in a heading.
+- Numbers (CPU, battery, time) use tabular figures so they do not jitter.
+- Icon set: one family, one stroke weight, sized on a 4px grid. Dock icon size comes from the user's setting, not a constant.
+- Color: 4 to 6 named base colors plus semantic colors (success, warning, danger, info). Each theme/skin must meet WCAG AA contrast for text and 3:1 for UI boundaries.
+
+## 4. Motion
+
+- Motion answers a user action: drag lifts and settles, reorder items slide into place, a scene switch cross-fades the layout, undo restores.
+- No entrance animations on page load except one orchestrated moment at most.
+- Durations from tokens (fast 120ms, base 200ms, slow 320ms). Easing from tokens.
+- `prefers-reduced-motion`: replace movement with instant or opacity-only changes. This must work on every OS.
+
+## 5. Personalization UX (the core of this release)
+
+- Direct manipulation first. Drag to reorder, drag to resize widgets (s, m, l), snap guides while dragging, lock toggle.
+- Live preview. Every appearance control changes the real dock immediately. Show Undo and Reset in the same place at all times.
+- Every destructive or global change is reversible: Undo toast with the action name ("Scene switched to Focus. Undo").
+- Scenes: show a small thumbnail of the layout on each scene card. Switching is one click and shows what changes.
+- Import/export JSON: validate before applying, show a readable diff ("3 widgets added, edge changed to left"), never apply silently.
+- Per-monitor: show a monitor diagram that matches the user's real arrangement. Selecting a monitor highlights it on the diagram.
+- Widget gallery: preview of each widget at s, m, l before adding. Permissions shown in plain language before install ("Connects to api.example.com").
+- Widget SDK states: loading skeleton, empty, error with a retry button, crashed (isolated, offers Reload), permission revoked.
+
+## 6. Cross-platform honesty
+
+- Same type, focus rings and motion rules on every OS. Platform gaps change copy, not the visual system.
+- macOS: vibrancy, system font, overlay dock. Never say "replaces the taskbar".
+- Linux: if the session cannot reserve a screen edge (GNOME Wayland), show a visible "Floating dock" notice in settings explaining why.
+- Unsupported actions render as disabled with a one-line reason, not hidden and not failing silently.
+- Never write copy for behavior that has not been verified. Mark unverified as "Not shipped yet".
+
+## 7. Updates UI
+
+- Settings shows: current version, last checked time, Check now, and a clear state: up to date / update available / check failed.
+- Update available shows the version, release notes link, and one primary button "Download for macOS" (label matches the OS).
+- Failure says what happened and what to do ("Couldn't reach github.com. Check your connection and try again.").
+- Make clear that settings, pins and data stay in place after installing.
+
+## 8. Copy
+
+- Sentence case, active voice, plain verbs. Buttons say what happens: "Save scene", not "Submit".
+- The same action keeps the same name across button, toast and history ("Reset" everywhere).
+- Errors do not apologize and are never vague. Empty states say what to do next.
+- Name things by what users understand ("Where the dock sits"), not by implementation ("dock.edge").
+
+## 9. Quality floor (always, never announced)
+
+- Keyboard: every control reachable, visible focus ring from tokens, logical tab order, drag actions have a keyboard alternative (arrow keys to move, Space to pick up).
+- Screen readers: labels on icon buttons, live region for undo/scene-change toasts, roles on the dock and flyouts.
+- Responsive: settings and hub work at 720px wide up; `apps/web` works down to 360px.
+- Mixed DPI: no blurry 1px borders; use device-pixel-safe values. Test at 100%, 150%, 200%.
+- Performance: dragging stays at 60fps. Use transform and opacity, avoid layout thrash.
+- Light and dark, plus each dock skin, verified.
+
+## 10. Self-critique before finishing
+
+1. Run the app (or storybook) and take screenshots at narrow, wide, light, dark, and one non-Windows state.
+2. Remove one decorative element.
+3. Check: does any element look like a default? Does one thing clearly lead?
+4. List what you changed after the critique in 3 bullets.
+
+## Hard constraints from the repo plan
+
+- Architecture changes need an ADR in `docs/adr` first.
+- OS calls only under `apps/desktop/src-tauri/src/platform/`.
+- Settings shape change: bump `SETTINGS_VERSION`, add migration and shared fixture.
+- Database migrations are append-only.
+- Do not open the staging PR, tag or release until the acceptance checklist is checked.

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const SETTINGS_VERSION = 4;
+export const SETTINGS_VERSION = 5;
 export const MAX_PINNED_APPS = 24;
 
 export const dockPositionSchema = z.enum(["top", "bottom", "left", "right"]);
@@ -8,6 +8,8 @@ export const dockSizeSchema = z.enum(["s", "m", "l"]);
 export const dockModeSchema = z.enum(["pill", "full"]);
 export const themeSchema = z.enum(["dark", "light"]);
 export const dockStyleSchema = z.enum(["glass", "solid", "midnight", "minimal", "neon", "ink"]);
+/** Gap between dock items, independent of icon size. */
+export const dockSpacingSchema = z.enum(["tight", "even", "roomy"]);
 /** "replace" hides the taskbar and lets the dock reserve its screen edge instead. */
 export const taskbarModeSchema = z.enum(["normal", "autohide", "hidden", "replace"]);
 export const startActionSchema = z.enum(["launcher", "windows"]);
@@ -29,6 +31,7 @@ export const dockSettingsSchema = z.object({
   mode: dockModeSchema.default("pill"),
   theme: themeSchema.default("dark"),
   style: dockStyleSchema.default("glass"),
+  spacing: dockSpacingSchema.default("even"),
   monitorId: z.string().max(256).nullable().default(null),
   itemOrder: z
     .array(dockItemIdSchema)
@@ -108,6 +111,7 @@ export type DockPosition = z.infer<typeof dockPositionSchema>;
 export type DockSize = z.infer<typeof dockSizeSchema>;
 export type DockMode = z.infer<typeof dockModeSchema>;
 export type DockStyle = z.infer<typeof dockStyleSchema>;
+export type DockSpacing = z.infer<typeof dockSpacingSchema>;
 export type Theme = z.infer<typeof themeSchema>;
 export type TaskbarMode = z.infer<typeof taskbarModeSchema>;
 export type StartAction = z.infer<typeof startActionSchema>;
@@ -135,8 +139,8 @@ export function migrateAppSettings(input: unknown): AppSettings {
     return parseAppSettings(input);
   }
   const doc = input as { version?: unknown; dock?: { itemOrder?: unknown } };
-  // Version 4 only added dock styles, so version 3 documents are already valid.
-  if (doc.version === 3) {
+  // Version 4 added dock styles. Version 5 adds spacing, which defaults to even.
+  if (doc.version === 3 || doc.version === 4) {
     return parseAppSettings({ ...doc, version: SETTINGS_VERSION });
   }
   if (doc.version !== 1 && doc.version !== 2) {

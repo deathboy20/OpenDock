@@ -2,9 +2,12 @@
 
 ## System requirements
 
-- Windows 10 or Windows 11, 64-bit
-- Microsoft Edge WebView2 runtime (preinstalled on Windows 11; the installer fetches it on Windows 10 if it's missing)
-- About 30 MB of disk space
+- Windows 10 or Windows 11, 64-bit, with Microsoft Edge WebView2 runtime (preinstalled on Windows 11; the installer fetches it on Windows 10 if it's missing)
+- Linux and macOS packages are experimental build-only artifacts. Build and package checks do not establish graphical runtime behavior or feature support.
+
+## Platform status
+
+Windows is the only supported platform. Linux x64/arm64 and universal macOS downloads are experimental. Do not expect Windows taskbar replacement, live window previews or screen-edge reservation on Linux or macOS.
 
 ## Download
 
@@ -14,7 +17,8 @@ Get the latest version from [GitHub Releases](https://github.com/isaacobenzy/Ope
 | --- | --- |
 | `OpenDock_<version>_x64-setup.exe` | You're installing for yourself. Recommended. |
 | `OpenDock_<version>_x64_en-US.msi` | You deploy software with Group Policy, Intune or another management tool |
-| `SHA256SUMS.txt` | You want to verify the download |
+| `.AppImage`, `.deb`, `.rpm`, or `.dmg` | Experimental Linux or macOS build-only artifact |
+| `SHA256SUMS.txt` | Verify every release download |
 
 ### Verify the download
 
@@ -26,6 +30,12 @@ Get-FileHash .\OpenDock_0.2.0_x64-setup.exe -Algorithm SHA256
 
 The hash must match the line for that file in `SHA256SUMS.txt` (letter case doesn't matter).
 
+On Linux or macOS, download all release assets into one directory and run:
+
+```sh
+sha256sum -c SHA256SUMS.txt
+```
+
 ## Install
 
 1. Run the installer.
@@ -36,6 +46,26 @@ The hash must match the line for that file in `SHA256SUMS.txt` (letter case does
    - **Look and feel:** style, theme, and whether to start with Windows.
 
 You can change all of these later from the dock menu (right-click an empty part of the dock) or the hub.
+
+## Linux (experimental build only)
+
+These steps install the package; they do not establish that the graphical application works on a particular distribution or desktop session.
+
+- AppImage: `chmod +x ./OpenDock_*.AppImage`, then run `./OpenDock_*.AppImage`.
+- Debian, Ubuntu or Mint: `sudo apt install ./OpenDock_*.deb`.
+- Fedora, RHEL or openSUSE: `sudo dnf install ./OpenDock-*.rpm` (use the distribution's package manager if it does not provide `dnf`).
+
+Flatpak packaging is not included because it has not been validated in CI. Linux runtime acceptance remains unrecorded.
+
+## macOS (experimental build only)
+
+Open the DMG and move OpenDock to Applications. Unsigned, unnotarized builds may be blocked by Gatekeeper. Try Control-click or right-click OpenDock and choose **Open**. If needed, remove the quarantine attribute explicitly:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/OpenDock.app
+```
+
+This build-only status does not establish that the UI or macOS-specific behavior works.
 
 ## Update
 
@@ -57,7 +87,7 @@ OpenDock restores the taskbar when it quits, when it crashes (a small guard proc
 
 If the taskbar is still hidden, try these in order:
 
-1. **Restart OpenDock and quit it properly:** right-click the dock and choose **Quit OpenDock**.
+1. **Restore it from OpenDock:** right-click the dock and choose **Restore the Windows taskbar**, or use the same button in the quick-actions tray. Then choose **Quit OpenDock** if you want the app to exit.
 2. **Run the restore command:** press `Win+R` and run:
 
    ```
