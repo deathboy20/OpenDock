@@ -6,21 +6,21 @@ All notable changes to OpenDock are documented here. The format is based on [Kee
 
 ## [0.3.0] - 2026-11-07
 
+Live dock settings, a restore-the-taskbar command, experimental Linux and macOS packages, and a dock you can try in the browser.
+
 ### Added
 
-- Merging `staging` into `main` now starts the release build and creates a draft prerelease with the combined platform bundle when a new version and matching changelog section are ready.
 - Dock settings opens on a live dock. Drag it to an edge, change style, shape, icon size and spacing, and use Undo or Reset. Arrow keys move the dock, Space picks up a widget, and the spacing bar takes arrow keys too. Settings version 5 stores spacing (tight, even or roomy). Older files gain even spacing.
-
-- Release pipeline configuration for Windows installers, Linux x64/arm64 AppImage/DEB/RPM packages and a universal macOS DMG, with a combined checksum manifest and draft prerelease publishing. Linux and macOS remain experimental build-only artifacts; CI/runtime results are not yet established.
+- **Restore the Windows taskbar** in the dock menu and the quick-actions tray. It puts the taskbar back without waiting for the guard process.
 - The homepage has a dock you can use in the browser: open apps, search from Start, change the volume, switch skins, and turn widgets on and off.
 - Now playing opens from the dock, not a separate block. Previous and next switch between *Just 2 Minutes of Fusion Jazz!* by Giulio Carmassi and *Tokyo* by Toshiki Soejima. YouTube loads only while that widget is open.
-- Contributor branches now run `develop` → `staging` → `main`.
-- **Restore the Windows taskbar** in the dock menu and the quick-actions tray. It puts the taskbar back without waiting for the guard process.
+- Windows installers, Linux x64/arm64 AppImage/DEB/RPM packages and a universal macOS DMG, with a combined checksum manifest. A version tag publishes a draft GitHub release. Stable versions are not marked as pre-release, so publishing the draft makes it Latest. Linux and macOS remain experimental build-only artifacts.
 
 ### Changed
 
 - The website and the README describe taskbar restore as the exits OpenDock can see, including the gap when Windows kills OpenDock and the guard together. The manual results are in `docs/testing-matrix.md`.
 - The footer link that said Pricing now says Free. There is no paid plan.
+- Contributor branches now run `develop` → `staging` → `main`.
 
 ### Fixed
 
