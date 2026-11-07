@@ -1,0 +1,344 @@
+.appearance {
+  margin-bottom: var(--od-space-lg);
+}
+
+.appearance-heading {
+  margin: 0 0 var(--od-space-sm);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.appearance-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--od-space-md);
+  padding: var(--od-space-sm) 0;
+  background: var(--od-ground);
+}
+
+.appearance-status {
+  flex: 1;
+  min-width: 0;
+  min-height: 1.3em;
+  margin: 0;
+  color: var(--od-muted);
+  font-size: 13px;
+}
+
+.appearance-status.is-error {
+  color: var(--od-danger);
+}
+
+.appearance-actions {
+  display: flex;
+  gap: var(--od-space-sm);
+  flex: none;
+}
+
+.appearance-actions .button[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.appearance-actions .button[aria-disabled="true"]:hover {
+  background: var(--od-raised);
+  border-color: var(--od-border);
+}
+
+.appearance-stage {
+  position: relative;
+  height: 220px;
+  border-radius: var(--od-radius-xl);
+  border: 1px solid var(--od-border);
+  background: var(--od-surface-deep);
+  overflow: hidden;
+  user-select: none;
+}
+
+.appearance-mover {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  cursor: grab;
+}
+
+.appearance-mover:focus-visible {
+  outline: 2px solid var(--od-accent);
+  outline-offset: -2px;
+}
+
+.appearance-stage.is-dragging .appearance-mover {
+  cursor: grabbing;
+}
+
+.appearance-edge {
+  position: absolute;
+  z-index: 1;
+  background: var(--od-border-strong);
+  pointer-events: none;
+}
+
+.appearance-edge.is-bottom {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+}
+
+.appearance-edge.is-top {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+}
+
+.appearance-edge.is-left {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+}
+
+.appearance-edge.is-right {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 2px;
+}
+
+.appearance-edge.is-target {
+  background: var(--od-accent);
+}
+
+.appearance-notice {
+  position: absolute;
+  z-index: 1;
+  top: var(--od-space-md);
+  left: var(--od-space-md);
+  max-width: 36ch;
+  margin: 0;
+  color: var(--od-text);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.appearance-stage.is-top .appearance-notice,
+.appearance-stage.is-left .appearance-notice {
+  top: auto;
+  bottom: var(--od-space-md);
+}
+
+.stage-dock {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  transition:
+    top var(--od-slow) var(--od-ease),
+    right var(--od-slow) var(--od-ease),
+    bottom var(--od-slow) var(--od-ease),
+    left var(--od-slow) var(--od-ease);
+}
+
+.stage-dock.is-lifted {
+  transition: none;
+}
+
+.stage-dock.is-bottom {
+  left: 50%;
+  bottom: var(--od-space-sm);
+  transform: translateX(-50%);
+}
+
+.stage-dock.is-top {
+  left: 50%;
+  top: var(--od-space-sm);
+  transform: translateX(-50%);
+}
+
+.stage-dock.is-left {
+  top: 50%;
+  left: var(--od-space-sm);
+  transform: translateY(-50%);
+}
+
+.stage-dock.is-right {
+  top: 50%;
+  right: var(--od-space-sm);
+  transform: translateY(-50%);
+}
+
+.stage-dock.is-floating.is-bottom {
+  bottom: var(--od-space-lg);
+}
+
+.stage-dock.is-floating.is-top {
+  top: var(--od-space-lg);
+}
+
+.stage-dock.is-floating.is-left {
+  left: var(--od-space-lg);
+}
+
+.stage-dock.is-floating.is-right {
+  right: var(--od-space-lg);
+}
+
+.stage-dock.is-full.is-bottom,
+.stage-dock.is-full.is-top {
+  left: var(--od-space-sm);
+  right: var(--od-space-sm);
+  max-width: none;
+  transform: none;
+}
+
+.stage-dock.is-full.is-left,
+.stage-dock.is-full.is-right {
+  top: var(--od-space-sm);
+  bottom: var(--od-space-sm);
+  max-height: none;
+  transform: none;
+}
+
+.stage-dock .dock-shell {
+  width: max-content;
+  max-width: none;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  cursor: grab;
+}
+
+.stage-dock.is-full.is-bottom .dock-shell,
+.stage-dock.is-full.is-top .dock-shell {
+  width: 100%;
+}
+
+.stage-dock.is-full.is-left .dock-shell,
+.stage-dock.is-full.is-right .dock-shell {
+  width: max-content;
+  height: auto;
+}
+
+.stage-dock.is-lifted .dock-shell {
+  cursor: grabbing;
+  box-shadow: var(--od-shadow);
+}
+
+.appearance .dock-item {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.appearance .dock-item.is-picked {
+  box-shadow: 0 0 0 2px var(--od-accent);
+}
+
+.appearance .dock-item.is-dragging {
+  pointer-events: none;
+  z-index: 2;
+}
+
+.dock-shell.has-grip {
+  padding-right: var(--od-space-lg);
+}
+
+.dock-shell.vertical.has-grip {
+  padding-right: 0;
+  padding-bottom: var(--od-space-lg);
+}
+
+.spacing-grip {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 20px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.spacing-grip::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  width: 3px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--od-border-strong);
+  transform: translateY(-50%);
+}
+
+.dock-shell.vertical .spacing-grip {
+  top: auto;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  width: auto;
+  height: 20px;
+  cursor: ns-resize;
+}
+
+.dock-shell.vertical .spacing-grip::before {
+  top: 8px;
+  left: 50%;
+  width: 16px;
+  height: 3px;
+  transform: translateX(-50%);
+}
+
+.spacing-grip:hover::before,
+.spacing-grip:focus-visible::before,
+.spacing-grip.is-active::before {
+  background: var(--od-accent);
+}
+
+.spacing-grip:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--od-accent);
+}
+
+.appearance-hint {
+  margin: var(--od-space-sm) 0 0;
+}
+
+.appearance-styles {
+  margin-top: var(--od-space-md);
+}
+
+.appearance-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--od-space-md) var(--od-space-lg);
+  margin-top: var(--od-space-md);
+}
+
+.appearance-field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--od-space-xs);
+}
+
+.appearance-field > span {
+  color: var(--od-muted);
+  font-size: 12px;
+}
+
+.appearance-clock {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--od-space-sm);
+  min-height: 32px;
+}

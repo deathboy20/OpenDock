@@ -1,5 +1,7 @@
 import type { AppSettings } from "@opendock/config-schema";
+import { isTauri } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
+import { previewShell, type ShellPlacement } from "../dock/appearance";
 import {
   errorText,
   getTaskbarStatus,
@@ -10,10 +12,15 @@ import {
   type TaskbarStatus,
 } from "../../services/ipc";
 import { useSettings } from "../../services/settingsContext";
-import { StylePicker } from "../dock/StylePicker";
 import { Icon } from "../widgets/icons";
+import { AppearanceEditor } from "./AppearanceEditor";
 import { Choice, Row, TaskbarOptions, Toggle } from "./controls";
 import { PageHeader } from "./PageHeader";
+
+function editorShell(): ShellPlacement {
+  if (isTauri() || typeof window === "undefined") return "windows";
+  return previewShell(window.location.search);
+}
 
 function NumberSetting({
   label,
@@ -78,6 +85,7 @@ function TaskbarSection({ settings, change }: { settings: AppSettings; change: (
       ) : (
         <TaskbarOptions value={settings.taskbar.mode} onChange={(mode) => change((s) => ({ ...s, taskbar: { mode } }))} />
       )}
+      {status?.error ? <p className="callout is-error" role="alert">{status.error}</p> : null}
       {status && supported ? (
         <p className="muted small">
           Right now: {status.visible === false ? "hidden" : status.autohide ? "auto-hiding" : "showing"}
@@ -192,69 +200,17 @@ export function DockSettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const change = (fn: (s: AppSettings) => AppSettings) => void update(fn).then(setError);
   const dock = settings.dock;
-  const setDock = (patch: Partial<AppSettings["dock"]>) => change((s) => ({ ...s, dock: { ...s.dock, ...patch } }));
-
+  const setDock = (patch: Partial<AppSettings["dock"]>) => change((current) => ({ ...current, dock: { ...current.dock, ...patch } }));
   return (
     <div className="page settings-page">
       <PageHeader title="Dock settings" subtitle="Changes apply straight away." />
       {error ? <p className="callout is-error" role="alert">{error}</p> : null}
 
-      <section className="settings-card">
-        <h2>Appearance</h2>
-        <Row label="Style">
-          <StylePicker value={dock.style} onChange={(style) => setDock({ style })} />
-        </Row>
-        <Row label="Theme">
-          <Choice
-            label="Theme"
-            value={dock.theme}
-            options={[
-              { value: "dark", label: "Dark" },
-              { value: "light", label: "Light" },
-            ]}
-            onChange={(theme) => setDock({ theme })}
-          />
-        </Row>
-        <Row label="Size">
-          <Choice
-            label="Size"
-            value={dock.size}
-            options={[
-              { value: "s", label: "Small" },
-              { value: "m", label: "Medium" },
-              { value: "l", label: "Large" },
-            ]}
-            onChange={(size) => setDock({ size })}
-          />
-        </Row>
-        <Row label="Position">
-          <Choice
-            label="Position"
-            value={dock.position}
-            options={[
-              { value: "bottom", label: "Bottom" },
-              { value: "top", label: "Top" },
-              { value: "left", label: "Left" },
-              { value: "right", label: "Right" },
-            ]}
-            onChange={(position) => setDock({ position })}
-          />
-        </Row>
-        <Row label="Shape" hint="A pill hugs your widgets; full width spans the screen edge.">
-          <Choice
-            label="Shape"
-            value={dock.mode}
-            options={[
-              { value: "pill", label: "Pill" },
-              { value: "full", label: "Full width" },
-            ]}
-            onChange={(mode) => setDock({ mode })}
-          />
-        </Row>
-        <Row label="24-hour clock">
-          <Toggle label="24-hour clock" checked={dock.clock24h} onChange={(clock24h) => setDock({ clock24h })} />
-        </Row>
-      </section>
+      <AppearanceEditor
+        dock={settings.dock}
+        shell={editorShell()}
+        onCommit={(next) => update((current) => ({ ...current, dock: next }))}
+      />
 
       <TaskbarSection settings={settings} change={change} />
 

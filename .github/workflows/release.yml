@@ -1,78 +1,203 @@
-# Builds the Windows installers from a release tag on a clean runner and
-# attaches them, with checksums, to an existing draft release.
-# See docs/releasing.md for the full process.
 name: Release build
 
 on:
+  push:
+    tags: ['v*.*.*']
   workflow_dispatch:
     inputs:
-      tag:
-        description: Release tag to build, for example v0.3.0. A draft release with this tag must exist.
+      dry_run:
+        description: Build the selected branch or tag without publishing a release
         required: true
-        type: string
+        type: boolean
+        default: true
 
 permissions:
   contents: read
 
 jobs:
-  windows:
-    name: Windows installers
-    runs-on: windows-latest
-    timeout-minutes: 60
-    permissions:
-      contents: write
+  guard:
+    runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+      dry_run: ${{ steps.release.outputs.dry_run }}
     steps:
-      - name: Check the tag format
-        shell: pwsh
-        env:
-          TAG: ${{ inputs.tag }}
-        run: |
-          if ($env:TAG -notmatch '^v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$') { throw "Tag '$env:TAG' is not a version tag" }
-
-      - name: Checkout the tag
+      - name: Checkout source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: refs/tags/${{ inputs.tag }}
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
-
+          ref: ${{ github.ref }}
+          fetch-depth: 0
       - name: Set up Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          cache: pnpm
+      - name: Guard version, tag ancestry, and changelog
+        id: release
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_REF: ${{ github.ref }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          version="$(node -e 'const fs=require("node:fs"); const p=JSON.parse(fs.readFileSync("package.json","utf8")); const t=JSON.parse(fs.readFileSync("apps/desktop/src-tauri/tauri.conf.json","utf8")); const c=fs.readFileSync("apps/desktop/src-tauri/Cargo.toml","utf8").match(/^version\s*=\s*"([^"]+)"/m); if (!c) throw Error("Cargo.toml package version not found"); if (p.version !== t.version || p.version !== c[1]) throw Error(`Version mismatch: package.json=${p.version}, Cargo.toml=${c[1]}, tauri.conf.json=${t.version}`); process.stdout.write(p.version)')"
+          dry_run=false
+          tag=""
+          if [[ "$EVENT_REF" == refs/tags/* ]]; then
+            tag="${EVENT_REF#refs/tags/}"
+          fi
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            dry_run="$INPUT_DRY_RUN"
+          fi
+          if [[ "$dry_run" != "true" ]]; then
+            [[ "$EVENT_REF" == refs/tags/* ]] || { echo 'Publishing requires dispatching against a version tag.'; exit 1; }
+            [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo 'A valid version tag is required.'; exit 1; }
+            [[ "$tag" == "v$version" ]] || { echo "Tag $tag does not match version $version"; exit 1; }
+            git fetch origin main --no-tags
+            tag_commit="$(git rev-parse "refs/tags/$tag^{commit}")"
+            main_commit="$(git rev-parse FETCH_HEAD)"
+            git merge-base --is-ancestor "$tag_commit" "$main_commit" || { echo 'Release tag commit is not on origin/main.'; exit 1; }
+            grep -Eq "^## \\[$version\\]([[:space:]]|$)" CHANGELOG.md || { echo "CHANGELOG.md has no section for $version"; exit 1; }
+          fi
+          printf 'version=%s\ntag=%s\ndry_run=%s\n' "$version" "$tag" "$dry_run" >> "$GITHUB_OUTPUT"
+          printf 'Validated %s from %s (dry_run=%s) in %s\n' "$version" "$EVENT_REF" "$dry_run" "$REPOSITORY"
 
+  verify:
+    needs: guard
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.ref }}
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        uses: ./.github/actions/install-linux-deps
+
+      - name: Locate pnpm store
+        id: pnpm-store
+        shell: bash
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+      - name: Cache pnpm store
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
           toolchain: stable
-
+          components: rustfmt, clippy
+      - name: Cache Rust build
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            apps/desktop/src-tauri/target
+          key: ${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('apps/desktop/src-tauri/Cargo.lock') }}
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Vitest
+        run: pnpm test
+      - name: Rust tests
+        run: cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml --all-targets --locked
+      - name: Clippy
+        run: cargo clippy --manifest-path apps/desktop/src-tauri/Cargo.toml --all-targets --locked -- -D warnings
+      - name: Rust format
+        run: pnpm fmt:check
 
-      - name: Test
+  packages:
+    needs: [guard, verify]
+    permissions:
+      contents: read
+    uses: ./.github/workflows/desktop-packages.yml
+    secrets: inherit
+
+  checksums:
+    needs: [guard, packages]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download all platform artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: artifacts
+      - name: Generate combined SHA256SUMS.txt
         run: |
-          pnpm test
-          pnpm test:rust
-
-      - name: Build installers
-        run: pnpm bundle:desktop
-
-      - name: Collect artifacts and checksums
-        shell: pwsh
-        run: ./scripts/collect-release.ps1 -OutDir release
-
-      - name: Upload workflow artifact
+          set -euo pipefail
+          mkdir -p release-artifacts
+          while IFS= read -r -d '' file; do
+            name="$(basename "$file")"
+            if [[ "$name" == SHA256SUMS-* || "$name" == SIGNING_STATUS.txt ]]; then
+              if [[ "$name" == SIGNING_STATUS.txt ]]; then cp -- "$file" "release-artifacts/$name"; fi
+              continue
+            fi
+            if [[ -e "release-artifacts/$name" ]]; then
+              echo "Duplicate release asset filename: $name"
+              exit 1
+            fi
+            cp -- "$file" "release-artifacts/$name"
+          done < <(find artifacts -type f -print0 | sort -z)
+          (cd release-artifacts && find . -type f ! -name SHA256SUMS.txt ! -name SIGNING_STATUS.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+      - name: Upload combined release bundle
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: opendock-${{ inputs.tag }}-windows-x64
-          path: release/*
+          name: opendock-release-bundle
+          path: release-artifacts/
           if-no-files-found: error
+          retention-days: 14
 
-      - name: Attach to the draft release
-        shell: pwsh
+  publish:
+    needs: [guard, checksums]
+    if: needs.guard.outputs.dry_run != 'true'
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Checkout release source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.ref }}
+      - name: Download combined release bundle
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: opendock-release-bundle
+          path: release-artifacts
+      - name: Create draft prerelease from changelog
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ inputs.tag }}
-        run: gh release upload $env:TAG (Get-ChildItem release -File).FullName --clobber
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ needs.guard.outputs.version }}
+          TAG: ${{ needs.guard.outputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          awk -v version="$VERSION" '$0 ~ "^## \\[" version "\\]([[:space:]]|$)" { found=1; next } found && /^## \[/ { exit } found { print }' CHANGELOG.md > release-notes.md
+          test -s release-notes.md
+          cat >> release-notes.md <<'NOTES'
+
+          Windows: supported.
+          Linux (AppImage, deb, rpm) and macOS (dmg): experimental. The dock does not replace the system shell on these platforms yet.
+          Builds are unsigned unless stated otherwise. Verify SHA256SUMS.txt.
+          NOTES
+          if grep -q '^signed and notarized$' release-artifacts/SIGNING_STATUS.txt; then
+            printf '\nmacOS DMG: code-signed and notarized.\n' >> release-notes.md
+          else
+            printf '\nmacOS DMG: unsigned and unnotarized; follow the Gatekeeper instructions in the installation guide.\n' >> release-notes.md
+          fi
+          gh release create "$TAG" --draft --prerelease --title "OpenDock $VERSION" --notes-file release-notes.md
+          find release-artifacts -type f ! -name SHA256SUMS.txt ! -name SIGNING_STATUS.txt -print0 | xargs -0 gh release upload "$TAG" --clobber
+          gh release upload "$TAG" release-artifacts/SHA256SUMS.txt --clobber

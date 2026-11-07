@@ -48,10 +48,10 @@ Full instructions, including uninstalling and recovering the taskbar: [docs/inst
 | --- | --- |
 | Windows 11 x64 | Supported |
 | Windows 10 x64 | Supported, best effort |
-| Linux | Planned (X11 and wlroots compositors first) |
-| macOS | Planned |
+| Linux x64 and arm64 | Experimental (build only) |
+| macOS universal | Experimental (build only) |
 
-Everything above the platform layer is shared, so Linux and macOS support is mostly a per-OS module plus packaging. See [ROADMAP.md](ROADMAP.md).
+Linux and macOS artifacts are experimental build outputs. Their UI and runtime behavior are not established, and Windows taskbar replacement, window previews and screen-edge reservation are not available there. See [ROADMAP.md](ROADMAP.md).
 
 ## Build from source
 
@@ -73,7 +73,7 @@ You need Node.js 22 (`.nvmrc`; `package.json` requires `>=22`), pnpm 10 (`packag
 | Restore command in the dock menu and quick-actions tray | Shipped |
 | Code signing, winget, Scoop, auto-update | Planned for 1.0 |
 | Widget SDK | Planned |
-| Linux and macOS | Planned |
+| Linux and macOS installers | Experimental build-only artifacts; runtime behavior is not verified |
 
 ## Commands
 
