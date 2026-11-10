@@ -16,7 +16,7 @@ node scripts/collect-packages.mjs linux-x64
 
 The collector requires a fresh release/linux-x64 directory, exactly one current-version package of each format, and writes SHA256SUMS-linux-x64.txt. It refuses partial or ambiguous output. Build directories from earlier runs must not be reused as release evidence.
 
-The release workflow builds Linux packages as part of a cross-platform draft prerelease. A manual dispatch with `dry_run=true` builds artifacts without publishing a release. The install smoke test checks package installation, installed files and dynamic-library resolution only; it does not test the UI or desktop-session behavior.
+The release workflow builds Linux packages as part of a cross-platform draft GitHub release. A manual dispatch with `dry_run=true` builds artifacts without publishing a release. The install smoke test checks package installation, installed files and dynamic-library resolution only; it does not test the UI or desktop-session behavior. Debian listings are read with `dpkg -L` after install so missing `./` prefixes in `dpkg-deb --contents` cannot hide the binary. Fedora images install the `file` package before inspecting the RPM.
 
 ## Distribution acceptance
 
