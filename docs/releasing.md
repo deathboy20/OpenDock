@@ -52,7 +52,7 @@ Record the results of the matrix, and the Windows versions you tested on, in the
 ## 3. Promote, dry-run, and tag
 
 1. Merge the version-bump PR into `develop`, then promote `develop` to `staging` and `staging` to `main` through pull requests. Wait for required checks at each stage.
-2. Dispatch the **Release build** workflow on `main` with `dry_run=true`. Confirm all platform builds, package inspections, checksums and install smoke jobs pass. The dry run builds artifacts but publishes nothing.
+2. Dispatch the **Release build** workflow on `main` with `dry_run=true`. Confirm all platform builds, package inspections, checksums and install smoke jobs pass. The dry run builds artifacts and a `opendock-release-notes` preview but publishes nothing.
 3. Only after the dry run is green, tag the current `main` commit and push that tag:
 
    ```sh
@@ -62,13 +62,13 @@ Record the results of the matrix, and the Windows versions you tested on, in the
    git push origin v0.3.0
    ```
 
-   The tag workflow verifies the version fields, changelog section and tag ancestry before building. It creates a draft prerelease with the combined artifacts and checksum manifest. If a tag already exists or a guard fails, stop and resolve it; do not overwrite a release.
+   The tag workflow verifies the version fields, changelog section and tag ancestry before building. It creates a draft GitHub release titled `OpenDock <version>` with the combined artifacts, `SHA256SUMS.txt`, and notes taken from that version's changelog section plus platform support. Stable versions are not marked as pre-release; publishing the draft makes it the Latest release. Versions with a suffix such as `-beta.1` stay pre-releases. If a tag already exists or a guard fails, stop and resolve it; do not overwrite a release.
 4. Open promotion PRs from `main` back into `staging` and `develop` so the version bump and release fixes stay synchronized.
 
 ## 4. Review and publish
 
 1. Download the packages from the generated draft, check `SHA256SUMS.txt`, and test the installed Windows build and every advertised Linux distro/session. See [Linux acceptance](linux.md). Package compilation alone does not establish Linux shell support.
-2. Publish the draft release. For a pre-release version (`-beta.1` and so on), keep it marked as a pre-release.
+2. Open the draft on the GitHub Releases page, check the title, notes, and attached installers, then publish it. For a pre-release version (`-beta.1` and so on), keep it marked as a pre-release so it does not replace Latest.
 
 ## 5. Announce
 
