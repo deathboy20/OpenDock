@@ -1,7 +1,7 @@
 {
   "name": "opendock",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A privacy-first, open-source dock and taskbar replacement for Windows",
   "license": "MIT",
   "packageManager": "pnpm@10.34.4",
