@@ -76,8 +76,8 @@ jobs:
           key: ${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('apps/desktop/src-tauri/Cargo.lock') }}
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Check package collector
-        run: node --test scripts/collect-packages.test.mjs
+      - name: Check package collector and release notes
+        run: node --test scripts/collect-packages.test.mjs scripts/package-paths.test.mjs scripts/release-notes.test.mjs
       - name: Build Windows and Linux packages
         if: matrix.target == 'native'
         run: pnpm --filter @opendock/desktop tauri build --bundles ${{ matrix.bundles }} -- --locked
@@ -222,22 +222,34 @@ jobs:
       - name: Install and inspect DEB package
         if: matrix.format == 'deb'
         shell: bash
+        env:
+          DEBIAN_FRONTEND: noninteractive
         run: |
           set -euo pipefail
           apt-get update
-          apt-get install -y dpkg-dev file
+          apt-get install -y --no-install-recommends ca-certificates file libc-bin
           package="$(find packages -maxdepth 1 -name '*.deb' -print -quit)"
           test -n "$package"
-          dpkg -i "$package" || { apt-get install -f -y; dpkg -i "$package"; }
-          binary_rel="$(dpkg-deb --contents "$package" | awk '{ path=$NF; if (path ~ /^\.\/usr\/bin\/[^/]+$/) { print path; exit } }')"
-          desktop_rel="$(dpkg-deb --contents "$package" | awk '{ path=$NF; if (path ~ /^\.\/usr\/share\/applications\/.*\.desktop$/) { print path; exit } }')"
-          test -n "$binary_rel" && test -n "$desktop_rel"
-          binary="/${binary_rel#./}"
-          desktop="/${desktop_rel#./}"
-          test -x "$binary" && test -f "$desktop"
+          apt-get install -y "$(readlink -f "$package")"
+          pkg_name="$(dpkg-deb -f "$package" Package)"
+          binary="$(dpkg -L "$pkg_name" | awk '/^\/usr\/bin\/[^/]+$/ { print; exit }')"
+          desktop="$(dpkg -L "$pkg_name" | awk '/^\/usr\/share\/applications\/[^/]+\.desktop$/ { print; exit }')"
+          if [[ -z "$binary" || -z "$desktop" ]]; then
+            echo "Could not find /usr/bin/* or a desktop file in $pkg_name"
+            dpkg -L "$pkg_name"
+            exit 1
+          fi
+          echo "binary=$binary"
+          echo "desktop=$desktop"
+          test -x "$binary"
+          test -f "$desktop"
           file "$binary"
-          ldd -r "$binary" > /tmp/opendock-ldd.txt 2>&1 || { cat /tmp/opendock-ldd.txt; exit 1; }
-          ! grep -q 'not found' /tmp/opendock-ldd.txt
+          ldd "$binary" > /tmp/opendock-ldd.txt 2>&1 || { cat /tmp/opendock-ldd.txt; exit 1; }
+          if grep -q ' => not found' /tmp/opendock-ldd.txt; then
+            cat /tmp/opendock-ldd.txt
+            echo 'Missing shared libraries.'
+            exit 1
+          fi
           "$binary" --taskbar-guard
           echo 'DEB installed; executable, desktop file, and dynamic dependencies verified. GUI behavior not tested.'
       - name: Install and inspect RPM package
@@ -247,13 +259,24 @@ jobs:
           set -euo pipefail
           package="$(find packages -maxdepth 1 -name '*.rpm' -print -quit)"
           test -n "$package"
-          dnf install -y "$package"
+          dnf install -y file "$(readlink -f "$package")"
           binary="$(rpm -qlp "$package" | awk '/^\/usr\/bin\/[^/]+$/ { print; exit }')"
-          desktop="$(rpm -qlp "$package" | awk '/^\/usr\/share\/applications\/.*\.desktop$/ { print; exit }')"
-          test -n "$binary" && test -n "$desktop"
-          test -x "$binary" && test -f "$desktop"
+          desktop="$(rpm -qlp "$package" | awk '/^\/usr\/share\/applications\/[^/]+\.desktop$/ { print; exit }')"
+          if [[ -z "$binary" || -z "$desktop" ]]; then
+            echo "Could not find /usr/bin/* or a desktop file in $package"
+            rpm -qlp "$package"
+            exit 1
+          fi
+          echo "binary=$binary"
+          echo "desktop=$desktop"
+          test -x "$binary"
+          test -f "$desktop"
           file "$binary"
-          ldd -r "$binary" > /tmp/opendock-ldd.txt 2>&1 || { cat /tmp/opendock-ldd.txt; exit 1; }
-          ! grep -q 'not found' /tmp/opendock-ldd.txt
+          ldd "$binary" > /tmp/opendock-ldd.txt 2>&1 || { cat /tmp/opendock-ldd.txt; exit 1; }
+          if grep -q ' => not found' /tmp/opendock-ldd.txt; then
+            cat /tmp/opendock-ldd.txt
+            echo 'Missing shared libraries.'
+            exit 1
+          fi
           "$binary" --taskbar-guard
           echo 'RPM installed; executable, desktop file, and dynamic dependencies verified. GUI behavior not tested.'
