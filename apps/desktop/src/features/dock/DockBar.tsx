@@ -31,6 +31,7 @@ import { ADD_WIDGET_ID, findWidget } from "../widgets/catalog";
 import { TileContent } from "../widgets/tiles";
 import { decideTileClick, flyoutKey, type FlyoutMemory } from "./dockClick";
 import { anchorOf, DockActionsContext } from "./dockActions";
+import { islandEdges, type IslandEdge } from "./islands";
 import "./dock.css";
 
 const HIGHLIGHT_MS = 4000;
@@ -39,12 +40,14 @@ function DockItem({
   id,
   vertical,
   highlighted,
+  island,
   onActivate,
   onMenu,
 }: {
   id: string;
   vertical: boolean;
   highlighted: boolean;
+  island?: IslandEdge;
   onActivate: (id: string, anchor: number) => void;
   onMenu: (id: string, anchor: number) => void;
 }) {
@@ -62,6 +65,7 @@ function DockItem({
       className={`dock-item ${isDragging ? "is-dragging" : ""} ${highlighted ? "is-highlighted" : ""}`}
       data-widget={id}
       data-accent={options.accent}
+      data-island={island}
       {...attributes}
       {...listeners}
       role="button"
@@ -86,7 +90,7 @@ function DockItem({
         onMenu(id, anchorOf(event.currentTarget, vertical));
       }}
     >
-      <TileContent id={id} size={size} compact={compact} />
+      <TileContent id={id} size={size} compact={compact} variant={options.variant ?? undefined} />
     </div>
   );
 }
@@ -150,10 +154,15 @@ export function DockBar() {
                 : scroller.scrollWidth - scroller.clientWidth,
             )
           : 0;
-        const box = Array.from(track.children).reduce(
-          (sum, child) => sum + (vertical ? (child as HTMLElement).offsetHeight : (child as HTMLElement).offsetWidth),
-          0,
-        );
+        // Islands put a margin before each new island, so margins count too.
+        const box = Array.from(track.children).reduce((sum, child) => {
+          const el = child as HTMLElement;
+          const style = getComputedStyle(el);
+          const margin = vertical
+            ? Number.parseFloat(style.marginTop) + Number.parseFloat(style.marginBottom)
+            : Number.parseFloat(style.marginLeft) + Number.parseFloat(style.marginRight);
+          return sum + (vertical ? el.offsetHeight : el.offsetWidth) + (Number.isFinite(margin) ? margin : 0);
+        }, 0);
         const gap = Number.parseFloat(getComputedStyle(track).gap) || 0;
         const length = box + gap * Math.max(0, track.children.length - 1) + hidden + padding;
         void setDockLength(length).catch(() => undefined);
@@ -167,7 +176,7 @@ export function DockBar() {
       observer.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, [vertical, dock.itemOrder, dock.size]);
+  }, [vertical, dock.itemOrder, dock.size, dock.layout, dock.density]);
 
   const open = (kind: string, anchor: number, target?: string) => {
     const key = flyoutKey(kind, target);
@@ -203,6 +212,8 @@ export function DockBar() {
     }));
   };
 
+  const islands = islandEdges(dock.itemOrder, dock.layout);
+
   const onShellPointerDown = (event: React.PointerEvent) => {
     if (event.button !== 0 || (event.target as HTMLElement).closest(".dock-item")) return;
     void getCurrentWindow()
@@ -212,7 +223,7 @@ export function DockBar() {
 
   return (
     <div
-      className={`dock-shell size-${dock.size} spacing-${dock.spacing} mode-${dock.mode} style-${dock.style} position-${dock.position} ${vertical ? "vertical" : "horizontal"}`}
+      className={`dock-shell size-${dock.size} spacing-${dock.spacing} mode-${dock.mode} style-${dock.style} layout-${dock.layout} density-${dock.density} tint-${dock.tint} position-${dock.position} ${vertical ? "vertical" : "horizontal"}`}
       role="toolbar"
       aria-label="OpenDock"
       aria-orientation={vertical ? "vertical" : "horizontal"}
@@ -235,6 +246,7 @@ export function DockBar() {
                   id={id}
                   vertical={vertical}
                   highlighted={highlight === id}
+                  island={islands?.[id]}
                   onActivate={onActivate}
                   onMenu={onMenu}
                 />

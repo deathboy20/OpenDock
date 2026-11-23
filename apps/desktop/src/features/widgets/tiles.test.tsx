@@ -1,4 +1,4 @@
-import { DEFAULT_ITEM_ORDER, defaultAppSettings, dockItemIdSchema, type DockSize } from "@opendock/config-schema";
+import { DEFAULT_ITEM_ORDER, defaultAppSettings, dockItemIdSchema, widgetVariants, type DockSize } from "@opendock/config-schema";
 import type { ReactNode } from "react";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
@@ -282,6 +282,37 @@ describe("dock tiles", () => {
       });
     }
   }
+
+  for (const [id, variants] of Object.entries(widgetVariants)) {
+    for (const variant of variants) {
+      it(`${id} draws its ${variant} variant in every state and size`, () => {
+        for (const [, live] of states) {
+          for (const size of sizes) {
+            for (const compact of [false, true]) {
+              const { container, unmount } = render(
+                withData(live, <TileContent id={id} size={size} compact={compact} variant={variant} />),
+              );
+              expect(container.querySelector(".tile"), `${id} ${variant} ${size}`).not.toBeNull();
+              unmount();
+            }
+          }
+        }
+      });
+    }
+  }
+
+  it("draws battery variants with an accessible name", () => {
+    for (const variant of ["ring", "dots", "gauge"]) {
+      const { getByRole, unmount } = render(withData(readyLive, <TileContent id="battery" size="m" compact={false} variant={variant} />));
+      expect(getByRole("img", { name: "Battery 15%" })).toBeInTheDocument();
+      unmount();
+    }
+  });
+
+  it("falls back to the default variant for an unknown one", () => {
+    const { container } = render(withData(readyLive, <TileContent id="battery" size="m" compact={false} variant="hologram" />));
+    expect(container.querySelector(".battery-glyph")).not.toBeNull();
+  });
 
   it("shows real data when ready", () => {
     const { getByText } = render(

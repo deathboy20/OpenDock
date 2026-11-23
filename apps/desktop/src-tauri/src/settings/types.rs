@@ -6,7 +6,7 @@ use super::desktop::DesktopSettings;
 use super::scenes::SceneSettings;
 use super::skins::SkinSettings;
 use crate::engine::rules::{is_valid_id, parse_clock};
-use crate::geometry::{DockMode, DockPosition, DockSize};
+use crate::geometry::{DockDensity, DockMode, DockPosition, DockSize};
 
 pub const SETTINGS_VERSION: u32 = 7;
 pub const MAX_PINNED_APPS: usize = 24;
@@ -38,6 +38,26 @@ pub enum DockStyle {
     Neon,
     /// Opaque and high contrast.
     Ink,
+}
+
+/// One bar, separate capsules for runs of related widgets, or a capsule per widget.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum DockLayout {
+    #[default]
+    Bar,
+    Islands,
+    Chips,
+}
+
+/// How opaque the dock's surface is; stronger reads better on bright or busy wallpapers.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum DockTint {
+    #[default]
+    Soft,
+    Medium,
+    Strong,
 }
 
 /// Gap between dock items. Independent of icon size.
@@ -95,6 +115,12 @@ pub struct DockSettings {
     pub style: DockStyle,
     #[serde(default)]
     pub spacing: DockSpacing,
+    #[serde(default)]
+    pub layout: DockLayout,
+    #[serde(default)]
+    pub density: DockDensity,
+    #[serde(default)]
+    pub tint: DockTint,
     #[serde(default)]
     pub monitor_id: Option<String>,
     pub item_order: Vec<String>,
@@ -205,6 +231,21 @@ pub struct WidgetOptions {
     pub accent: WidgetAccent,
     /// Seconds between checks for widgets that poll. `None` uses the widget's default.
     pub refresh_seconds: Option<u32>,
+    /// How the widget draws its data (see widget-variants.json). `None` uses its default.
+    pub variant: Option<String>,
+}
+
+/// Asks GitHub once a day whether a newer release exists. Nothing else is sent.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase", default)]
+pub struct UpdateSettings {
+    pub check: bool,
+}
+
+impl Default for UpdateSettings {
+    fn default() -> Self {
+        Self { check: true }
+    }
 }
 
 /// Folders whose git repositories the Projects widget lists, one or two levels deep.
@@ -335,6 +376,8 @@ pub struct AppSettings {
     pub scenes: SceneSettings,
     #[serde(default)]
     pub desktop: DesktopSettings,
+    #[serde(default)]
+    pub updates: UpdateSettings,
     /// False until the first-run welcome has been completed or skipped.
     #[serde(default)]
     pub onboarded: bool,
@@ -361,6 +404,9 @@ impl Default for AppSettings {
                 theme: Theme::Dark,
                 style: DockStyle::Glass,
                 spacing: DockSpacing::Even,
+                layout: DockLayout::Bar,
+                density: DockDensity::Regular,
+                tint: DockTint::Soft,
                 monitor_id: None,
                 item_order: DEFAULT_ITEM_ORDER.iter().map(|s| s.to_string()).collect(),
                 clock24h: false,
@@ -375,6 +421,7 @@ impl Default for AppSettings {
             skins: SkinSettings::default(),
             scenes: SceneSettings::default(),
             desktop: DesktopSettings::default(),
+            updates: UpdateSettings::default(),
             onboarded: false,
         }
     }
@@ -467,6 +514,11 @@ impl AppSettings {
                 .is_some_and(|s| !(15..=3600).contains(&s))
             {
                 return Err("refresh must be 15-3600 seconds".into());
+            }
+            if let Some(variant) = &option.variant {
+                if !super::variants::is_valid_variant(id, variant) {
+                    return Err(format!("{id} has no {variant} variant"));
+                }
             }
         }
         let roots = &self.widgets.projects.roots;

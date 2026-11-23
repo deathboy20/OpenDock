@@ -34,6 +34,22 @@ fn catalog() -> &'static TokenCatalog {
     CATALOG.get_or_init(|| serde_json::from_str(TOKENS_JSON).expect("skin-tokens.json is valid"))
 }
 
+/// Optional layout choices a skin brings. Applying the skin copies them into settings.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SkinInterface {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub layout: Option<super::types::DockLayout>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub density: Option<crate::geometry::DockDensity>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tint: Option<super::types::DockTint>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub style: Option<super::types::DockStyle>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub variants: Option<BTreeMap<String, String>>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Skin {
@@ -47,6 +63,8 @@ pub struct Skin {
     pub dark: BTreeMap<String, Value>,
     #[serde(default)]
     pub light: BTreeMap<String, Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub interface: Option<SkinInterface>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
@@ -57,13 +75,60 @@ pub struct SkinSettings {
     pub custom: Vec<Skin>,
 }
 
+pub fn builtin_skins() -> &'static [Skin] {
+    static SKINS: OnceLock<Vec<Skin>> = OnceLock::new();
+    SKINS.get_or_init(|| serde_json::from_str(BUILTINS_JSON).expect("builtin-skins.json is valid"))
+}
+
 pub fn builtin_ids() -> &'static [String] {
     static IDS: OnceLock<Vec<String>> = OnceLock::new();
-    IDS.get_or_init(|| {
-        let skins: Vec<Skin> =
-            serde_json::from_str(BUILTINS_JSON).expect("builtin-skins.json is valid");
-        skins.into_iter().map(|s| s.id).collect()
-    })
+    IDS.get_or_init(|| builtin_skins().iter().map(|s| s.id.clone()).collect())
+}
+
+/// Settings with a skin made active and its interface choices copied in. `None` turns skins
+/// off and leaves the layout as it is.
+pub fn apply(
+    settings: &super::types::AppSettings,
+    id: Option<&str>,
+) -> Result<super::types::AppSettings, String> {
+    let mut next = settings.clone();
+    let Some(id) = id else {
+        next.skins.active = None;
+        return Ok(next);
+    };
+    let skin = builtin_skins()
+        .iter()
+        .chain(settings.skins.custom.iter())
+        .find(|s| s.id == id)
+        .ok_or_else(|| "That skin no longer exists".to_string())?;
+    next.skins.active = Some(skin.id.clone());
+    if let Some(interface) = &skin.interface {
+        if let Some(layout) = interface.layout {
+            next.dock.layout = layout;
+        }
+        if let Some(density) = interface.density {
+            next.dock.density = density;
+        }
+        if let Some(tint) = interface.tint {
+            next.dock.tint = tint;
+        }
+        if let Some(style) = interface.style {
+            next.dock.style = style;
+        }
+        for (widget, variant) in interface.variants.iter().flatten() {
+            if next.widgets.options.len() >= super::types::MAX_WIDGET_OPTIONS
+                && !next.widgets.options.contains_key(widget)
+            {
+                continue;
+            }
+            next.widgets
+                .options
+                .entry(widget.clone())
+                .or_default()
+                .variant = Some(variant.clone());
+        }
+    }
+    Ok(next)
 }
 
 pub fn is_valid_skin_id(id: &str) -> bool {
@@ -156,6 +221,13 @@ impl Skin {
                 return Err(format!("{token} has a value a skin can't use"));
             }
         }
+        if let Some(variants) = self.interface.as_ref().and_then(|i| i.variants.as_ref()) {
+            for (widget, variant) in variants {
+                if !super::variants::is_valid_variant(widget, variant) {
+                    return Err(format!("{widget} has no {variant} variant"));
+                }
+            }
+        }
         Ok(())
     }
 }
@@ -193,12 +265,68 @@ mod tests {
     #[test]
     fn built_in_skins_are_valid() {
         let skins: Vec<Skin> = serde_json::from_str(BUILTINS_JSON).unwrap();
-        assert_eq!(skins.len(), 5);
+        assert_eq!(skins.len(), 10);
         for skin in &skins {
             skin.validate()
                 .unwrap_or_else(|e| panic!("{}: {e}", skin.id));
         }
         assert!(builtin_ids().contains(&"graphite".to_string()));
+    }
+
+    #[test]
+    fn applying_a_skin_copies_its_interface() {
+        use crate::geometry::DockDensity;
+        use crate::settings::types::{AppSettings, DockLayout, DockTint};
+        let mut settings = AppSettings::default();
+        settings.skins.custom.push(Skin {
+            format: "opendock-skin".into(),
+            version: 1,
+            id: "isles".into(),
+            name: "Isles".into(),
+            description: String::new(),
+            dark: BTreeMap::new(),
+            light: BTreeMap::new(),
+            interface: Some(SkinInterface {
+                layout: Some(DockLayout::Islands),
+                density: Some(DockDensity::Slim),
+                tint: Some(DockTint::Strong),
+                style: None,
+                variants: Some(BTreeMap::from([(
+                    "battery".to_string(),
+                    "dots".to_string(),
+                )])),
+            }),
+        });
+        let next = apply(&settings, Some("isles")).unwrap();
+        assert_eq!(next.skins.active.as_deref(), Some("isles"));
+        assert_eq!(next.dock.layout, DockLayout::Islands);
+        assert_eq!(next.dock.density, DockDensity::Slim);
+        assert_eq!(next.dock.tint, DockTint::Strong);
+        assert_eq!(next.dock.style, settings.dock.style);
+        assert_eq!(
+            next.widgets.options["battery"].variant.as_deref(),
+            Some("dots")
+        );
+        next.validate().unwrap();
+        let off = apply(&next, None).unwrap();
+        assert_eq!(off.skins.active, None);
+        assert_eq!(off.dock.layout, DockLayout::Islands);
+        assert!(apply(&settings, Some("missing")).is_err());
+    }
+
+    #[test]
+    fn refuses_unknown_interface_fields_and_variants() {
+        let raw = json!({
+            "format": "opendock-skin", "version": 1, "id": "x", "name": "X",
+            "interface": { "css": "body{}" }
+        });
+        assert!(serde_json::from_value::<Skin>(raw).is_err());
+        let raw = json!({
+            "format": "opendock-skin", "version": 1, "id": "x", "name": "X",
+            "interface": { "variants": { "battery": "hologram" } }
+        });
+        let skin: Skin = serde_json::from_value(raw).unwrap();
+        assert!(skin.validate().is_err());
     }
 
     #[test]
@@ -252,6 +380,7 @@ mod tests {
             description: String::new(),
             dark: BTreeMap::from([("accent".to_string(), json!("#ff8800"))]),
             light: BTreeMap::new(),
+            interface: None,
         };
         let ok = SkinSettings {
             active: Some("mine".into()),

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidVariant } from "./variants";
 import { desktopSettingsSchema } from "./desktop";
 import { sceneSettingsSchema } from "./scenes";
 import { skinSettingsSchema } from "./skins";
@@ -13,6 +14,12 @@ export const dockSizeSchema = z.enum(["s", "m", "l"]);
 export const dockModeSchema = z.enum(["pill", "full"]);
 export const themeSchema = z.enum(["dark", "light"]);
 export const dockStyleSchema = z.enum(["glass", "solid", "midnight", "minimal", "neon", "ink"]);
+/** One bar, separate capsules for runs of related widgets, or a capsule per widget. */
+export const dockLayoutSchema = z.enum(["bar", "islands", "chips"]);
+/** Slim makes the dock thinner without changing icon size choices. */
+export const dockDensitySchema = z.enum(["regular", "slim"]);
+/** How opaque the dock's surface is; stronger reads better on bright or busy wallpapers. */
+export const dockTintSchema = z.enum(["soft", "medium", "strong"]);
 /** Gap between dock items, independent of icon size. */
 export const dockSpacingSchema = z.enum(["tight", "even", "roomy"]);
 /** "replace" hides the taskbar and lets the dock reserve its screen edge instead. */
@@ -37,6 +44,9 @@ export const dockSettingsSchema = z.object({
   theme: themeSchema.default("dark"),
   style: dockStyleSchema.default("glass"),
   spacing: dockSpacingSchema.default("even"),
+  layout: dockLayoutSchema.default("bar"),
+  density: dockDensitySchema.default("regular"),
+  tint: dockTintSchema.default("soft"),
   monitorId: z.string().max(256).nullable().default(null),
   itemOrder: z
     .array(dockItemIdSchema)
@@ -133,6 +143,8 @@ export const widgetOptionsSchema = z.object({
   accent: widgetAccentSchema.default("theme"),
   /** Seconds between checks for widgets that poll. Null uses the widget's own default. */
   refreshSeconds: z.number().int().min(15).max(3600).nullable().default(null),
+  /** How the widget draws its data (see widget-variants.json). Null uses its default. */
+  variant: z.string().max(32).nullable().default(null),
 });
 
 export const widgetSettingsSchema = z.object({
@@ -140,6 +152,10 @@ export const widgetSettingsSchema = z.object({
   options: z
     .record(dockItemIdSchema, widgetOptionsSchema)
     .refine((options) => Object.keys(options).length <= MAX_WIDGET_OPTIONS, "too many widget options")
+    .refine(
+      (options) => Object.entries(options).every(([id, o]) => o.variant === null || isValidVariant(id, o.variant)),
+      "a widget uses a variant it doesn't have",
+    )
     .default({}),
   weather: weatherSettingsSchema.default({}),
   focus: focusSettingsSchema.default({}),
@@ -170,6 +186,12 @@ export const appSettingsSchema = z.object({
   skins: skinSettingsSchema.default({}),
   scenes: sceneSettingsSchema.default({}),
   desktop: desktopSettingsSchema.default({}),
+  updates: z
+    .object({
+      /** Ask GitHub once a day whether a newer OpenDock release exists. Nothing else is sent. */
+      check: z.boolean().default(true),
+    })
+    .default({}),
   /** False until the first-run welcome has been completed or skipped. */
   onboarded: z.boolean().default(false),
 });
@@ -179,6 +201,9 @@ export type DockSize = z.infer<typeof dockSizeSchema>;
 export type DockMode = z.infer<typeof dockModeSchema>;
 export type DockStyle = z.infer<typeof dockStyleSchema>;
 export type DockSpacing = z.infer<typeof dockSpacingSchema>;
+export type DockLayout = z.infer<typeof dockLayoutSchema>;
+export type DockDensity = z.infer<typeof dockDensitySchema>;
+export type DockTint = z.infer<typeof dockTintSchema>;
 export type Theme = z.infer<typeof themeSchema>;
 export type TaskbarMode = z.infer<typeof taskbarModeSchema>;
 export type StartAction = z.infer<typeof startActionSchema>;

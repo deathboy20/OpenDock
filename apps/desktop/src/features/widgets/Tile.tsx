@@ -2,7 +2,12 @@ import type { DockSize } from "@opendock/config-schema";
 import type { ReactNode } from "react";
 import { Skeleton } from "./visuals";
 
-export type TileProps = { size: DockSize; compact: boolean };
+export type TileProps = {
+  size: DockSize;
+  compact: boolean;
+  /** One of the widget's variants from widget-variants.json; TileContent resolves the default. */
+  variant?: string;
+};
 
 export type TileState = "ready" | "loading" | "empty" | "error";
 

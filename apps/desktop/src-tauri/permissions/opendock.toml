@@ -3,10 +3,11 @@
 
 [[set]]
 identifier = "dock-core"
-description = "Read and save settings, switch scenes and lay out the dock."
+description = "Read and save settings, switch scenes and skins, and lay out the dock."
 permissions = [
   "allow-get-settings",
   "allow-apply-scene",
+  "allow-apply-skin",
   "allow-save-settings",
   "allow-apply-dock-layout-command",
   "allow-set-dock-length",

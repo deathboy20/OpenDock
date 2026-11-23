@@ -1,14 +1,16 @@
-import { setWidgetOptions, widgetOptionsFor, type AppSettings } from "@opendock/config-schema";
+import { setWidgetOptions, variantsFor, widgetOptionsFor, type AppSettings } from "@opendock/config-schema";
 import { useState } from "react";
 import { useSettings } from "../../services/settingsContext";
 import { Choice } from "../hub/controls";
 import { PageHeader } from "../hub/PageHeader";
 import { ADD_WIDGET_ID, findWidget } from "../widgets/catalog";
+import { TileContent } from "../widgets/tiles";
 import { Icon } from "../widgets/icons";
 import { DesktopSection } from "./DesktopSection";
+import { InterfaceSection } from "./InterfaceSection";
 import { ScenesSection } from "./ScenesSection";
 import { SkinsSection } from "./SkinsSection";
-import { ACCENTS, effectiveRefresh, formatSeconds, LAYOUTS, POLLING, refreshChoices } from "./widgetOptions";
+import { ACCENTS, effectiveRefresh, formatSeconds, LAYOUTS, POLLING, refreshChoices, variantLabel } from "./widgetOptions";
 import "./customise.css";
 
 type Change = (fn: (s: AppSettings) => AppSettings) => void;
@@ -42,9 +44,11 @@ function WidgetOptionsRow({ id, settings, change }: { id: string; settings: AppS
   const widget = findWidget(id);
   const options = widgetOptionsFor(settings, id);
   const polling = POLLING[id];
+  const variants = variantsFor(id);
   const name = widget?.name ?? id;
   const summary = [
     options.label ? `“${options.label}”` : null,
+    variants.length > 0 ? variantLabel(options.variant ?? variants[0]) : null,
     LAYOUTS.find((l) => l.value === options.layout)?.label,
     options.accent === "theme" ? null : ACCENTS.find((a) => a.value === options.accent)?.label,
     polling ? `every ${formatSeconds(effectiveRefresh(id, options.refreshSeconds) ?? polling.defaultSeconds)}` : null,
@@ -65,6 +69,35 @@ function WidgetOptionsRow({ id, settings, change }: { id: string; settings: AppS
             <span className="small">Label</span>
             <LabelInput id={id} value={options.label} fallback={name} change={change} />
           </div>
+          {variants.length > 0 ? (
+            <div className="option-field option-field-wide">
+              <span className="small">Look</span>
+              <div className="option-variants" role="radiogroup" aria-label={`${name} look`}>
+                {variants.map((variant) => {
+                  const active = (options.variant ?? variants[0]) === variant;
+                  return (
+                    <button
+                      key={variant}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      className={`variant-card ${active ? "is-active" : ""}`}
+                      onClick={() => change((s) => setWidgetOptions(s, id, { variant: variant === variants[0] ? null : variant }))}
+                    >
+                      <span className={`preview-dock dock-shell size-m style-${settings.dock.style} horizontal`} aria-hidden>
+                        <span className="dock-track">
+                          <span className="dock-item">
+                            <TileContent id={id} size="m" compact={false} variant={variant} />
+                          </span>
+                        </span>
+                      </span>
+                      {variantLabel(variant)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
           <div className="option-field">
             <span className="small">Layout</span>
             <Choice
@@ -141,14 +174,15 @@ export function CustomisePage() {
   const change: Change = (fn) => void update(fn).then(setError);
   return (
     <div className="page settings-page">
-      <PageHeader title="Customise" subtitle="Scenes, skins, widget options and desktop widgets. Changes apply straight away." />
+      <PageHeader title="Customise" subtitle="Scenes, skins, the dock's shape, each widget's look and desktop widgets. Changes apply straight away." />
       {error ? (
         <p className="callout is-error" role="alert">
           {error}
         </p>
       ) : null}
       <ScenesSection settings={settings} />
-      <SkinsSection settings={settings} change={change} />
+      <SkinsSection settings={settings} />
+      <InterfaceSection settings={settings} change={change} />
       <WidgetOptionsSection settings={settings} change={change} />
       <DesktopSection settings={settings} change={change} />
     </div>

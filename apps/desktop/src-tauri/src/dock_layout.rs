@@ -28,7 +28,14 @@ pub fn apply_dock_layout(
         work_area_from_window(window)
     }
     .ok_or_else(|| "no monitor work area".to_string())?;
-    let rect = compute_dock_rect(area, dock.position, dock.size, dock.mode, content_length);
+    let rect = compute_dock_rect(
+        area,
+        dock.position,
+        dock.size,
+        dock.density,
+        dock.mode,
+        content_length,
+    );
 
     let width = (rect.width as f64 * scale).round() as u32;
     let height = (rect.height as f64 * scale).round() as u32;
@@ -43,7 +50,7 @@ pub fn apply_dock_layout(
         .map_err(|e| e.to_string())?;
 
     let reservation = replacing.then(|| {
-        let depth = cross_axis_thickness(dock.size) + 2 * DOCK_MARGIN as u32;
+        let depth = cross_axis_thickness(dock.size, dock.density) + 2 * DOCK_MARGIN as u32;
         (dock.position, f64::from(depth))
     });
     reserve_edge(window, reservation)

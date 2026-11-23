@@ -748,3 +748,124 @@ p.callout {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* ---------- widget variant visuals ---------- */
+
+.od-dots {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+}
+
+.od-dots i {
+  width: 4px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--od-track);
+}
+
+.od-dots i.is-lit {
+  background: var(--od-accent);
+}
+
+.od-dots.tone-warn i.is-lit {
+  background: var(--od-warn);
+}
+
+.od-dots.tone-info i.is-lit {
+  background: var(--od-info);
+}
+
+.od-gauge {
+  display: block;
+  flex: none;
+  overflow: visible;
+}
+
+.od-gauge-track,
+.od-gauge-value {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.od-gauge-track {
+  stroke: var(--od-track);
+}
+
+.od-gauge-value {
+  stroke: var(--od-accent);
+  transition: stroke-dashoffset var(--od-slow) var(--od-ease);
+}
+
+.od-gauge.tone-warn .od-gauge-value {
+  stroke: var(--od-warn);
+}
+
+.od-gauge-needle {
+  stroke: var(--od-text);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+.od-gauge-hub {
+  fill: var(--od-text);
+}
+
+.od-analog {
+  display: block;
+  flex: none;
+}
+
+.od-analog-face {
+  fill: var(--od-raised);
+  stroke: var(--od-border-strong);
+  stroke-width: 1;
+}
+
+.od-analog-tick {
+  stroke: var(--od-muted);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+.od-analog-hour,
+.od-analog-minute {
+  stroke: var(--od-text);
+  stroke-linecap: round;
+}
+
+.od-analog-hour {
+  stroke-width: 2;
+}
+
+.od-analog-minute {
+  stroke-width: 1.4;
+}
+
+.od-analog-hub {
+  fill: var(--od-accent);
+}
+
+.tile-bars {
+  display: grid;
+  gap: 3px;
+  width: 56px;
+}
+
+.tile-bars .tile-bar-row {
+  display: grid;
+  grid-template-columns: 12px 1fr;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--od-muted);
+}
+
+.tile-stacked-time {
+  display: grid;
+  line-height: 0.95;
+  font-family: var(--od-font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}

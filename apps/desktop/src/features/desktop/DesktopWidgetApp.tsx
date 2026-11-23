@@ -64,7 +64,7 @@ export function DesktopWidgetApp() {
       onPointerUp={() => (press.current = null)}
     >
       <div className="dock-item" data-widget={id} data-accent={options.accent}>
-        <TileContent id={id} size="l" compact={options.layout === "compact"} />
+        <TileContent id={id} size="l" compact={options.layout === "compact"} variant={options.variant ?? undefined} />
       </div>
     </div>
   );

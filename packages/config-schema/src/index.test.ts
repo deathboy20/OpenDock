@@ -18,6 +18,8 @@ import {
   ruleRecipes,
   ruleSchema,
   SETTINGS_VERSION,
+  resolveVariant,
+  variantsFor,
   setWidgetOptions,
   widgetOptionsFor,
   defaultWidgetOptions,
@@ -137,10 +139,26 @@ describe("appSettingsSchema", () => {
 describe("widget options", () => {
   it("stores only options that differ from the defaults", () => {
     const set = setWidgetOptions(defaultAppSettings, "projects", { layout: "detailed", refreshSeconds: 60 });
-    expect(widgetOptionsFor(set, "projects")).toEqual({ label: "", layout: "detailed", accent: "theme", refreshSeconds: 60 });
+    expect(widgetOptionsFor(set, "projects")).toEqual({ label: "", layout: "detailed", accent: "theme", refreshSeconds: 60, variant: null });
     expect(widgetOptionsFor(set, "clock")).toEqual(defaultWidgetOptions);
     const reset = setWidgetOptions(set, "projects", { layout: "auto", refreshSeconds: null });
     expect(reset.widgets.options).toEqual({});
+  });
+});
+
+describe("widget variants", () => {
+  it("reads the shared catalog and falls back to the default", () => {
+    expect(variantsFor("battery")).toEqual(["standard", "ring", "dots", "gauge"]);
+    expect(resolveVariant("battery", "dots")).toBe("dots");
+    expect(resolveVariant("battery", "hologram")).toBe("standard");
+    expect(resolveVariant("projects", "ring")).toBeNull();
+  });
+
+  it("refuses a variant a widget doesn't have", () => {
+    const withVariant = (variant: string) =>
+      appSettingsSchema.safeParse({ ...defaultAppSettings, widgets: { ...defaultAppSettings.widgets, options: { battery: { variant } } } }).success;
+    expect(withVariant("gauge")).toBe(true);
+    expect(withVariant("analog")).toBe(false);
   });
 });
 

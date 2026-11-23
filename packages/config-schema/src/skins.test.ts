@@ -31,8 +31,19 @@ describe("skin values", () => {
 });
 
 describe("built-in skins", () => {
-  it("ships five, each with dark and light values", () => {
-    expect(builtinSkins.map((s) => s.id)).toEqual(["graphite", "paper", "dusk", "forest", "contrast"]);
+  it("ships ten, each with dark and light values", () => {
+    expect(builtinSkins.map((s) => s.id)).toEqual([
+      "graphite",
+      "paper",
+      "dusk",
+      "forest",
+      "contrast",
+      "islands",
+      "daylight",
+      "console",
+      "instruments",
+      "float",
+    ]);
     for (const skin of builtinSkins) {
       expect(Object.keys(skin.dark).length, skin.id).toBeGreaterThan(0);
       expect(Object.keys(skin.light).length, skin.id).toBeGreaterThan(0);
@@ -47,6 +58,16 @@ describe("built-in skins", () => {
     expect(vars["--od-fast"]).toBe("80ms");
     expect(vars["--od-shadow"]).toBe("none");
     expect(skinVariables(undefined, "dark")).toEqual({});
+  });
+});
+
+describe("skin interfaces", () => {
+  it("accept only known layouts and widget looks", () => {
+    const base = { format: "opendock-skin", version: 1, id: "x", name: "X" };
+    expect(importSkin(JSON.stringify({ ...base, interface: { layout: "islands", variants: { battery: "dots" } } }), [])).toHaveProperty("skin");
+    expect(importSkin(JSON.stringify({ ...base, interface: { layout: "spiral" } }), [])).toHaveProperty("error");
+    expect(importSkin(JSON.stringify({ ...base, interface: { variants: { battery: "hologram" } } }), [])).toHaveProperty("error");
+    expect(importSkin(JSON.stringify({ ...base, interface: { css: "body{}" } }), [])).toHaveProperty("error");
   });
 });
 

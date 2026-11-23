@@ -133,6 +133,7 @@ pub fn run() {
             commands::apply_scene,
             commands::delete_scene,
             commands::settle_desktop_widget,
+            commands::apply_skin,
             commands::widgets::get_media_state,
             commands::widgets::media_control,
             commands::widgets::get_system_stats,
