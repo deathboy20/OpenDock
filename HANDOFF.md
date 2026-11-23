@@ -28,17 +28,27 @@ Seen working in `pnpm dev` on 2026-11-23 (Windows 10 Pro, this PC, Windows taskb
 
 Checks verified on 2026-11-23 (Windows 10 Pro, this PC): `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm fmt:check`, `pnpm test:rust` and `cargo clippy --all-targets -- -D warnings` all pass. Rust builds offline from the local cargo cache.
 
-Phase B, in progress:
+Phase B (code complete; live check partly done, see below):
 
 7. **Widget options** (settings v7, `widgets.options` keyed by widget id: `label` ≤ 40, `layout` auto/compact/detailed, `accent` theme/mint/sky/amber/rose/violet, `refreshSeconds` 15-3600 or null). The dock applies them in `features/dock/DockBar.tsx` (size, compact, `data-accent`, name); the flyout uses the label and accent. Rust `services::refresh_interval` applies the refresh with a floor per widget (Projects 30 s, Local AI 15 s, CI 60 s). Accent swatch tokens are in `styles/tokens.css`; `features/customise/widgetOptions.test.ts` measures their contrast. UI: hub page **Customise** (`features/customise/CustomisePage.tsx`), also linked from the dock menu.
 8. **Skins** (`skins.active`, `skins.custom` ≤ 20). Token list `packages/config-schema/src/skin-tokens.json` and built-ins `builtin-skins.json` (Graphite, Paper, Dusk, Forest, High contrast), both read by Zod (`skins.ts`) and Rust (`settings/skins.rs`, `include_str!`). Values: colour (`#rrggbb[aa]` or `rgba()`), length/duration with a max, font and shadow presets. `app/App.tsx` sets the active skin's CSS variables on every window's root. Import (paste or `.json` file), export (copy JSON), delete and contrast warnings in `features/customise/SkinsSection.tsx`; `skinChecks.test.ts` measures the built-ins and checks the base colours match `tokens.css`.
 9. **Scenes** (`scenes.items` ≤ 12, `scenes.active`). Rust `settings/scenes.rs` captures (`save_current`, replaces by name), applies (dock items, size, style, spacing, position, theme, skin, quiet hours, automations; never the taskbar mode; a missing skin falls back to none) and deletes. Commands `save_scene`, `apply_scene` (dock, flyout and hub via `dock-core`), `delete_scene` (hub only). Zod mirror `packages/config-schema/src/scenes.ts`. UI `features/customise/ScenesSection.tsx` and a Scenes list in the dock menu.
 10. **Desktop widgets layer** (`desktop.grid` 8-64, `desktop.widgets` ≤ 12 of `{id, monitorId, x, y}`; positions are logical px relative to the monitor's top-left). Rust `settings/desktop.rs` (validation, `snap`, `settle`, `screen_position`; the first spot for a new widget comes from `nextFreeSpot` in `packages/config-schema/src/desktop.ts`) and `services/desktop.rs` (one `desk-<id>` window per widget: no decorations, transparent, `always_on_bottom`, skips the taskbar; synced at startup and whenever `settings.desktop` changes in `persist_settings`). The window starts a native drag after 4 px of movement, then calls `settle_desktop_widget`, which snaps, clamps to the monitor and saves the monitor name. Capability `capabilities/desktop.json` (`desk-*`). UI `features/desktop/DesktopWidgetApp.tsx` and `features/customise/DesktopSection.tsx`. No Win32 code was needed: Tauri's `always_on_bottom` covers it.
 
+11. **App icon fix**: the Rust (`services/apps.rs`) and UI (`services/appIcons.ts`) icon caches no longer keep a failed lookup forever; misses are retried after 20 s (UI up to 4 times). This was the "F" and "M" letters Isaac saw for File Explorer and Edge.
+
+Phase B live check, 2026-11-23 in `pnpm dev` (taskbar kept, v5 settings backed up and restored afterwards):
+- Seen: the two desktop widgets (Clock, Projects) open at their saved spots on the desktop; after the icon fix, File Explorer and Edge show real icons; the Customise page with Scenes, Skins and the five skin cards; Dusk, High contrast and Paper applied in the browser preview (`http://localhost:1420/?window=hub&page=customise`, in-memory settings).
+- Not verified: dragging and snapping a desktop widget, a second monitor, saving or switching a scene, importing or exporting a skin, and skins on the real dock. Isaac declined click access to Explorer, which sat in front of the dock, so the real app couldn't be clicked.
+
 ## Open items and known issues
 
 - One settings bump covers each phase: v6 for all four developer widgets, v7 for all of Phase B. Neither has shipped, and each field defaults, so files written by an earlier commit on this branch still load. Decision by the agent; say if you want one bump per feature.
 - Project folders default to an empty list, not `D:\Gitfiles`, because the default ships to every user. Isaac adds `D:\Gitfiles` once in **Developer widgets**.
+- **Skins are only colours and shapes of corners today.** Isaac wants skins that change the interface the way Rainmeter and lumabar do (references: https://lumabar.xyz/widgets, https://lumabar.xyz/showcase). Proposed, not started: per-widget display variants (Battery as ring, dots, gauge; Now playing as card, compact, mini, bar; System as rings, bars, sparkline; Clock as digital, big, analog), dock layouts (one bar, separate islands per group, slim bar), surface treatments for bright or busy wallpapers (tint strength, outline, solid), and more built-in skins that set all of these. They stay data-only enums validated in both languages, so skins still can't carry CSS.
+- **Auto-update is not built.** Isaac expects users to get updates. It needs `tauri-plugin-updater` (new crate and npm package, needs his OK), an update signing key kept as a GitHub secret, a `latest.json` published with each release on `deathboy20/OpenDock`, and an update check UI. It's on the 1.0 roadmap.
+- **Linux and macOS** have build-only experimental packages (see `ROADMAP.md`); nothing runs or is tested there. The new code has non-Windows fallbacks (`platform/process.rs`, keychain via `keyring`, Tauri `always_on_bottom`), but desktop widgets can't place themselves on Wayland and the taskbar features are Windows-only.
+- The toast window (`OpenDock notification`) appeared once with a native title bar and an empty body after a dev rebuild restarted the app. Not caused by this branch's code (the toast builder is unchanged); not investigated.
 - README links `isaacobenzy/OpenDock` while the canonical remote is `deathboy20/OpenDock`. Not changed.
 - Running `pnpm dev` on this PC uses the installed app's `%APPDATA%\com.opendock.app\settings.json`, which has taskbar mode `replace` and start-with-Windows on. A dev run hides the taskbar and migrates the file to v6, which the installed 0.3.0 would then reject. Back it up first. The 2026-11-23 run used `settings.v5-backup-2026-11-23.json` and `opendock.db.backup-2026-11-23` (same folder); the original v5 settings were copied back afterwards.
 - Projects never fetches, so "behind" is relative to the last fetch. Each `git status` has a 10 s limit; a repo that takes longer shows "git status took too long".
@@ -61,8 +71,10 @@ Phase B, in progress:
 
 ## Next steps
 
+0. Decide with Isaac: (a) the skin interfaces plan above, (b) adding `tauri-plugin-updater` for auto-update, (c) merging or opening a PR for `feat/developer-widgets`.
+
 1. Phase A code is complete: Local AI (Ollama), CI status (opt-in, token in the keychain).
-2. Phase B: per-widget instance options, JSON skins (token overrides only), desktop widgets layer, Scenes.
+2. Phase B (done except the open live checks): per-widget instance options, JSON skins (token overrides only), desktop widgets layer, Scenes.
 3. Phase C (taskbar mode) waits for Isaac and a recorded `docs/testing-matrix.md` on Windows 10.
 
 Last updated: 2026-11-23
