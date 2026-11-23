@@ -8,9 +8,17 @@ OpenDock: a local-first dock and taskbar replacement for Windows. Tauri 2 (Rust 
 - `apps/web`: the Astro website (opendock.pages.dev). Its widget list must match the app's catalog (`apps/web/src/data/product.test.ts`).
 - `packages/config-schema`: Zod schemas, migrations and shared fixtures that the Rust tests also load.
 
-Version 0.3.0 is released. Canonical remote: `origin` = `github.com/deathboy20/OpenDock` (Isaac confirmed 2026-11-23). The README still links `isaacobenzy/OpenDock`; that mismatch is an open item.
+Version 0.3.0 is the latest release; 0.4.0 is being prepared (see Current state). Canonical remote: `origin` = `github.com/deathboy20/OpenDock` (Isaac confirmed 2026-11-23). The README still links `isaacobenzy/OpenDock`; that mismatch is an open item.
 
 ## Current state
+
+**Release 0.4.0 in preparation** (2026-11-23, Isaac asked for it). PR #11 merged into `main` as `3568f55`. Branch `release/0.4.0` was cut from `origin/main` (not from `develop` as `docs/releasing.md` describes, because the work went straight to `main`). It is local only: not pushed, no PR, no tag, no release build.
+- `273171b` chore(release): versions 0.4.0 in all six places, `Cargo.lock` refreshed offline, CHANGELOG `## [0.4.0] - 2026-11-23` with a summary, website `releases.ts` and `docs/installation.md` point at 0.4.0 files. If the release ships on another day, change the date in both `CHANGELOG.md` and `apps/web/src/data/releases.ts` (a web test checks they match).
+- `60f1bdc` desktop widget windows get read-only permissions (`settings-read`, `widget-read`, `apps-read`, `desktop-widget`).
+- `3857a9a` dropped desktop widgets move off each other (`avoid_overlap` in `settings/desktop.rs`); privacy page list wording; `docs/UI_CHECKLIST.md`.
+- Verified locally: lint, typecheck, tests (desktop 214, schema 130, web 13, Rust 107), fmt, clippy, `pnpm build:web` (11 pages), the release-script tests (18), and the release-notes script extracts the 0.4.0 section. In `pnpm dev`: desktop widgets load data and save drags under the new permissions. Website privacy and widgets pages have no overflow at 360 and 1280 px.
+- **Release checklists.** Anti-slop: passes (`docs/ANTI_SLOP_CHECKLIST.md`). UI: ready after owner decision on three app-wide items, visible labels, pre-disabled buttons and 44 px targets in shared hub controls (`docs/UI_CHECKLIST.md`). Security: ready after owner action. Isaac accepted the known `pnpm audit` advisories (Astro, sharp, Zod) for 0.4.0 on 2026-11-23, with upgrades (Astro 7.4.7+, Zod 4.6.6+) planned for a later release; Dependabot alerts and secret scanning still need turning on in the GitHub settings. Details are in the vault (`Security/OpenDock security checklist 0.4.0 (2026-11-23).md`), not in this public repo.
+- Not done (needs Isaac): push `release/0.4.0` and PR it, the manual Windows matrix on an installed build, the Release build dry run (`dry_run=true`, a cloud build), tagging `v0.4.0`, and publishing the draft.
 
 - Branch `feat/developer-widgets`, cut from `origin/release/0.3.0` at `1fe5078` (Isaac chose this base on 2026-11-23). Pushed to `origin` on 2026-11-23 and opened as PR #11 into `main`: https://github.com/deathboy20/OpenDock/pull/11 (ready for review, not a draft). Before the push every local check passed again and `pnpm build:web` built 11 pages; `pnpm lighthouse:web` was not run. This HANDOFF update is committed locally but not pushed, to save a CI run; it goes up with the next push.
 - Plan agreed with Isaac on 2026-11-23: `C:\Users\Obeng\Documents\AI-Vault\Plans\OpenDock developer widgets and skins.md`. Keep the Windows taskbar (with TranslucentTB) for now; build developer widgets (Phase A), then Rainmeter-style customisation (Phase B); taskbar mode (Phase C) only after A and B work and the restore matrix is recorded.
@@ -84,9 +92,11 @@ Phase B live check, 2026-11-23 in `pnpm dev` (taskbar kept, v5 settings backed u
 
 ## Next steps
 
+0. Release 0.4.0: Isaac turns on Dependabot alerts and secret scanning and decides on the three UI checklist items, then push `release/0.4.0`, PR it, dry-run the Release build, tag `v0.4.0`, review and publish the draft (`docs/releasing.md`).
 1. Isaac to look at the dock in `pnpm dev` (back up `settings.json` first; see Open items) and try Customise on the real app: skins, Undo, islands and chips, a vertical dock, widget looks, scenes, desktop widgets.
 2. Decide: (a) ADR 0006 (update checks on by default) from Proposed to Accepted, (b) `tauri-plugin-updater` with a signing key for in-app installs, (c) review and merge PR #11 (targets `main`; the README's flow would send features to `develop` first). Before merging to `main`, run the `security-release-checklist` and `ui-release-checklist` skills; neither has run yet.
-3. Worth doing next: a "switch scene" automation action (scenes from rules, e.g. Focus at 9:00), more widget looks (Now playing bar with progress, Year progress dots), and a Linux/macOS runtime check before promising those platforms.
-4. Phase C (taskbar mode) waits for Isaac and a recorded `docs/testing-matrix.md` on Windows 10.
+3. Upgrade Astro (7.4.7+) and Zod (4.6.6+) after 0.4.0, as agreed when the advisories were accepted.
+4. Worth doing next: a "switch scene" automation action (scenes from rules, e.g. Focus at 9:00), more widget looks (Now playing bar with progress, Year progress dots), and a Linux/macOS runtime check before promising those platforms.
+5. Phase C (taskbar mode) waits for Isaac and a recorded `docs/testing-matrix.md` on Windows 10.
 
 Last updated: 2026-11-23

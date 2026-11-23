@@ -157,3 +157,8 @@ permissions = ["allow-take-pending-toasts", "allow-hide-toast", "allow-undo-acti
 identifier = "desktop-widget"
 description = "Commands only desktop widget windows use: save where the user dropped the widget."
 permissions = ["allow-settle-desktop-widget"]
+
+[[set]]
+identifier = "settings-read"
+description = "Read settings without changing them, for windows that only display."
+permissions = ["allow-get-settings"]
