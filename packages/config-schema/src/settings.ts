@@ -1,7 +1,9 @@
 import { z } from "zod";
 
-export const SETTINGS_VERSION = 5;
+export const SETTINGS_VERSION = 6;
 export const MAX_PINNED_APPS = 24;
+export const MAX_PROJECT_ROOTS = 8;
+export const MAX_CI_REPOS = 10;
 
 export const dockPositionSchema = z.enum(["top", "bottom", "left", "right"]);
 export const dockSizeSchema = z.enum(["s", "m", "l"]);
@@ -80,9 +82,48 @@ export const focusSettingsSchema = z.object({
   breakMinutes: z.number().int().min(1).max(60).default(5),
 });
 
+const folderPathSchema = z.string().trim().min(1).max(1024);
+
+export const projectsSettingsSchema = z.object({
+  /** Folders whose git repositories the Projects widget lists, one or two levels deep. */
+  roots: z
+    .array(folderPathSchema)
+    .max(MAX_PROJECT_ROOTS)
+    .refine((roots) => new Set(roots.map((r) => r.toLowerCase())).size === roots.length, "a folder is listed twice")
+    .default([]),
+});
+
+export const vaultSettingsSchema = z.object({
+  /** The Obsidian vault the capture box writes to. Empty until the user picks one. */
+  path: z.string().trim().max(1024).default(""),
+});
+
+export const localAiSettingsSchema = z.object({
+  /** The Ollama model quick prompts go to. Empty means the first installed model. */
+  model: z.string().trim().max(128).default(""),
+});
+
+/** `owner/name`, as GitHub allows them. */
+export const githubRepoSchema = z.string().regex(/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})\/[A-Za-z0-9._-]{1,100}$/, "expected owner/name")
+  .refine((repo) => !/\/\.{1,2}$/.test(repo), "expected owner/name");
+
+export const ciSettingsSchema = z.object({
+  /** Off by default: CI status is the only developer widget that leaves the device. */
+  enabled: z.boolean().default(false),
+  repos: z
+    .array(githubRepoSchema)
+    .max(MAX_CI_REPOS)
+    .refine((repos) => new Set(repos.map((r) => r.toLowerCase())).size === repos.length, "a repository is listed twice")
+    .default([]),
+});
+
 export const widgetSettingsSchema = z.object({
   weather: weatherSettingsSchema.default({}),
   focus: focusSettingsSchema.default({}),
+  projects: projectsSettingsSchema.default({}),
+  vault: vaultSettingsSchema.default({}),
+  localAi: localAiSettingsSchema.default({}),
+  ci: ciSettingsSchema.default({}),
 });
 
 export const quietHoursSchema = z.object({
@@ -121,6 +162,10 @@ export type DockSettings = z.infer<typeof dockSettingsSchema>;
 export type WeatherSettings = z.infer<typeof weatherSettingsSchema>;
 export type FocusSettings = z.infer<typeof focusSettingsSchema>;
 export type QuietHours = z.infer<typeof quietHoursSchema>;
+export type ProjectsSettings = z.infer<typeof projectsSettingsSchema>;
+export type VaultSettings = z.infer<typeof vaultSettingsSchema>;
+export type LocalAiSettings = z.infer<typeof localAiSettingsSchema>;
+export type CiSettings = z.infer<typeof ciSettingsSchema>;
 export type AppSettings = z.infer<typeof appSettingsSchema>;
 
 export const defaultAppSettings: AppSettings = appSettingsSchema.parse({
@@ -139,8 +184,9 @@ export function migrateAppSettings(input: unknown): AppSettings {
     return parseAppSettings(input);
   }
   const doc = input as { version?: unknown; dock?: { itemOrder?: unknown } };
-  // Version 4 added dock styles. Version 5 adds spacing, which defaults to even.
-  if (doc.version === 3 || doc.version === 4) {
+  // Version 4 added dock styles, version 5 spacing (even), version 6 the developer widgets
+  // (projects, vault, local AI and CI, all empty or off). Each defaults on parse.
+  if (doc.version === 3 || doc.version === 4 || doc.version === 5) {
     return parseAppSettings({ ...doc, version: SETTINGS_VERSION });
   }
   if (doc.version !== 1 && doc.version !== 2) {

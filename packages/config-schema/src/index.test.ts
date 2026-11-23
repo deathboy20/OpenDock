@@ -17,6 +17,7 @@ import {
   reorderDockItems,
   ruleRecipes,
   ruleSchema,
+  SETTINGS_VERSION,
   slugifyRuleId,
 } from "./index";
 
@@ -48,7 +49,7 @@ describe("appSettingsSchema", () => {
         launchAtStartup: false,
       },
     });
-    expect(migrated.version).toBe(5);
+    expect(migrated.version).toBe(SETTINGS_VERSION);
     expect(migrated.dock.position).toBe("top");
     expect(migrated.dock.style).toBe("glass");
     expect(migrated.dock.spacing).toBe("even");
@@ -82,7 +83,7 @@ describe("appSettingsSchema", () => {
   it("migrates version 3 documents without changing them", () => {
     const v3 = { ...defaultAppSettings, version: 3, onboarded: false, dock: { ...defaultAppSettings.dock, style: "midnight" } };
     const migrated = migrateAppSettings(v3);
-    expect(migrated).toEqual({ ...v3, version: 5 });
+    expect(migrated).toEqual({ ...v3, version: SETTINGS_VERSION });
   });
 
   it("migrates version 4 documents and defaults spacing", () => {
@@ -100,10 +101,20 @@ describe("appSettingsSchema", () => {
         launchAtStartup: false,
       },
     });
-    expect(migrated.version).toBe(5);
+    expect(migrated.version).toBe(SETTINGS_VERSION);
     expect(migrated.dock.style).toBe("ink");
     expect(migrated.dock.spacing).toBe("even");
     expect(migrated.dock.position).toBe("left");
+  });
+
+  it("migrates version 5 documents with the developer widgets off", () => {
+    const { weather, focus } = defaultAppSettings.widgets;
+    const migrated = migrateAppSettings({ ...defaultAppSettings, version: 5, widgets: { weather, focus } });
+    expect(migrated.version).toBe(SETTINGS_VERSION);
+    expect(migrated.widgets.projects.roots).toEqual([]);
+    expect(migrated.widgets.vault.path).toBe("");
+    expect(migrated.widgets.localAi.model).toBe("");
+    expect(migrated.widgets.ci).toEqual({ enabled: false, repos: [] });
   });
 
   it("greets new installs", () => {
