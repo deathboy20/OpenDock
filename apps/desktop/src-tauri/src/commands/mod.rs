@@ -70,13 +70,18 @@ pub fn persist_settings(
     if previous.widgets.weather != settings.widgets.weather {
         app.state::<Wakers>().wake_weather();
     }
-    if previous.widgets.projects != settings.widgets.projects {
+    if previous.widgets.projects != settings.widgets.projects
+        || previous.widgets.options != settings.widgets.options
+    {
         app.state::<Wakers>().wake_projects();
     }
-    if previous.dock.item_order != settings.dock.item_order {
+    if previous.dock.item_order != settings.dock.item_order
+        || previous.widgets.options != settings.widgets.options
+    {
         app.state::<Wakers>().wake_local_ai();
     }
     if previous.widgets.ci != settings.widgets.ci
+        || previous.widgets.options != settings.widgets.options
         || previous.dock.item_order != settings.dock.item_order
     {
         app.state::<Wakers>().wake_ci();

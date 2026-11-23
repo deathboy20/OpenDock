@@ -3,7 +3,7 @@ use tauri::{AppHandle, State};
 use crate::services::automation::ToastPayload;
 use crate::services::windows::{self as dock_windows, FlyoutRequest, WindowRegistry};
 
-const HUB_PAGES: [&str; 9] = [
+const HUB_PAGES: [&str; 10] = [
     "welcome",
     "apps",
     "widgets",
@@ -13,6 +13,7 @@ const HUB_PAGES: [&str; 9] = [
     "privacy",
     "calendars",
     "developer",
+    "customise",
 ];
 
 // Window-creating commands are async: building a webview inside a synchronous command

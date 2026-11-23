@@ -1,7 +1,7 @@
 {
   "valid": [
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -33,7 +33,7 @@
       "onboarded": true
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "top",
         "size": "l",
@@ -58,7 +58,7 @@
       "onboarded": false
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "left",
         "size": "s",
@@ -72,7 +72,7 @@
       }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -86,7 +86,7 @@
       }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "right",
         "size": "s",
@@ -100,7 +100,7 @@
       }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "l",
@@ -114,7 +114,7 @@
       }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -134,7 +134,7 @@
       }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -147,11 +147,12 @@
         "launchAtStartup": false
       },
       "widgets": { "projects": {}, "vault": {}, "localAi": {}, "ci": {} }
-    }
+    },
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"projects": {"label": "Repos", "layout": "detailed", "accent": "sky", "refreshSeconds": 60}, "clock": {"layout": "compact"}, "ci": {"label": "", "layout": "auto", "accent": "theme", "refreshSeconds": null}}}}
   ],
   "invalid": [
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -172,7 +173,7 @@
       "automation": { "enabled": true, "quietHours": { "enabled": false, "start": "22:00", "end": "07:00" } }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -193,7 +194,7 @@
       "automation": { "enabled": true, "quietHours": { "enabled": false, "start": "22:00", "end": "07:00" } }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -214,7 +215,7 @@
       "automation": { "enabled": true, "quietHours": { "enabled": false, "start": "22:00", "end": "07:00" } }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -256,7 +257,7 @@
       "automation": { "enabled": true, "quietHours": { "enabled": false, "start": "22:00", "end": "07:00" } }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -271,7 +272,7 @@
       }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -291,7 +292,7 @@
       }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -306,7 +307,7 @@
       "apps": { "pinned": [{ "name": "", "path": "C:\\Apps\\Nameless.exe", "target": null }] }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -321,7 +322,7 @@
       "taskbar": { "mode": "vanish" }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -335,7 +336,7 @@
       }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -364,7 +365,7 @@
       }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -379,7 +380,7 @@
       "widgets": { "ci": { "enabled": true, "repos": ["not-a-repo"] } }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -394,7 +395,7 @@
       "widgets": { "ci": { "enabled": true, "repos": ["owner/.."] } }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -409,7 +410,7 @@
       "widgets": { "ci": { "repos": ["Owner/Repo", "owner/repo"] } }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -424,7 +425,7 @@
       "widgets": { "projects": { "roots": ["D:\\Gitfiles", "d:\\gitfiles"] } }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -439,7 +440,7 @@
       "widgets": { "projects": { "roots": [""] } }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -454,7 +455,7 @@
       "widgets": { "projects": { "roots": ["a", "b", "c", "d", "e", "f", "g", "h", "i"] } }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -469,7 +470,7 @@
       "widgets": { "localAi": { "model": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" } }
     },
     {
-      "version": 6,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -482,6 +483,12 @@
         "launchAtStartup": false
       },
       "widgets": { "ci": { "enabled": "yes" } }
-    }
+    },
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"Bad Id": {"layout": "auto"}}}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"projects": {"refreshSeconds": 5}}}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"projects": {"refreshSeconds": 4000}}}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"projects": {"accent": "pink"}}}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"projects": {"layout": "huge"}}}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"projects": {"label": "a label that is far too long for a dock tile"}}}}
   ]
 }

@@ -32,6 +32,22 @@ const PROJECTS_INTERVAL: Duration = Duration::from_secs(2 * 60);
 const LOCAL_AI_INTERVAL: Duration = Duration::from_secs(60);
 const CI_INTERVAL: Duration = Duration::from_secs(5 * 60);
 
+/// A widget's own refresh setting, kept within what its source can bear.
+pub fn refresh_interval(
+    settings: &crate::settings::AppSettings,
+    widget: &str,
+    default: Duration,
+    min: Duration,
+) -> Duration {
+    settings
+        .widgets
+        .options
+        .get(widget)
+        .and_then(|o| o.refresh_seconds)
+        .map(|s| Duration::from_secs(u64::from(s)).max(min))
+        .unwrap_or(default)
+}
+
 /// Lets commands ask a polling service to refresh now.
 pub struct Wakers {
     weather: Mutex<Sender<()>>,
@@ -347,7 +363,13 @@ fn spawn_projects(app: AppHandle, rx: Receiver<()>) {
             *slot = Some(snapshot.clone());
         }
         let _ = app.emit("projects:update", &snapshot);
-        if !wait_or_wake(&rx, PROJECTS_INTERVAL) {
+        let interval = refresh_interval(
+            &state.settings(),
+            "projects",
+            PROJECTS_INTERVAL,
+            Duration::from_secs(30),
+        );
+        if !wait_or_wake(&rx, interval) {
             break;
         }
     });
@@ -371,7 +393,13 @@ fn spawn_local_ai(app: AppHandle, rx: Receiver<()>) {
             }
             let _ = app.emit("localAi:update", &snapshot);
         }
-        if !wait_or_wake(&rx, LOCAL_AI_INTERVAL) {
+        let interval = refresh_interval(
+            &state.settings(),
+            local_ai::WIDGET,
+            LOCAL_AI_INTERVAL,
+            Duration::from_secs(15),
+        );
+        if !wait_or_wake(&rx, interval) {
             break;
         }
     });
@@ -400,7 +428,10 @@ fn spawn_ci(app: AppHandle, rx: Receiver<()>) {
             *slot = Some(snapshot.clone());
         }
         let _ = app.emit("ci:update", &snapshot);
-        if !wait_or_wake(&rx, CI_INTERVAL) {
+        // GitHub allows 60 unauthenticated requests an hour, so CI never polls faster than 1 min.
+        let interval =
+            refresh_interval(&settings, ci::WIDGET, CI_INTERVAL, Duration::from_secs(60));
+        if !wait_or_wake(&rx, interval) {
             break;
         }
     });

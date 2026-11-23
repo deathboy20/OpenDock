@@ -28,9 +28,13 @@ Seen working in `pnpm dev` on 2026-11-23 (Windows 10 Pro, this PC, Windows taskb
 
 Checks verified on 2026-11-23 (Windows 10 Pro, this PC): `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm fmt:check`, `pnpm test:rust` and `cargo clippy --all-targets -- -D warnings` all pass. Rust builds offline from the local cargo cache.
 
+Phase B, in progress:
+
+7. **Widget options** (settings v7, `widgets.options` keyed by widget id: `label` ≤ 40, `layout` auto/compact/detailed, `accent` theme/mint/sky/amber/rose/violet, `refreshSeconds` 15-3600 or null). The dock applies them in `features/dock/DockBar.tsx` (size, compact, `data-accent`, name); the flyout uses the label and accent. Rust `services::refresh_interval` applies the refresh with a floor per widget (Projects 30 s, Local AI 15 s, CI 60 s). Accent swatch tokens are in `styles/tokens.css`; `features/customise/widgetOptions.test.ts` measures their contrast. UI: hub page **Customise** (`features/customise/CustomisePage.tsx`), also linked from the dock menu.
+
 ## Open items and known issues
 
-- One settings bump (v6) covers all four developer widgets instead of one bump per widget: v6 has not shipped, and each field defaults, so files written by an earlier commit on this branch still load. Decision by the agent; say if you want one bump per widget.
+- One settings bump covers each phase: v6 for all four developer widgets, v7 for all of Phase B. Neither has shipped, and each field defaults, so files written by an earlier commit on this branch still load. Decision by the agent; say if you want one bump per feature.
 - Project folders default to an empty list, not `D:\Gitfiles`, because the default ships to every user. Isaac adds `D:\Gitfiles` once in **Developer widgets**.
 - README links `isaacobenzy/OpenDock` while the canonical remote is `deathboy20/OpenDock`. Not changed.
 - Running `pnpm dev` on this PC uses the installed app's `%APPDATA%\com.opendock.app\settings.json`, which has taskbar mode `replace` and start-with-Windows on. A dev run hides the taskbar and migrates the file to v6, which the installed 0.3.0 would then reject. Back it up first. The 2026-11-23 run used `settings.v5-backup-2026-11-23.json` and `opendock.db.backup-2026-11-23` (same folder); the original v5 settings were copied back afterwards.

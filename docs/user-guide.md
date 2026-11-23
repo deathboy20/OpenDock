@@ -67,6 +67,21 @@ Open the **Widget gallery** from the dock menu to add widgets. Each one shows wh
 | Local AI | Ollama status, models and a quick prompt | Only Ollama on this PC (`127.0.0.1`) |
 | CI status | The latest GitHub Actions run per repository (off until you turn it on) | GitHub (`api.github.com`) |
 
+## Customise
+
+Open **Customise** from the hub or the dock menu.
+
+### Widget options
+
+Every widget on the dock has its own options. Select a widget to change:
+
+- **Label:** the name used in its tooltip and panel title. Leave it empty to keep the widget's name.
+- **Layout:** **Dock size** follows the dock, **Icon only** shows just the icon, and **Detailed** uses the large layout even on a small dock.
+- **Accent:** Theme, Mint, Sky, Amber, Rose or Violet. Each swatch keeps text on it at 4.5:1 contrast or more in both themes.
+- **Check every:** for widgets that poll (Projects, Local AI and CI status). CI status never checks more often than once a minute, because GitHub allows 60 requests an hour without a token.
+
+Right-click a widget and choose **Options for…** to jump here.
+
 ## Developer widgets
 
 Set these up in **Developer widgets** in the hub.

@@ -1,0 +1,118 @@
+/* Customise page: widget options, skins, scenes and desktop widgets. Tokens only. */
+
+.option-list {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.option-row {
+  border: 1px solid var(--od-border);
+  border-radius: var(--od-radius-sm);
+}
+
+.option-row.is-open {
+  border-color: var(--od-border-strong);
+}
+
+.option-row-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--od-radius-sm);
+  background: transparent;
+  color: var(--od-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.option-row-head:hover {
+  background: var(--od-hover);
+}
+
+.option-row-head:focus-visible {
+  outline: 2px solid var(--od-accent);
+  outline-offset: -2px;
+}
+
+.option-row-head .od-icon {
+  flex: none;
+  color: var(--od-faint);
+  transition: transform var(--od-fast) var(--od-ease);
+}
+
+.option-row.is-open .option-row-head .od-icon {
+  transform: rotate(90deg);
+}
+
+.option-swatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--od-accent);
+}
+
+.option-name {
+  font-weight: 600;
+}
+
+.option-summary {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.option-body {
+  display: grid;
+  gap: 14px;
+  padding: 4px 12px 14px;
+}
+
+.option-field {
+  display: grid;
+  gap: 6px;
+  max-width: 420px;
+}
+
+.swatch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.swatch {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--od-border);
+  border-radius: 50%;
+  background: var(--od-accent);
+  cursor: pointer;
+}
+
+.swatch.is-active {
+  border-color: var(--od-text);
+  box-shadow: 0 0 0 2px var(--od-surface-solid) inset;
+}
+
+.swatch:focus-visible {
+  outline: 2px solid var(--od-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option-row-head .od-icon {
+    transition: none;
+  }
+}

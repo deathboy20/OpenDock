@@ -216,7 +216,8 @@ export type HubPage =
   | "dock"
   | "calendars"
   | "privacy"
-  | "developer";
+  | "developer"
+  | "customise";
 export type DataTopic = "todos" | "notes" | "calendar" | "rules" | "activity" | "vault";
 
 // ---------- settings and dock ----------

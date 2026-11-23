@@ -9,6 +9,8 @@ import {
   resizeFlyout,
   type FlyoutRequest,
 } from "../../services/ipc";
+import { widgetOptionsFor } from "@opendock/config-schema";
+import { useSettings } from "../../services/settingsContext";
 import { flyoutKey } from "../dock/dockClick";
 import { findWidget } from "../widgets/catalog";
 import { PanelState } from "../widgets/visuals";
@@ -78,15 +80,16 @@ function Panel({ request, onDone }: { request: FlyoutRequest; onDone: () => void
   }
 }
 
-function titleFor(request: FlyoutRequest | null): string {
+function titleFor(request: FlyoutRequest | null, label: string): string {
   if (!request) return "";
   if (request.kind === "menu") return "Dock";
   if (request.kind === "start") return "Start";
   if (request.kind === "app") return "App windows";
-  return findWidget(request.kind)?.name ?? request.kind;
+  return label || (findWidget(request.kind)?.name ?? request.kind);
 }
 
 export function FlyoutApp() {
+  const { settings } = useSettings();
   const [request, setRequest] = useState<FlyoutRequest | null>(null);
   const [opened, setOpened] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -132,7 +135,13 @@ export function FlyoutApp() {
 
   return (
     <div className="flyout-frame" ref={contentRef}>
-      <div className={`flyout-panel kind-${request?.kind ?? "none"}`} key={opened} role="dialog" aria-label={titleFor(request)}>
+      <div
+        className={`flyout-panel kind-${request?.kind ?? "none"}`}
+        key={opened}
+        role="dialog"
+        data-accent={request ? widgetOptionsFor(settings, request.kind).accent : undefined}
+        aria-label={titleFor(request, request ? widgetOptionsFor(settings, request.kind).label : "")}
+      >
         {request ? (
           <Panel request={request} onDone={() => close(keyRef.current)} />
         ) : (

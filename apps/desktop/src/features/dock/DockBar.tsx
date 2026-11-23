@@ -15,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { reorderDockItems } from "@opendock/config-schema";
+import { reorderDockItems, widgetOptionsFor } from "@opendock/config-schema";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
@@ -50,7 +50,10 @@ function DockItem({
 }) {
   const { settings } = useSettings();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
-  const name = id === ADD_WIDGET_ID ? "Add widget" : (findWidget(id)?.name ?? id);
+  const options = widgetOptionsFor(settings, id);
+  const name = id === ADD_WIDGET_ID ? "Add widget" : options.label || (findWidget(id)?.name ?? id);
+  const compact = vertical || options.layout === "compact";
+  const size = options.layout === "detailed" ? "l" : settings.dock.size;
 
   return (
     <div
@@ -58,6 +61,7 @@ function DockItem({
       style={{ transform: CSS.Translate.toString(transform), transition }}
       className={`dock-item ${isDragging ? "is-dragging" : ""} ${highlighted ? "is-highlighted" : ""}`}
       data-widget={id}
+      data-accent={options.accent}
       {...attributes}
       {...listeners}
       role="button"
@@ -82,7 +86,7 @@ function DockItem({
         onMenu(id, anchorOf(event.currentTarget, vertical));
       }}
     >
-      <TileContent id={id} size={settings.dock.size} compact={vertical} />
+      <TileContent id={id} size={size} compact={compact} />
     </div>
   );
 }

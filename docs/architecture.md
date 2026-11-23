@@ -192,5 +192,6 @@ The UI is organised by feature under `apps/desktop/src/features/`. Each feature 
 - `hub/` — hub pages, Automation Studio and the welcome flow
 - `toast/` — the toast window and its queue
 - `developer/` — the developer widgets (Projects, Vault capture, Local AI, CI status), their models and panels
+- `customise/` — the Customise hub page: per-widget options and their models
 
 Global styles live in `styles/`: `tokens.css` holds every colour, radius, shadow and motion value, and `base.css` holds shared primitives. Feature CSS uses tokens only.
