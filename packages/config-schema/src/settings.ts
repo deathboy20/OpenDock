@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const SETTINGS_VERSION = 6;
+export const SETTINGS_VERSION = 7;
 export const MAX_PINNED_APPS = 24;
 export const MAX_PROJECT_ROOTS = 8;
 export const MAX_CI_REPOS = 10;
@@ -117,7 +117,27 @@ export const ciSettingsSchema = z.object({
     .default([]),
 });
 
+/** How a widget fills its dock slot: follow the dock size, icon only, or the large layout. */
+export const widgetLayoutSchema = z.enum(["auto", "compact", "detailed"]);
+/** Accent swatches from tokens.css. "theme" keeps the dock's accent. */
+export const widgetAccentSchema = z.enum(["theme", "mint", "sky", "amber", "rose", "violet"]);
+export const MAX_WIDGET_OPTIONS = 40;
+
+export const widgetOptionsSchema = z.object({
+  /** Shown as the widget's name in tooltips and panel titles. Empty uses the widget's own name. */
+  label: z.string().trim().max(40).default(""),
+  layout: widgetLayoutSchema.default("auto"),
+  accent: widgetAccentSchema.default("theme"),
+  /** Seconds between checks for widgets that poll. Null uses the widget's own default. */
+  refreshSeconds: z.number().int().min(15).max(3600).nullable().default(null),
+});
+
 export const widgetSettingsSchema = z.object({
+  /** Options per dock widget, keyed by widget id. */
+  options: z
+    .record(dockItemIdSchema, widgetOptionsSchema)
+    .refine((options) => Object.keys(options).length <= MAX_WIDGET_OPTIONS, "too many widget options")
+    .default({}),
   weather: weatherSettingsSchema.default({}),
   focus: focusSettingsSchema.default({}),
   projects: projectsSettingsSchema.default({}),
@@ -166,6 +186,9 @@ export type ProjectsSettings = z.infer<typeof projectsSettingsSchema>;
 export type VaultSettings = z.infer<typeof vaultSettingsSchema>;
 export type LocalAiSettings = z.infer<typeof localAiSettingsSchema>;
 export type CiSettings = z.infer<typeof ciSettingsSchema>;
+export type WidgetLayout = z.infer<typeof widgetLayoutSchema>;
+export type WidgetAccent = z.infer<typeof widgetAccentSchema>;
+export type WidgetOptions = z.infer<typeof widgetOptionsSchema>;
 export type AppSettings = z.infer<typeof appSettingsSchema>;
 
 export const defaultAppSettings: AppSettings = appSettingsSchema.parse({
@@ -185,8 +208,9 @@ export function migrateAppSettings(input: unknown): AppSettings {
   }
   const doc = input as { version?: unknown; dock?: { itemOrder?: unknown } };
   // Version 4 added dock styles, version 5 spacing (even), version 6 the developer widgets
-  // (projects, vault, local AI and CI, all empty or off). Each defaults on parse.
-  if (doc.version === 3 || doc.version === 4 || doc.version === 5) {
+  // (projects, vault, local AI and CI, all empty or off), version 7 per-widget options,
+  // skins, scenes and desktop widgets (all empty). Each defaults on parse.
+  if (doc.version === 3 || doc.version === 4 || doc.version === 5 || doc.version === 6) {
     return parseAppSettings({ ...doc, version: SETTINGS_VERSION });
   }
   if (doc.version !== 1 && doc.version !== 2) {
@@ -256,4 +280,22 @@ export function addDockItem(order: string[], id: string): string[] {
 export function removeDockItem(order: string[], id: string): string[] {
   const next = order.filter((item) => item !== id);
   return next.length === 0 ? ["add-widget"] : next;
+}
+
+export const defaultWidgetOptions: WidgetOptions = widgetOptionsSchema.parse({});
+
+export function widgetOptionsFor(settings: AppSettings, id: string): WidgetOptions {
+  return settings.widgets.options[id] ?? defaultWidgetOptions;
+}
+
+/** Sets one widget's options, dropping the entry when it is back to the defaults. */
+export function setWidgetOptions(settings: AppSettings, id: string, patch: Partial<WidgetOptions>): AppSettings {
+  const next = { ...widgetOptionsFor(settings, id), ...patch };
+  const options = { ...settings.widgets.options };
+  const isDefault = (Object.keys(defaultWidgetOptions) as (keyof WidgetOptions)[]).every(
+    (key) => next[key] === defaultWidgetOptions[key],
+  );
+  if (isDefault) delete options[id];
+  else options[id] = next;
+  return { ...settings, widgets: { ...settings.widgets, options } };
 }

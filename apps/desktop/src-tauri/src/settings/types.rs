@@ -1,12 +1,15 @@
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 
 use crate::engine::rules::{is_valid_id, parse_clock};
 use crate::geometry::{DockMode, DockPosition, DockSize};
 
-pub const SETTINGS_VERSION: u32 = 6;
+pub const SETTINGS_VERSION: u32 = 7;
 pub const MAX_PINNED_APPS: usize = 24;
 pub const MAX_PROJECT_ROOTS: usize = 8;
 pub const MAX_CI_REPOS: usize = 10;
+pub const MAX_WIDGET_OPTIONS: usize = 40;
 
 fn default_true() -> bool {
     true
@@ -167,6 +170,40 @@ impl Default for FocusSettings {
     }
 }
 
+/// How a widget fills its dock slot: follow the dock size, icon only, or the large layout.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum WidgetLayout {
+    #[default]
+    Auto,
+    Compact,
+    Detailed,
+}
+
+/// Accent swatches from tokens.css. `Theme` keeps the dock's accent.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum WidgetAccent {
+    #[default]
+    Theme,
+    Mint,
+    Sky,
+    Amber,
+    Rose,
+    Violet,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct WidgetOptions {
+    /// Shown as the widget's name in tooltips and panel titles. Empty uses the widget's name.
+    pub label: String,
+    pub layout: WidgetLayout,
+    pub accent: WidgetAccent,
+    /// Seconds between checks for widgets that poll. `None` uses the widget's default.
+    pub refresh_seconds: Option<u32>,
+}
+
 /// Folders whose git repositories the Projects widget lists, one or two levels deep.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename_all = "camelCase", default)]
@@ -199,6 +236,9 @@ pub struct CiSettings {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct WidgetSettings {
+    /// Options per dock widget, keyed by widget id.
+    #[serde(default)]
+    pub options: BTreeMap<String, WidgetOptions>,
     #[serde(default)]
     pub weather: WeatherSettings,
     #[serde(default)]
@@ -333,8 +373,9 @@ impl AppSettings {
     pub fn migrate(value: &mut serde_json::Value) -> bool {
         let version = value.get("version").and_then(|v| v.as_u64());
         // Version 4 added dock styles, version 5 spacing (even), version 6 the developer
-        // widgets (projects, vault, local AI and CI, all empty or off). Each defaults on load.
-        if matches!(version, Some(3) | Some(4) | Some(5)) {
+        // widgets (projects, vault, local AI and CI, all empty or off), version 7 per-widget
+        // options, skins, scenes and desktop widgets (all empty). Each defaults on load.
+        if matches!(version, Some(3) | Some(4) | Some(5) | Some(6)) {
             value["version"] = serde_json::json!(SETTINGS_VERSION);
             return true;
         }
@@ -397,6 +438,24 @@ impl AppSettings {
         let focus = &self.widgets.focus;
         if !(1..=180).contains(&focus.focus_minutes) || !(1..=60).contains(&focus.break_minutes) {
             return Err("focus lengths out of range".into());
+        }
+        let options = &self.widgets.options;
+        if options.len() > MAX_WIDGET_OPTIONS {
+            return Err("too many widget options".into());
+        }
+        for (id, option) in options {
+            if !is_valid_id(id) {
+                return Err(format!("invalid widget id in options: {id}"));
+            }
+            if option.label.chars().count() > 40 {
+                return Err("widget labels must be at most 40 characters".into());
+            }
+            if option
+                .refresh_seconds
+                .is_some_and(|s| !(15..=3600).contains(&s))
+            {
+                return Err("refresh must be 15-3600 seconds".into());
+            }
         }
         let roots = &self.widgets.projects.roots;
         if roots.len() > MAX_PROJECT_ROOTS {
@@ -594,6 +653,17 @@ mod tests {
         assert!(settings.widgets.vault.path.is_empty());
         assert!(!settings.widgets.ci.enabled);
         assert!(!AppSettings::migrate(&mut value));
+    }
+
+    #[test]
+    fn migrates_version_six_without_widget_options() {
+        let mut value = serde_json::to_value(AppSettings::default()).unwrap();
+        value["version"] = serde_json::json!(6);
+        value["widgets"].as_object_mut().unwrap().remove("options");
+        assert!(AppSettings::migrate(&mut value));
+        let settings = parse(&value).unwrap();
+        assert_eq!(settings.version, SETTINGS_VERSION);
+        assert!(settings.widgets.options.is_empty());
     }
 
     #[test]

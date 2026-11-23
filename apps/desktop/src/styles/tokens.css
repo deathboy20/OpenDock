@@ -43,6 +43,18 @@
   --od-float-text: 0 1px 2px rgba(0, 0, 0, 0.75), 0 0 10px rgba(0, 0, 0, 0.45);
   --od-float-drop: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
   --od-blur: 22px;
+  /* Accent swatches a widget can pick in Customise. Each ink colour is measured against
+     its swatch at 4.5:1 or more. */
+  --od-swatch-mint: #7cf2c8;
+  --od-swatch-mint-ink: #052419;
+  --od-swatch-sky: #8ab4ff;
+  --od-swatch-sky-ink: #0a1a33;
+  --od-swatch-amber: #ffc56b;
+  --od-swatch-amber-ink: #2b1a00;
+  --od-swatch-rose: #ff9bb5;
+  --od-swatch-rose-ink: #33060f;
+  --od-swatch-violet: #c4a8ff;
+  --od-swatch-violet-ink: #1c0b3d;
 }
 
 [data-theme="light"] {
@@ -85,6 +97,16 @@
   --od-ink-edge: rgba(16, 20, 28, 0.55);
   --od-float-text: 0 1px 2px rgba(255, 255, 255, 0.85), 0 0 10px rgba(255, 255, 255, 0.6);
   --od-float-drop: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.7));
+  --od-swatch-mint: #0b7a5a;
+  --od-swatch-mint-ink: #ffffff;
+  --od-swatch-sky: #2558c4;
+  --od-swatch-sky-ink: #ffffff;
+  --od-swatch-amber: #8a5000;
+  --od-swatch-amber-ink: #ffffff;
+  --od-swatch-rose: #b4234d;
+  --od-swatch-rose-ink: #ffffff;
+  --od-swatch-violet: #6b3fd4;
+  --od-swatch-violet-ink: #ffffff;
 }
 
 :root {

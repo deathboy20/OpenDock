@@ -91,6 +91,7 @@ export function DockMenu({ target, onDone }: { target: string | null; onDone: ()
           {widget.configure ? (
             <MenuItem icon="settings" label={`Set up ${widget.name}`} onClick={() => go(widget.configure!)} />
           ) : null}
+          <MenuItem icon="palette" label={`Options for ${widget.name}`} onClick={() => go("customise")} />
         </section>
       ) : null}
 
@@ -135,6 +136,7 @@ export function DockMenu({ target, onDone }: { target: string | null; onDone: ()
 
       <section className="menu-section">
         <MenuItem icon="grid" label="Widget gallery" onClick={() => go("widgets")} />
+        <MenuItem icon="palette" label="Customise" onClick={() => go("customise")} />
         <MenuItem icon="spark" label="Automation Studio" onClick={() => go("automations")} />
         <MenuItem icon="apps" label="Apps & taskbar" onClick={() => go("apps")} />
         <MenuItem icon="settings" label="Dock settings" onClick={() => go("dock")} />

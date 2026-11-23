@@ -18,6 +18,9 @@ import {
   ruleRecipes,
   ruleSchema,
   SETTINGS_VERSION,
+  setWidgetOptions,
+  widgetOptionsFor,
+  defaultWidgetOptions,
   slugifyRuleId,
 } from "./index";
 
@@ -117,9 +120,27 @@ describe("appSettingsSchema", () => {
     expect(migrated.widgets.ci).toEqual({ enabled: false, repos: [] });
   });
 
+  it("migrates version 6 documents with no widget options", () => {
+    const { options: _unused, ...v6Widgets } = defaultAppSettings.widgets;
+    void _unused;
+    const migrated = migrateAppSettings({ ...defaultAppSettings, version: 6, widgets: v6Widgets });
+    expect(migrated.version).toBe(SETTINGS_VERSION);
+    expect(migrated.widgets.options).toEqual({});
+  });
+
   it("greets new installs", () => {
     expect(defaultAppSettings.onboarded).toBe(false);
     expect(defaultAppSettings.dock.itemOrder).toEqual(DEFAULT_ITEM_ORDER);
+  });
+});
+
+describe("widget options", () => {
+  it("stores only options that differ from the defaults", () => {
+    const set = setWidgetOptions(defaultAppSettings, "projects", { layout: "detailed", refreshSeconds: 60 });
+    expect(widgetOptionsFor(set, "projects")).toEqual({ label: "", layout: "detailed", accent: "theme", refreshSeconds: 60 });
+    expect(widgetOptionsFor(set, "clock")).toEqual(defaultWidgetOptions);
+    const reset = setWidgetOptions(set, "projects", { layout: "auto", refreshSeconds: null });
+    expect(reset.widgets.options).toEqual({});
   });
 });
 
