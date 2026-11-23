@@ -14,7 +14,7 @@ permissions = [
 
 [[set]]
 identifier = "widget-read"
-description = "Read local widget data: media, system stats, focus, todos, notes, weather and calendar events."
+description = "Read local widget data: media, system stats, focus, todos, notes, weather, calendar events, projects and their handoff notes."
 permissions = [
   "allow-get-media-state",
   "allow-get-system-stats",
@@ -24,11 +24,13 @@ permissions = [
   "allow-get-weather",
   "allow-upcoming-events",
   "allow-list-calendars",
+  "allow-get-projects",
+  "allow-read-handoff",
 ]
 
 [[set]]
 identifier = "widget-control"
-description = "Act on widgets: media keys, Start, focus rounds, todos, notes and refreshes."
+description = "Act on widgets: media keys, Start, focus rounds, todos, notes, refreshes and opening a listed project in an editor or terminal."
 permissions = [
   "allow-media-control",
   "allow-open-start-menu",
@@ -45,6 +47,8 @@ permissions = [
   "allow-delete-note",
   "allow-refresh-weather",
   "allow-sync-calendars",
+  "allow-refresh-projects",
+  "allow-open-project",
 ]
 
 [[set]]

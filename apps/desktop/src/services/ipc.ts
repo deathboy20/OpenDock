@@ -151,6 +151,28 @@ export type Shortcut = "quickSettings" | "notifications" | "showDesktop" | "task
 export type PowerAction = "lock" | "sleep" | "signOut" | "restart" | "shutDown";
 export type ThumbnailSlot = { id: number; x: number; y: number; width: number; height: number };
 
+export type Project = {
+  name: string;
+  path: string;
+  root: string;
+  branch: string | null;
+  detached: boolean;
+  upstream: string | null;
+  ahead: number | null;
+  behind: number | null;
+  dirty: number;
+  hasHandoff: boolean;
+  error: string | null;
+};
+export type ProjectsSnapshot = {
+  projects: Project[];
+  missingRoots: string[];
+  truncated: boolean;
+  gitAvailable: boolean;
+  scannedAt: number;
+};
+export type ProjectTool = "cursor" | "vscode" | "terminal" | "githubDesktop" | "explorer";
+
 export type HubPage =
   | "welcome"
   | "apps"
@@ -159,7 +181,8 @@ export type HubPage =
   | "activity"
   | "dock"
   | "calendars"
-  | "privacy";
+  | "privacy"
+  | "developer";
 export type DataTopic = "todos" | "notes" | "calendar" | "rules" | "activity";
 
 // ---------- settings and dock ----------
@@ -265,6 +288,13 @@ export const hideFlyout = () => invoke<void>("hide_flyout");
 export const takePendingToasts = () => invoke<ToastPayload[]>("take_pending_toasts");
 export const hideToast = () => invoke<void>("hide_toast");
 
+// ---------- developer widgets ----------
+
+export const getProjects = () => invoke<ProjectsSnapshot | null>("get_projects");
+export const refreshProjects = () => invoke<void>("refresh_projects");
+export const openProject = (path: string, tool: ProjectTool) => invoke<void>("open_project", { path, tool });
+export const readHandoff = (path: string) => invoke<string | null>("read_handoff", { path });
+
 // ---------- events ----------
 
 export type EventMap = {
@@ -284,6 +314,7 @@ export type EventMap = {
   "dock:fullscreen-visible": null;
   "windows:changed": WindowsSnapshot;
   "volume:state": VolumeState | null;
+  "projects:update": ProjectsSnapshot;
 };
 
 /** Subscribes to a backend event. Outside Tauri (tests, plain browser) it is a no-op. */

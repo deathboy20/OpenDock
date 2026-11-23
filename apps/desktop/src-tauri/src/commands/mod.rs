@@ -1,5 +1,6 @@
 pub mod apps;
 pub mod automation;
+pub mod developer;
 pub mod widgets;
 pub mod windows;
 
@@ -68,6 +69,9 @@ pub fn persist_settings(
     }
     if previous.widgets.weather != settings.widgets.weather {
         app.state::<Wakers>().wake_weather();
+    }
+    if previous.widgets.projects != settings.widgets.projects {
+        app.state::<Wakers>().wake_projects();
     }
     let _ = app.emit("settings:changed", &settings);
     Ok(settings)

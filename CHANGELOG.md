@@ -4,6 +4,15 @@ All notable changes to OpenDock are documented here. The format is based on [Kee
 
 ## [Unreleased]
 
+### Added
+
+- **Projects widget.** Lists the git repositories in the folders you choose, with branch, uncommitted changes and ahead or behind. Open one in Cursor, VS Code, a terminal, GitHub Desktop or File Explorer, or read its `HANDOFF.md` in the panel. A new **Developer widgets** page in the hub holds the folders.
+
+### Changed
+
+- Settings move to version 6 for the developer widgets. Older files are migrated automatically; the new widgets start empty or off.
+- `net.rs` can now send headers and JSON bodies, and allows plain `http://` only to declared hosts on this PC (`127.0.0.1`), for local services such as Ollama.
+
 ## [0.3.0] - 2026-11-07
 
 Live dock settings, a restore-the-taskbar command, experimental Linux and macOS packages, and a dock you can try in the browser.

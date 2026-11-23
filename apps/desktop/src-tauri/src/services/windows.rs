@@ -25,7 +25,7 @@ const PREVIEW_WIDTH: f64 = 420.0;
 fn flyout_width(kind: &str) -> f64 {
     match kind {
         "start" => LAUNCHER_WIDTH,
-        "app" => PREVIEW_WIDTH,
+        "app" | "projects" => PREVIEW_WIDTH,
         _ => FLYOUT_WIDTH,
     }
 }

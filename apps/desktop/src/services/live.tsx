@@ -3,6 +3,7 @@ import {
   errorText,
   getFocusState,
   getMediaState,
+  getProjects,
   getSystemStats,
   getVolume,
   getWeather,
@@ -15,6 +16,7 @@ import {
   type FocusState,
   type MediaState,
   type Note,
+  type ProjectsSnapshot,
   type SystemStats,
   type Todo,
   type VolumeState,
@@ -43,6 +45,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
   const [events, setEvents] = useState<Loadable<CalendarEvent[]>>(loading);
   const [windows, setWindows] = useState<Loadable<WindowsSnapshot>>(loading);
   const [volume, setVolume] = useState<Loadable<VolumeState | null>>(loading);
+  const [projects, setProjects] = useState<Loadable<ProjectsSnapshot | null>>(loading);
 
   useEffect(() => {
     load(listWindows, setWindows);
@@ -54,6 +57,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
     load(listTodos, setTodos);
     load(listNotes, setNotes);
     load(() => upcomingEvents(72), setEvents);
+    load(getProjects, setProjects);
 
     const offs = [
       on("media:state", (m) => setMedia(ready(m))),
@@ -66,6 +70,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       on("weather:update", (w) => setWeather(ready(w))),
       on("windows:changed", (w) => setWindows(ready(w))),
       on("volume:state", (v) => setVolume(ready(v))),
+      on("projects:update", (p) => setProjects(ready(p))),
       on("data:changed", (topic) => {
         if (topic === "todos") load(listTodos, setTodos);
         if (topic === "notes") load(listNotes, setNotes);
@@ -82,7 +87,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
 
   return (
     <LiveContext.Provider
-      value={{ media, stats, cpuHistory, memoryHistory, focus, weather, todos, notes, events, windows, volume }}
+      value={{ media, stats, cpuHistory, memoryHistory, focus, weather, todos, notes, events, windows, volume, projects }}
     >
       {children}
     </LiveContext.Provider>
