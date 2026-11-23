@@ -1,15 +1,19 @@
-import { pinApp, type DockStyle, type TaskbarMode, type Theme } from "@opendock/config-schema";
+import { builtinSkins, pinApp, type DockStyle, type TaskbarMode, type Theme } from "@opendock/config-schema";
 import { useEffect, useState } from "react";
-import { errorText, listTaskbarPins, setLaunchAtStartup, type HubPage, type ShellApp } from "../../services/ipc";
+import { applySkin, errorText, listTaskbarPins, setLaunchAtStartup, type HubPage, type ShellApp } from "../../services/ipc";
 import { failed, loading, ready, type Loadable } from "../../services/loadable";
 import { useSettings } from "../../services/settingsContext";
 import { AppIcon } from "../apps/AppIcon";
 import { toPinned } from "../apps/model";
+import { SkinCard } from "../customise/SkinsSection";
 import { StylePicker } from "../dock/StylePicker";
+import "../customise/customise.css";
 import { Icon } from "../widgets/icons";
 import { Choice, Row, TaskbarOptions, Toggle } from "./controls";
 
 const STEPS = ["Taskbar", "Your apps", "Look and feel"] as const;
+/** A short, varied pick for first run; every skin is in Customise. */
+const WELCOME_SKINS = ["islands", "daylight", "float", "graphite", "contrast"];
 
 export function WelcomePage({ onNavigate }: { onNavigate: (page: HubPage) => void }) {
   const { settings, update } = useSettings();
@@ -20,6 +24,7 @@ export function WelcomePage({ onNavigate }: { onNavigate: (page: HubPage) => voi
   const [style, setStyle] = useState<DockStyle>(settings.dock.style);
   const [theme, setTheme] = useState<Theme>(settings.dock.theme);
   const [startup, setStartup] = useState(true);
+  const [skin, setSkin] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,6 +56,7 @@ export function WelcomePage({ onNavigate }: { onNavigate: (page: HubPage) => voi
       apps: { ...s.apps, pinned: picked.reduce((list, app) => pinApp(list, toPinned(app)), s.apps.pinned) },
     }));
     if (!problem) await setLaunchAtStartup(startup).catch(() => undefined);
+    if (!problem && skin) await applySkin(skin).catch(() => undefined);
     setSaving(false);
     if (problem) setError(problem);
     else onNavigate("widgets");
@@ -136,6 +142,16 @@ export function WelcomePage({ onNavigate }: { onNavigate: (page: HubPage) => voi
                 ]}
                 onChange={setTheme}
               />
+            </Row>
+            <Row label="Look" hint="Bright wallpaper? Daylight and Islands stay readable. You can change this any time in Customise.">
+              <div className="skin-grid welcome-skins" role="radiogroup" aria-label="Look">
+                <SkinCard skin={undefined} theme={theme} active={skin === null} onPick={() => setSkin(null)} />
+                {builtinSkins
+                  .filter((s) => WELCOME_SKINS.includes(s.id))
+                  .map((s) => (
+                    <SkinCard key={s.id} skin={s} theme={theme} active={skin === s.id} onPick={() => setSkin(s.id)} />
+                  ))}
+              </div>
             </Row>
             <Row label="Start with Windows" hint="Recommended when OpenDock replaces the taskbar.">
               <Toggle label="Start with Windows" checked={startup} onChange={setStartup} />

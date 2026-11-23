@@ -11,10 +11,11 @@ import { useRef, useState, type CSSProperties } from "react";
 import { applySkin, errorText } from "../../services/ipc";
 import { useSettings } from "../../services/settingsContext";
 import { Icon } from "../widgets/icons";
+import { restoreLook } from "./look";
 import { contrastProblems, previewColors } from "./skinChecks";
 
 
-function SkinCard({
+export function SkinCard({
   skin,
   theme,
   active,
@@ -76,9 +77,15 @@ export function SkinsSection({ settings }: { settings: AppSettings }) {
   const [message, setMessage] = useState<{ tone: "ok" | "warn" | "error"; text: string } | null>(null);
   const [exported, setExported] = useState<Skin | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [undo, setUndo] = useState<{ before: AppSettings; name: string } | null>(null);
 
-  const setActive = (id: string | null) =>
-    void applySkin(id).catch((e) => setMessage({ tone: "error", text: errorText(e) }));
+  const setActive = (id: string | null) => {
+    const before = settings;
+    const name = id === null ? "the dock style" : (findSkin(settings.skins, id)?.name ?? id);
+    void applySkin(id)
+      .then(() => setUndo({ before, name }))
+      .catch((e) => setMessage({ tone: "error", text: errorText(e) }));
+  };
 
   const add = (text: string) => {
     if (custom.length >= MAX_CUSTOM_SKINS) {
@@ -129,6 +136,23 @@ export function SkinsSection({ settings }: { settings: AppSettings }) {
           <SkinCard key={skin.id} skin={skin} theme={theme} active={active === skin.id} onPick={() => setActive(skin.id)} />
         ))}
       </div>
+
+      {undo ? (
+        <p className="callout is-ok small skin-undo" role="status">
+          <span>Switched to {undo.name}.</span>
+          <button
+            type="button"
+            className="button is-ghost"
+            onClick={() => {
+              const { before } = undo;
+              setUndo(null);
+              void update((s) => restoreLook(s, before));
+            }}
+          >
+            <Icon name="undo" size={14} /> Undo
+          </button>
+        </p>
+      ) : null}
 
       {custom.length > 0 ? (
         <ul className="folder-list" aria-label="Your skins">
