@@ -121,8 +121,33 @@ pub fn settle(
     let scale = window.scale_factor().ok()?;
     let pos = window.outer_position().ok()?.to_logical::<f64>(scale);
     let rect = logical_rect(&monitor);
-    let (x, y) = desktop::settle(
+    let snapped = desktop::settle(
         (pos.x.round() as i32, pos.y.round() as i32),
+        (WIDGET_WIDTH, WIDGET_HEIGHT),
+        rect,
+        settings.desktop.grid,
+    );
+    let monitor_name = monitor.name().map(|n| n.to_string());
+    let primary = app
+        .primary_monitor()
+        .ok()
+        .flatten()
+        .and_then(|m| m.name().map(|n| n.to_string()));
+    let same_monitor = |w: &DesktopWidget| {
+        let theirs = w.monitor_id.clone().or_else(|| primary.clone());
+        theirs == monitor_name
+    };
+    let others: Vec<(i32, i32)> = settings
+        .desktop
+        .widgets
+        .iter()
+        .enumerate()
+        .filter(|(i, w)| *i != index && same_monitor(w))
+        .map(|(_, w)| (w.x, w.y))
+        .collect();
+    let (x, y) = desktop::avoid_overlap(
+        snapped,
+        &others,
         (WIDGET_WIDTH, WIDGET_HEIGHT),
         rect,
         settings.desktop.grid,
@@ -131,7 +156,7 @@ pub fn settle(
     let widget = &mut next.desktop.widgets[index];
     widget.x = x;
     widget.y = y;
-    widget.monitor_id = monitor.name().map(|n| n.to_string());
+    widget.monitor_id = monitor_name;
     let _ = window.set_position(LogicalPosition::new(rect[0] + x, rect[1] + y));
     Some(next)
 }
