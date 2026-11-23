@@ -24,14 +24,16 @@ Done on this branch:
 5. **Local AI widget** (`id: local-ai`). Rust `services/local_ai.rs`: `/api/tags` and `/api/ps` on `http://127.0.0.1:11434` through `net.rs` (declared host `127.0.0.1`), polled every 60 s only while `local-ai` is in `dock.itemOrder`; `/api/generate` with `stream: false`, 180 s timeout, one prompt at a time, only to a model from the latest check, `<think>` blocks stripped. Commands `get_local_ai`, `refresh_local_ai`, `ask_local_ai`. The chosen model is `widgets.localAi.model`. UI `features/developer/LocalAiPanel.tsx`.
 6. **CI status widget** (`id: ci`). Rust `services/ci.rs`: `GET https://api.github.com/repos/{repo}/actions/runs?per_page=1` through `net.rs` with `Accept` and `X-GitHub-Api-Version` headers and an optional `Bearer` token from the keychain (`secrets.rs`, account `github:token`). Polls every 5 min only when `widgets.ci.enabled`, repos are listed and `ci` is on the dock. Only `https://github.com/` run links are passed on or opened. Commands `get_ci_status`, `refresh_ci`, `open_ci_run`, and hub-only `set_github_token`, `clear_github_token`. UI `features/developer/CiPanel.tsx`; toggle, repos and token on the Developer widgets page.
 
-Verified on 2026-11-23 (Windows 10 Pro, this PC): `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm fmt:check`, `pnpm test:rust` and `cargo clippy --all-targets -- -D warnings` all pass. Rust builds offline from the local cargo cache.
+Seen working in `pnpm dev` on 2026-11-23 (Windows 10 Pro, this PC, Windows taskbar kept): Projects listed 20 repos under `D:\Gitfiles` with branches and changes, expanded a row and showed OpenDock's HANDOFF.md; Vault capture wrote `- 14:20 OpenDock vault capture test (safe to delete)` to `AI-Vault/Inbox/2026-11-23.md`; Local AI listed both Ollama models and answered a prompt from `isaac-sec:latest`; CI status showed `deathboy20/OpenDock` as Passing; the Developer widgets hub page showed all three sections. Not clicked: the Cursor, VS Code, Terminal, GitHub Desktop and Files buttons, the Obsidian buttons, and saving a GitHub token.
+
+Checks verified on 2026-11-23 (Windows 10 Pro, this PC): `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm fmt:check`, `pnpm test:rust` and `cargo clippy --all-targets -- -D warnings` all pass. Rust builds offline from the local cargo cache.
 
 ## Open items and known issues
 
 - One settings bump (v6) covers all four developer widgets instead of one bump per widget: v6 has not shipped, and each field defaults, so files written by an earlier commit on this branch still load. Decision by the agent; say if you want one bump per widget.
 - Project folders default to an empty list, not `D:\Gitfiles`, because the default ships to every user. Isaac adds `D:\Gitfiles` once in **Developer widgets**.
 - README links `isaacobenzy/OpenDock` while the canonical remote is `deathboy20/OpenDock`. Not changed.
-- Running `pnpm dev` on this PC uses the installed app's `%APPDATA%\com.opendock.app\settings.json`, which has taskbar mode `replace` and start-with-Windows on. A dev run hides the taskbar and migrates the file to v6, which the installed 0.3.0 would then reject. Back it up first.
+- Running `pnpm dev` on this PC uses the installed app's `%APPDATA%\com.opendock.app\settings.json`, which has taskbar mode `replace` and start-with-Windows on. A dev run hides the taskbar and migrates the file to v6, which the installed 0.3.0 would then reject. Back it up first. The 2026-11-23 run used `settings.v5-backup-2026-11-23.json` and `opendock.db.backup-2026-11-23` (same folder); the original v5 settings were copied back afterwards.
 - Projects never fetches, so "behind" is relative to the last fetch. Each `git status` has a 10 s limit; a repo that takes longer shows "git status took too long".
 - Local `main` is behind `origin/release/0.3.0` by the two CI release fixes.
 
@@ -53,7 +55,7 @@ Verified on 2026-11-23 (Windows 10 Pro, this PC): `pnpm lint`, `pnpm typecheck`,
 ## Next steps
 
 1. Phase A code is complete: Local AI (Ollama), CI status (opt-in, token in the keychain).
-2. Show them in `pnpm dev`, then Phase B: per-widget instance options, JSON skins (token overrides only), desktop widgets layer, Scenes.
+2. Phase B: per-widget instance options, JSON skins (token overrides only), desktop widgets layer, Scenes.
 3. Phase C (taskbar mode) waits for Isaac and a recorded `docs/testing-matrix.md` on Windows 10.
 
 Last updated: 2026-11-23

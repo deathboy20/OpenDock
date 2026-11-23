@@ -57,7 +57,7 @@ function ProjectRow({
           <span className="muted">{projectLocation(project)}</span>
           {project.name}
         </span>
-        <span className="project-branch mono">
+        <span className="project-branch mono" title={branchLabel(project)}>
           <Icon name="branch" size={12} />
           {branchLabel(project)}
         </span>

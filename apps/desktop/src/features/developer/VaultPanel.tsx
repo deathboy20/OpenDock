@@ -131,10 +131,10 @@ export function VaultPanel() {
       </section>
       <div className="button-row vault-open">
         <button type="button" className="button" onClick={() => void openVault(true).catch((e) => setError(errorText(e)))}>
-          <Icon name="note" size={14} /> Open today's note
+          <Icon name="note" size={14} /> Today's note
         </button>
         <button type="button" className="button is-ghost" onClick={() => void openVault(false).catch((e) => setError(errorText(e)))}>
-          Open vault in Obsidian
+          Open in Obsidian
         </button>
       </div>
       {v.isObsidian ? null : (
