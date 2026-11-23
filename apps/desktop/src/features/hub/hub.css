@@ -1109,3 +1109,57 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- developer widgets page ---------- */
+
+.folder-list {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.folder-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 4px 0 10px;
+  border: 1px solid var(--od-border);
+  border-radius: var(--od-radius-sm);
+  color: var(--od-muted);
+}
+
+.folder-list li .mono {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--od-text);
+}
+
+.folder-add {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.token-form {
+  margin-top: 0;
+  flex-wrap: wrap;
+}
+
+.update-notes {
+  max-height: 160px;
+  margin: 8px 0;
+  padding: 10px 12px;
+  overflow: auto;
+  border-radius: var(--od-radius-sm);
+  background: var(--od-surface-deep);
+  color: var(--od-muted);
+  font-family: inherit;
+  font-size: 12.5px;
+  white-space: pre-wrap;
+}

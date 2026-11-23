@@ -5,6 +5,8 @@ import { Icon, type IconName } from "../widgets/icons";
 import { ActivityPage } from "./ActivityPage";
 import { AppsPage } from "./AppsPage";
 import { CalendarsPage } from "./CalendarsPage";
+import { CustomisePage } from "../customise/CustomisePage";
+import { DeveloperPage } from "./DeveloperPage";
 import { DockSettingsPage } from "./DockSettingsPage";
 import { GalleryPage } from "./GalleryPage";
 import { PrivacyPage } from "./PrivacyPage";
@@ -16,13 +18,15 @@ const NAV: { page: HubPage; label: string; icon: IconName; group: "Make" | "Sett
   { page: "widgets", label: "Widget gallery", icon: "grid", group: "Make" },
   { page: "automations", label: "Automation Studio", icon: "spark", group: "Make" },
   { page: "activity", label: "Activity", icon: "history", group: "Make" },
+  { page: "customise", label: "Customise", icon: "palette", group: "Make" },
   { page: "apps", label: "Apps & taskbar", icon: "apps", group: "Settings" },
   { page: "dock", label: "Dock settings", icon: "dock", group: "Settings" },
   { page: "calendars", label: "Calendars", icon: "calendar", group: "Settings" },
+  { page: "developer", label: "Developer widgets", icon: "code", group: "Settings" },
   { page: "privacy", label: "Privacy ledger", icon: "shield", group: "Settings" },
 ];
 
-const HUB_PAGES: readonly HubPage[] = ["welcome", "apps", "widgets", "automations", "activity", "dock", "calendars", "privacy"];
+const HUB_PAGES: readonly HubPage[] = ["welcome", "apps", "widgets", "automations", "activity", "dock", "calendars", "privacy", "developer", "customise"];
 
 function pageFromLocation(): HubPage {
   if (isTauri() || typeof window === "undefined") return "widgets";
@@ -88,6 +92,8 @@ export function HubApp() {
         {page === "apps" ? <AppsPage /> : null}
         {page === "calendars" ? <CalendarsPage /> : null}
         {page === "privacy" ? <PrivacyPage /> : null}
+        {page === "developer" ? <DeveloperPage /> : null}
+        {page === "customise" ? <CustomisePage /> : null}
       </main>
     </div>
   );

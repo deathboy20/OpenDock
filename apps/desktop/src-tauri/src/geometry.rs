@@ -20,6 +20,15 @@ pub enum DockSize {
     L,
 }
 
+/// Slim makes the dock thinner without changing the icon size choice.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum DockDensity {
+    #[default]
+    Regular,
+    Slim,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum DockMode {
@@ -43,11 +52,14 @@ pub struct DockRect {
     pub height: u32,
 }
 
-pub fn cross_axis_thickness(size: DockSize) -> u32 {
-    match size {
-        DockSize::S => 52,
-        DockSize::M => 60,
-        DockSize::L => 70,
+pub fn cross_axis_thickness(size: DockSize, density: DockDensity) -> u32 {
+    match (size, density) {
+        (DockSize::S, DockDensity::Regular) => 52,
+        (DockSize::M, DockDensity::Regular) => 60,
+        (DockSize::L, DockDensity::Regular) => 70,
+        (DockSize::S, DockDensity::Slim) => 42,
+        (DockSize::M, DockDensity::Slim) => 48,
+        (DockSize::L, DockDensity::Slim) => 56,
     }
 }
 
@@ -68,11 +80,12 @@ pub fn compute_dock_rect(
     work: WorkArea,
     position: DockPosition,
     size: DockSize,
+    density: DockDensity,
     mode: DockMode,
     content_length: Option<u32>,
 ) -> DockRect {
     let margin = DOCK_MARGIN;
-    let thickness = cross_axis_thickness(size);
+    let thickness = cross_axis_thickness(size, density);
     let pill = |available: u32| {
         let wanted = content_length.unwrap_or_else(|| pill_main_length(size));
         let max = available
@@ -144,6 +157,7 @@ mod tests {
             WORK,
             DockPosition::Bottom,
             DockSize::M,
+            DockDensity::Regular,
             DockMode::Pill,
             None,
         );
@@ -159,6 +173,7 @@ mod tests {
             WORK,
             DockPosition::Bottom,
             DockSize::M,
+            DockDensity::Regular,
             DockMode::Pill,
             Some(840),
         );
@@ -168,6 +183,7 @@ mod tests {
             WORK,
             DockPosition::Bottom,
             DockSize::M,
+            DockDensity::Regular,
             DockMode::Pill,
             Some(10),
         );
@@ -176,6 +192,7 @@ mod tests {
             WORK,
             DockPosition::Bottom,
             DockSize::M,
+            DockDensity::Regular,
             DockMode::Pill,
             Some(5000),
         );
@@ -188,6 +205,7 @@ mod tests {
             WORK,
             DockPosition::Top,
             DockSize::S,
+            DockDensity::Regular,
             DockMode::Full,
             Some(300),
         );
@@ -197,8 +215,30 @@ mod tests {
 
     #[test]
     fn left_pill_vertical() {
-        let rect = compute_dock_rect(WORK, DockPosition::Left, DockSize::L, DockMode::Pill, None);
+        let rect = compute_dock_rect(
+            WORK,
+            DockPosition::Left,
+            DockSize::L,
+            DockDensity::Regular,
+            DockMode::Pill,
+            None,
+        );
         assert_eq!(rect.width, 70);
         assert_eq!(rect.height, 620);
+    }
+}
+
+#[cfg(test)]
+mod density_tests {
+    use super::*;
+
+    #[test]
+    fn slim_docks_are_thinner() {
+        for size in [DockSize::S, DockSize::M, DockSize::L] {
+            assert!(
+                cross_axis_thickness(size, DockDensity::Slim)
+                    < cross_axis_thickness(size, DockDensity::Regular)
+            );
+        }
     }
 }

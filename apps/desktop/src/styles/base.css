@@ -21,7 +21,8 @@ body,
 html[data-window="main"],
 html[data-window="main"] body,
 html[data-window="flyout"] body,
-html[data-window="toast"] body {
+html[data-window="toast"] body,
+html[data-window="desktop"] body {
   overflow: hidden;
 }
 
@@ -690,4 +691,181 @@ p.callout {
 
 .od-bar.tone-warn .od-bar-fill {
   background: var(--od-warn);
+}
+
+/* ---------- per-widget accent ---------- */
+
+[data-accent="mint"] {
+  --od-accent: var(--od-swatch-mint);
+  --od-accent-strong: var(--od-swatch-mint);
+  --od-accent-ink: var(--od-swatch-mint-ink);
+  --od-accent-soft: color-mix(in srgb, var(--od-swatch-mint) 14%, transparent);
+  --od-accent-glow: color-mix(in srgb, var(--od-swatch-mint) 35%, transparent);
+}
+
+[data-accent="sky"] {
+  --od-accent: var(--od-swatch-sky);
+  --od-accent-strong: var(--od-swatch-sky);
+  --od-accent-ink: var(--od-swatch-sky-ink);
+  --od-accent-soft: color-mix(in srgb, var(--od-swatch-sky) 14%, transparent);
+  --od-accent-glow: color-mix(in srgb, var(--od-swatch-sky) 35%, transparent);
+}
+
+[data-accent="amber"] {
+  --od-accent: var(--od-swatch-amber);
+  --od-accent-strong: var(--od-swatch-amber);
+  --od-accent-ink: var(--od-swatch-amber-ink);
+  --od-accent-soft: color-mix(in srgb, var(--od-swatch-amber) 14%, transparent);
+  --od-accent-glow: color-mix(in srgb, var(--od-swatch-amber) 35%, transparent);
+}
+
+[data-accent="rose"] {
+  --od-accent: var(--od-swatch-rose);
+  --od-accent-strong: var(--od-swatch-rose);
+  --od-accent-ink: var(--od-swatch-rose-ink);
+  --od-accent-soft: color-mix(in srgb, var(--od-swatch-rose) 14%, transparent);
+  --od-accent-glow: color-mix(in srgb, var(--od-swatch-rose) 35%, transparent);
+}
+
+[data-accent="violet"] {
+  --od-accent: var(--od-swatch-violet);
+  --od-accent-strong: var(--od-swatch-violet);
+  --od-accent-ink: var(--od-swatch-violet-ink);
+  --od-accent-soft: color-mix(in srgb, var(--od-swatch-violet) 14%, transparent);
+  --od-accent-glow: color-mix(in srgb, var(--od-swatch-violet) 35%, transparent);
+}
+
+.dock-item[data-accent]:not([data-accent="theme"]) .tile-icon {
+  color: var(--od-accent);
+}
+
+/* Read by screen readers, not shown. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- widget variant visuals ---------- */
+
+.od-dots {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+}
+
+.od-dots i {
+  width: 4px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--od-track);
+}
+
+.od-dots i.is-lit {
+  background: var(--od-accent);
+}
+
+.od-dots.tone-warn i.is-lit {
+  background: var(--od-warn);
+}
+
+.od-dots.tone-info i.is-lit {
+  background: var(--od-info);
+}
+
+.od-gauge {
+  display: block;
+  flex: none;
+  overflow: visible;
+}
+
+.od-gauge-track,
+.od-gauge-value {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.od-gauge-track {
+  stroke: var(--od-track);
+}
+
+.od-gauge-value {
+  stroke: var(--od-accent);
+  transition: stroke-dashoffset var(--od-slow) var(--od-ease);
+}
+
+.od-gauge.tone-warn .od-gauge-value {
+  stroke: var(--od-warn);
+}
+
+.od-gauge-needle {
+  stroke: var(--od-text);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+.od-gauge-hub {
+  fill: var(--od-text);
+}
+
+.od-analog {
+  display: block;
+  flex: none;
+}
+
+.od-analog-face {
+  fill: var(--od-raised);
+  stroke: var(--od-border-strong);
+  stroke-width: 1;
+}
+
+.od-analog-tick {
+  stroke: var(--od-muted);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+.od-analog-hour,
+.od-analog-minute {
+  stroke: var(--od-text);
+  stroke-linecap: round;
+}
+
+.od-analog-hour {
+  stroke-width: 2;
+}
+
+.od-analog-minute {
+  stroke-width: 1.4;
+}
+
+.od-analog-hub {
+  fill: var(--od-accent);
+}
+
+.tile-bars {
+  display: grid;
+  gap: 3px;
+  width: 56px;
+}
+
+.tile-bars .tile-bar-row {
+  display: grid;
+  grid-template-columns: 12px 1fr;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--od-muted);
+}
+
+.tile-stacked-time {
+  display: grid;
+  line-height: 0.95;
+  font-family: var(--od-font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }

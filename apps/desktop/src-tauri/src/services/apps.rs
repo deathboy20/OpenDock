@@ -21,9 +21,29 @@ const VOLUME_POLL: Duration = Duration::from_millis(1000);
 const INDEX_TTL: Duration = Duration::from_secs(120);
 const MAX_SCAN_DEPTH: usize = 4;
 
+/// A looked-up icon. A miss is retried after `ICON_RETRY`, because the shell's icon call can
+/// fail while Explorer is busy (at sign-in, for example) and an app would otherwise keep its
+/// letter until OpenDock restarts.
+#[derive(Clone)]
+enum CachedIcon {
+    Found(String),
+    Missing(Instant),
+}
+
+const ICON_RETRY: Duration = Duration::from_secs(20);
+
+/// Whether a cached entry still answers, or the icon should be looked up again.
+fn cached_answer(entry: Option<&CachedIcon>, now: Instant) -> Option<Option<String>> {
+    match entry? {
+        CachedIcon::Found(icon) => Some(Some(icon.clone())),
+        CachedIcon::Missing(at) if now.duration_since(*at) < ICON_RETRY => Some(None),
+        CachedIcon::Missing(_) => None,
+    }
+}
+
 #[derive(Default)]
 pub struct AppCatalog {
-    icons: Mutex<HashMap<String, Option<String>>>,
+    icons: Mutex<HashMap<String, CachedIcon>>,
     index: Mutex<Option<(Instant, Vec<ShellApp>)>>,
 }
 
@@ -53,7 +73,13 @@ impl AppCatalog {
 
     pub fn icon(&self, path: &str, window: Option<i64>) -> Option<String> {
         let key = path.to_lowercase();
-        if let Some(hit) = self.icons.lock().ok().and_then(|i| i.get(&key).cloned()) {
+        let now = Instant::now();
+        if let Some(hit) = self
+            .icons
+            .lock()
+            .ok()
+            .and_then(|i| cached_answer(i.get(&key), now))
+        {
             return hit;
         }
         // Store apps live under WindowsApps, where the file icon is a generic one.
@@ -70,7 +96,11 @@ impl AppCatalog {
             if icons.len() > 512 {
                 icons.clear();
             }
-            icons.insert(key, icon.clone());
+            let entry = match &icon {
+                Some(found) => CachedIcon::Found(found.clone()),
+                None => CachedIcon::Missing(now),
+            };
+            icons.insert(key, entry);
         }
         icon
     }
@@ -289,6 +319,21 @@ pub fn spawn_volume(app: AppHandle) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn retries_missing_icons_but_keeps_found_ones() {
+        let now = Instant::now();
+        let found = CachedIcon::Found("data:image/png;base64,x".into());
+        assert_eq!(
+            cached_answer(Some(&found), now),
+            Some(Some("data:image/png;base64,x".into()))
+        );
+        let fresh_miss = CachedIcon::Missing(now);
+        assert_eq!(cached_answer(Some(&fresh_miss), now), Some(None));
+        let old_miss = CachedIcon::Missing(now - ICON_RETRY - Duration::from_secs(1));
+        assert_eq!(cached_answer(Some(&old_miss), now), None);
+        assert_eq!(cached_answer(None, now), None);
+    }
 
     fn window(id: i64, app: &str) -> AppWindow {
         AppWindow {

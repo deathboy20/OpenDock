@@ -15,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { reorderDockItems } from "@opendock/config-schema";
+import { reorderDockItems, widgetOptionsFor } from "@opendock/config-schema";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
@@ -31,6 +31,7 @@ import { ADD_WIDGET_ID, findWidget } from "../widgets/catalog";
 import { TileContent } from "../widgets/tiles";
 import { decideTileClick, flyoutKey, type FlyoutMemory } from "./dockClick";
 import { anchorOf, DockActionsContext } from "./dockActions";
+import { islandEdges, islandStyle, useIslandRects, type IslandEdge } from "./islands";
 import "./dock.css";
 
 const HIGHLIGHT_MS = 4000;
@@ -39,18 +40,23 @@ function DockItem({
   id,
   vertical,
   highlighted,
+  island,
   onActivate,
   onMenu,
 }: {
   id: string;
   vertical: boolean;
   highlighted: boolean;
+  island?: IslandEdge;
   onActivate: (id: string, anchor: number) => void;
   onMenu: (id: string, anchor: number) => void;
 }) {
   const { settings } = useSettings();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
-  const name = id === ADD_WIDGET_ID ? "Add widget" : (findWidget(id)?.name ?? id);
+  const options = widgetOptionsFor(settings, id);
+  const name = id === ADD_WIDGET_ID ? "Add widget" : options.label || (findWidget(id)?.name ?? id);
+  const compact = vertical || options.layout === "compact";
+  const size = options.layout === "detailed" ? "l" : settings.dock.size;
 
   return (
     <div
@@ -58,6 +64,8 @@ function DockItem({
       style={{ transform: CSS.Translate.toString(transform), transition }}
       className={`dock-item ${isDragging ? "is-dragging" : ""} ${highlighted ? "is-highlighted" : ""}`}
       data-widget={id}
+      data-accent={options.accent}
+      data-island={island}
       {...attributes}
       {...listeners}
       role="button"
@@ -82,7 +90,7 @@ function DockItem({
         onMenu(id, anchorOf(event.currentTarget, vertical));
       }}
     >
-      <TileContent id={id} size={settings.dock.size} compact={vertical} />
+      <TileContent id={id} size={size} compact={compact} variant={options.variant ?? undefined} />
     </div>
   );
 }
@@ -146,10 +154,15 @@ export function DockBar() {
                 : scroller.scrollWidth - scroller.clientWidth,
             )
           : 0;
-        const box = Array.from(track.children).reduce(
-          (sum, child) => sum + (vertical ? (child as HTMLElement).offsetHeight : (child as HTMLElement).offsetWidth),
-          0,
-        );
+        // Islands put a margin before each new island, so margins count too.
+        const box = Array.from(track.children).reduce((sum, child) => {
+          const el = child as HTMLElement;
+          const style = getComputedStyle(el);
+          const margin = vertical
+            ? Number.parseFloat(style.marginTop) + Number.parseFloat(style.marginBottom)
+            : Number.parseFloat(style.marginLeft) + Number.parseFloat(style.marginRight);
+          return sum + (vertical ? el.offsetHeight : el.offsetWidth) + (Number.isFinite(margin) ? margin : 0);
+        }, 0);
         const gap = Number.parseFloat(getComputedStyle(track).gap) || 0;
         const length = box + gap * Math.max(0, track.children.length - 1) + hidden + padding;
         void setDockLength(length).catch(() => undefined);
@@ -163,7 +176,7 @@ export function DockBar() {
       observer.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, [vertical, dock.itemOrder, dock.size]);
+  }, [vertical, dock.itemOrder, dock.size, dock.layout, dock.density]);
 
   const open = (kind: string, anchor: number, target?: string) => {
     const key = flyoutKey(kind, target);
@@ -199,6 +212,14 @@ export function DockBar() {
     }));
   };
 
+  const islands = islandEdges(dock.itemOrder, dock.layout);
+  const islandRects = useIslandRects(
+    trackRef,
+    vertical,
+    islands !== null,
+    `${dock.itemOrder.join(",")}|${dock.layout}|${dock.size}|${dock.density}|${dock.spacing}`,
+  );
+
   const onShellPointerDown = (event: React.PointerEvent) => {
     if (event.button !== 0 || (event.target as HTMLElement).closest(".dock-item")) return;
     void getCurrentWindow()
@@ -208,7 +229,7 @@ export function DockBar() {
 
   return (
     <div
-      className={`dock-shell size-${dock.size} spacing-${dock.spacing} mode-${dock.mode} style-${dock.style} position-${dock.position} ${vertical ? "vertical" : "horizontal"}`}
+      className={`dock-shell size-${dock.size} spacing-${dock.spacing} mode-${dock.mode} style-${dock.style} layout-${dock.layout} density-${dock.density} tint-${dock.tint} position-${dock.position} ${vertical ? "vertical" : "horizontal"}`}
       role="toolbar"
       aria-label="OpenDock"
       aria-orientation={vertical ? "vertical" : "horizontal"}
@@ -218,6 +239,13 @@ export function DockBar() {
         onMenu(null, vertical ? event.clientY : event.clientX);
       }}
     >
+      {islandRects.length > 0 ? (
+        <div className="dock-islands" aria-hidden>
+          {islandRects.map((rect, i) => (
+            <span key={i} className="dock-island" style={islandStyle(rect)} />
+          ))}
+        </div>
+      ) : null}
       <DockActionsContext.Provider value={{ openPanel: open, vertical }}>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
           <SortableContext
@@ -231,6 +259,7 @@ export function DockBar() {
                   id={id}
                   vertical={vertical}
                   highlighted={highlight === id}
+                  island={islands?.[id]}
                   onActivate={onActivate}
                   onMenu={onMenu}
                 />

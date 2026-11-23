@@ -1,6 +1,6 @@
 import type { IconName } from "./icons";
 
-export type WidgetCategory = "Essentials" | "Productivity" | "System" | "Info";
+export type WidgetCategory = "Essentials" | "Productivity" | "Developer" | "System" | "Info";
 
 export type Widget = {
   /** Must match the id in the desktop app's widget catalog. */
@@ -14,7 +14,7 @@ export type Widget = {
   stores?: string;
 };
 
-export const widgetCategories: WidgetCategory[] = ["Essentials", "Productivity", "System", "Info"];
+export const widgetCategories: WidgetCategory[] = ["Essentials", "Productivity", "Developer", "System", "Info"];
 
 export const widgets: Widget[] = [
   {
@@ -134,6 +134,40 @@ export const widgets: Widget[] = [
     category: "Info",
     summary: "How much of the day, week and year has gone.",
     network: [],
+  },
+  {
+    id: "projects",
+    name: "Projects",
+    icon: "folder",
+    category: "Developer",
+    summary: "Every git repository in your project folders, with branch, uncommitted changes and ahead or behind. Open one in Cursor, VS Code, a terminal or GitHub Desktop, or read its HANDOFF.md.",
+    network: [],
+  },
+  {
+    id: "vault",
+    name: "Vault capture",
+    icon: "note",
+    category: "Developer",
+    summary: "Type a thought and it lands as a timestamped line in today's Inbox note in your Obsidian vault. Opens the vault in Obsidian too.",
+    network: [],
+    stores: "Your notes, in your own vault",
+  },
+  {
+    id: "local-ai",
+    name: "Local AI",
+    icon: "spark",
+    category: "Developer",
+    summary: "Whether Ollama is running, your models and what is loaded in memory, plus a quick question box. It only talks to Ollama on your own PC.",
+    network: [],
+  },
+  {
+    id: "ci",
+    name: "CI status",
+    icon: "check",
+    category: "Developer",
+    summary: "The latest GitHub Actions run for the repositories you list. Off until you turn it on; an optional token stays in the system keychain.",
+    network: ["api.github.com"],
+    stores: "Your repository list",
   },
 ];
 

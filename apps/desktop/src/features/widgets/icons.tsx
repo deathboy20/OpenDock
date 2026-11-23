@@ -50,9 +50,27 @@ export type IconName =
   | "import"
   | "arrow-up"
   | "arrow-down"
+  | "folder"
+  | "branch"
+  | "terminal"
+  | "code"
+  | "back"
+  | "inbox"
+  | "chip"
+  | "pipeline"
+  | "palette"
   | WeatherKind;
 
 const paths: Record<IconName, string> = {
+  folder: "M3 6.5h6.5l2 2H21V19H3z",
+  branch: "M7 4v16M7 16c0-4 10-3 10-8M17 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
+  terminal: "M3 5h18v14H3zM7 9.5l3 2.5-3 2.5M12.5 15H17",
+  code: "M9 7l-5 5 5 5M15 7l5 5-5 5",
+  back: "M15 6l-6 6 6 6",
+  palette: "M12 3a9 9 0 0 0 0 18c1.4 0 2-1 2-2 0-1.6 1.2-2.5 2.6-2.5H18a3 3 0 0 0 3-3C21 7 17 3 12 3zM7.5 12.5h.01M9.5 8h.01M14.5 7.5h.01M17 11h.01",
+  pipeline: "M6 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM18 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM6 7v3a3 3 0 0 0 3 3h6a3 3 0 0 1 3 3v1",
+  chip: "M8 8h8v8H8zM5 5h14v14H5zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3",
+  inbox: "M4 13.5h4.5l1.5 2.5h4l1.5-2.5H20M4 13.5L6.5 5h11l2.5 8.5V19H4z",
   start: "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z",
   clock: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2",
   play: "M8 5.5v13l10-6.5z",

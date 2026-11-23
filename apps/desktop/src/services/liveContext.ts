@@ -1,11 +1,15 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type {
   CalendarEvent,
+  CiSnapshot,
   FocusState,
+  LocalAiSnapshot,
   MediaState,
   Note,
+  ProjectsSnapshot,
   SystemStats,
   Todo,
+  VaultStatus,
   VolumeState,
   WeatherSnapshot,
   WindowsSnapshot,
@@ -24,6 +28,10 @@ export type LiveData = {
   events: Loadable<CalendarEvent[]>;
   windows: Loadable<WindowsSnapshot>;
   volume: Loadable<VolumeState | null>;
+  projects: Loadable<ProjectsSnapshot | null>;
+  vault: Loadable<VaultStatus>;
+  localAi: Loadable<LocalAiSnapshot | null>;
+  ci: Loadable<CiSnapshot | null>;
 };
 
 export const emptyLive: LiveData = {
@@ -38,6 +46,10 @@ export const emptyLive: LiveData = {
   events: loading,
   windows: loading,
   volume: loading,
+  projects: loading,
+  vault: loading,
+  localAi: loading,
+  ci: loading,
 };
 
 export const LiveContext = createContext<LiveData>(emptyLive);

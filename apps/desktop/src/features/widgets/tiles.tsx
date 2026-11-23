@@ -1,7 +1,7 @@
-import type { DockSize } from "@opendock/config-schema";
-import type { ReactNode } from "react";
 import { AppsTile } from "../apps/AppsTile";
 import { TrayTile, VolumeTile } from "../apps/TrayTiles";
+import type { ReactNode } from "react";
+import { resolveVariant } from "@opendock/config-schema";
 import { mediaControl } from "../../services/ipc";
 import { useLive, useNow } from "../../services/liveContext";
 import { useSettings } from "../../services/settingsContext";
@@ -20,48 +20,11 @@ import {
   weatherLabel,
 } from "./format";
 import { Icon } from "./icons";
-import { Bar, Ring, Skeleton, Sparkline } from "./visuals";
+import { Tile, type TileProps } from "./Tile";
+import { AnalogClock, Bar, Dots, Gauge, Ring, Sparkline } from "./visuals";
+import { CiTile, LocalAiTile, ProjectsTile, VaultTile } from "../developer/DeveloperTiles";
 
-export type TileProps = { size: DockSize; compact: boolean };
-
-type TileState = "ready" | "loading" | "empty" | "error";
-
-function Tile({
-  state,
-  icon,
-  primary,
-  secondary,
-  extra,
-  title,
-  compact,
-}: {
-  state: TileState;
-  icon: ReactNode;
-  primary?: ReactNode;
-  secondary?: ReactNode;
-  extra?: ReactNode;
-  title?: string;
-  compact: boolean;
-}) {
-  return (
-    <span className={`tile is-${state}`} title={title}>
-      <span className="tile-icon">{icon}</span>
-      {compact ? null : (
-        <span className="tile-text">
-          {state === "loading" ? (
-            <Skeleton width={52} />
-          ) : (
-            <>
-              {primary !== undefined ? <span className="tile-primary">{primary}</span> : null}
-              {secondary !== undefined ? <span className="tile-secondary">{secondary}</span> : null}
-            </>
-          )}
-        </span>
-      )}
-      {extra && !compact ? <span className="tile-extra">{extra}</span> : null}
-    </span>
-  );
-}
+export type { TileProps } from "./Tile";
 
 function StartTile() {
   return (
@@ -73,16 +36,37 @@ function StartTile() {
   );
 }
 
-function ClockTile({ size, compact }: TileProps) {
+function ClockTile({ size, compact, variant }: TileProps) {
   const now = useNow(1000);
   const { settings } = useSettings();
   const date = new Date(now);
   const time = formatTime(date, settings.dock.clock24h);
-  if (compact) {
+  const hours = settings.dock.clock24h ? date.getHours() : date.getHours() % 12 || 12;
+  if (compact || variant === "stacked") {
     return (
-      <span className="tile tile-clock is-ready is-compact" title={formatShortDate(date)}>
-        <span className="tile-primary">{date.getHours().toString().padStart(2, "0")}</span>
-        <span className="tile-primary">{date.getMinutes().toString().padStart(2, "0")}</span>
+      <span className={`tile tile-clock is-ready ${compact ? "is-compact" : ""}`} title={`${time}, ${formatShortDate(date)}`}>
+        <span className="tile-stacked-time" aria-label={time}>
+          <span>{settings.dock.clock24h ? hours.toString().padStart(2, "0") : hours}</span>
+          <span>{date.getMinutes().toString().padStart(2, "0")}</span>
+        </span>
+        {compact || size === "s" ? null : (
+          <span className="tile-text">
+            <span className="tile-secondary">{formatShortDate(date)}</span>
+          </span>
+        )}
+      </span>
+    );
+  }
+  if (variant === "analog") {
+    return (
+      <span className="tile tile-clock is-ready" title={`${time}, ${formatShortDate(date)}`}>
+        <AnalogClock date={date} size={size === "l" ? 30 : 26} label={time} />
+        {size === "s" ? null : (
+          <span className="tile-text">
+            <span className="tile-primary tabular">{time}</span>
+            {size === "l" ? <span className="tile-secondary">{formatShortDate(date)}</span> : null}
+          </span>
+        )}
       </span>
     );
   }
@@ -96,7 +80,7 @@ function ClockTile({ size, compact }: TileProps) {
   );
 }
 
-function MediaTile({ size, compact }: TileProps) {
+function MediaTile({ size, compact, variant }: TileProps) {
   const { media } = useLive();
   if (media.status !== "ready") {
     return (
@@ -112,16 +96,17 @@ function MediaTile({ size, compact }: TileProps) {
   const m = media.data;
   if (!m.available || !m.title) {
     return (
-      <Tile compact={compact} state="empty" icon={<Icon name="music" />} primary="Nothing playing" />
+      <Tile compact={compact || variant === "mini"} state="empty" icon={<Icon name="music" />} primary="Nothing playing" />
     );
   }
   const toggle = (event: React.MouseEvent | React.KeyboardEvent) => {
     event.stopPropagation();
     void mediaControl("toggle");
   };
+  const showArtist = variant === "card" && size !== "s";
   return (
     <Tile
-      compact={compact}
+      compact={compact || variant === "mini"}
       state="ready"
       title={`${m.title} — ${m.artist}`}
       icon={
@@ -129,7 +114,7 @@ function MediaTile({ size, compact }: TileProps) {
           className={`media-art ${m.playing ? "is-playing" : ""}`}
           role="button"
           tabIndex={0}
-          aria-label={m.playing ? "Pause" : "Play"}
+          aria-label={m.playing ? `Pause ${m.title}` : `Play ${m.title}`}
           onClick={toggle}
           onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && toggle(e)}
           onPointerDown={(e) => e.stopPropagation()}
@@ -138,13 +123,13 @@ function MediaTile({ size, compact }: TileProps) {
         </span>
       }
       primary={<span className="tile-truncate">{m.title}</span>}
-      secondary={size === "s" ? undefined : <span className="tile-truncate">{m.artist || m.app}</span>}
-      extra={size === "l" && m.playing ? <span className="eq" aria-hidden><i /><i /><i /></span> : undefined}
+      secondary={showArtist ? <span className="tile-truncate">{m.artist || m.app}</span> : undefined}
+      extra={variant === "card" && size === "l" && m.playing ? <span className="eq" aria-hidden><i /><i /><i /></span> : undefined}
     />
   );
 }
 
-function FocusTile({ compact }: TileProps) {
+function FocusTile({ compact, variant }: TileProps) {
   const { focus } = useLive();
   const now = useNow(1000);
   if (focus.status !== "ready") {
@@ -156,25 +141,38 @@ function FocusTile({ compact }: TileProps) {
       <Tile
         compact={compact}
         state="empty"
-        icon={<Ring value={0} size={24} />}
+        icon={variant === "bar" ? <Icon name="focus" /> : <Ring value={0} size={24} />}
         primary="Focus"
         secondary={f.todayMinutes > 0 ? `${f.todayMinutes} min today` : "Start a round"}
       />
     );
   }
   const progress = focusProgress(f, now);
+  const tone = f.phase === "break" ? "info" : "accent";
+  const countdown = <span className="tabular">{formatCountdown(focusRemaining(f, now))}</span>;
+  if (variant === "bar") {
+    return (
+      <Tile
+        compact={compact}
+        state="ready"
+        icon={<Icon name="focus" />}
+        primary={countdown}
+        secondary={<Bar value={progress} label={f.phase === "break" ? "Break progress" : "Focus progress"} />}
+      />
+    );
+  }
   return (
     <Tile
       compact={compact}
       state="ready"
-      icon={<Ring value={progress} size={24} tone={f.phase === "break" ? "info" : "accent"} />}
-      primary={<span className="tabular">{formatCountdown(focusRemaining(f, now))}</span>}
+      icon={<Ring value={progress} size={24} tone={tone} />}
+      primary={countdown}
       secondary={f.phase === "break" ? "Break" : "Focusing"}
     />
   );
 }
 
-function SystemTile({ size, compact }: TileProps) {
+function SystemTile({ size, compact, variant }: TileProps) {
   const { stats, cpuHistory } = useLive();
   if (stats.status !== "ready" || stats.data === null) {
     const state = stats.status === "ready" ? "empty" : stats.status;
@@ -191,8 +189,40 @@ function SystemTile({ size, compact }: TileProps) {
   const s = stats.data;
   const cpu = s.cpu ?? 0;
   const memory = s.memory ?? 0;
+  const title = `CPU ${formatPercent(s.cpu)}, memory ${formatPercent(s.memory)}`;
+  if (variant === "bars" && !compact) {
+    return (
+      <span className="tile tile-system is-ready" title={title}>
+        <span className="tile-bars">
+          <span className="tile-bar-row">
+            C<Bar value={cpu / 100} tone={cpu > 85 ? "warn" : "accent"} label={`CPU ${formatPercent(s.cpu)}`} />
+          </span>
+          <span className="tile-bar-row">
+            M<Bar value={memory / 100} tone={memory > 85 ? "warn" : "accent"} label={`Memory ${formatPercent(s.memory)}`} />
+          </span>
+        </span>
+        {size !== "s" ? (
+          <span className="tile-text">
+            <span className="tile-primary tabular">{formatPercent(s.cpu)}</span>
+            <span className="tile-secondary">CPU</span>
+          </span>
+        ) : null}
+      </span>
+    );
+  }
+  if (variant === "graph" && !compact) {
+    return (
+      <span className="tile tile-system is-ready" title={title}>
+        <Sparkline values={cpuHistory} width={size === "l" ? 72 : 52} />
+        <span className="tile-text">
+          <span className="tile-primary tabular">{formatPercent(s.cpu)}</span>
+          {size === "s" ? null : <span className="tile-secondary">CPU</span>}
+        </span>
+      </span>
+    );
+  }
   return (
-    <span className="tile tile-system is-ready" title={`CPU ${formatPercent(s.cpu)}, memory ${formatPercent(s.memory)}`}>
+    <span className="tile tile-system is-ready" title={title}>
       <Ring value={cpu / 100} size={26} tone={cpu > 85 ? "warn" : "accent"} label={`CPU ${formatPercent(s.cpu)}`}>
         {compact ? null : <small>C</small>}
       </Ring>
@@ -212,7 +242,7 @@ function SystemTile({ size, compact }: TileProps) {
   );
 }
 
-function BatteryTile({ compact }: TileProps) {
+function BatteryTile({ compact, variant }: TileProps) {
   const { stats } = useLive();
   if (stats.status !== "ready") {
     return <Tile compact={compact} state={stats.status} icon={<Icon name="battery" />} primary="Battery" />;
@@ -222,8 +252,24 @@ function BatteryTile({ compact }: TileProps) {
     return <Tile compact={compact} state="empty" icon={<Icon name="battery" />} primary="No battery" />;
   }
   const low = battery.percent <= 20 && !battery.charging;
+  const tone = low ? "warn" : "accent";
+  const label = `Battery ${battery.percent}%${battery.charging ? ", charging" : ""}`;
+  const percent = compact ? null : (
+    <span className="tile-primary tabular">
+      {battery.percent}%{battery.charging ? <Icon name="bolt" size={10} label="charging" /> : null}
+    </span>
+  );
+  const shell = (visual: ReactNode) => (
+    <span className={`tile tile-battery is-ready ${low ? "is-warn" : ""}`} title={label}>
+      {visual}
+      {percent}
+    </span>
+  );
+  if (variant === "ring") return shell(<Ring value={battery.percent / 100} size={24} tone={tone} label={label} />);
+  if (variant === "dots") return shell(<Dots count={10} filled={battery.percent / 10} tone={tone} label={label} />);
+  if (variant === "gauge") return shell(<Gauge value={battery.percent / 100} size={30} tone={tone} label={label} />);
   return (
-    <span className={`tile tile-battery is-ready ${low ? "is-warn" : ""}`} title={`${battery.percent}%`}>
+    <span className={`tile tile-battery is-ready ${low ? "is-warn" : ""}`} title={label}>
       <span className="battery-glyph" aria-hidden>
         <span className="battery-fill" style={{ width: `${battery.percent}%` }} />
         {battery.charging ? <Icon name="bolt" size={10} /> : null}
@@ -233,7 +279,7 @@ function BatteryTile({ compact }: TileProps) {
   );
 }
 
-function WeatherTile({ size, compact }: TileProps) {
+function WeatherTile({ size, compact, variant }: TileProps) {
   const { weather } = useLive();
   const { settings } = useSettings();
   if (weather.status !== "ready") {
@@ -251,6 +297,7 @@ function WeatherTile({ size, compact }: TileProps) {
       />
     );
   }
+  const minimal = variant === "minimal";
   return (
     <Tile
       compact={compact}
@@ -258,7 +305,7 @@ function WeatherTile({ size, compact }: TileProps) {
       title={w.error ? `Showing saved forecast: ${w.error}` : `${weatherLabel(w.code)} in ${w.city}`}
       icon={<Icon name={weatherKind(w.code)} />}
       primary={<span className="tabular">{formatTemperature(w.temperature, w.unit)}</span>}
-      secondary={size === "s" ? undefined : size === "l" ? `${weatherLabel(w.code)} · ${w.city}` : w.city}
+      secondary={minimal || size === "s" ? undefined : size === "l" ? `${weatherLabel(w.code)} · ${w.city}` : w.city}
     />
   );
 }
@@ -330,20 +377,48 @@ function NotesTile({ size, compact }: TileProps) {
   );
 }
 
-function DayProgressTile({ size, compact }: TileProps) {
+function DayProgressTile({ size, compact, variant }: TileProps) {
   const now = useNow(60_000);
-  const progress = dayProgress(new Date(now));
+  const date = new Date(now);
+  const progress = dayProgress(date);
+  const percent = Math.round(progress.day * 100);
+  const label = `${percent}% of today`;
   if (compact) {
     return (
-      <span className="tile is-ready" title={`${Math.round(progress.day * 100)}% of today`}>
-        <Ring value={progress.day} size={24} />
+      <span className="tile is-ready" title={label}>
+        <Ring value={progress.day} size={24} label={label} />
+      </span>
+    );
+  }
+  if (variant === "ring") {
+    return (
+      <span className="tile tile-progress is-ready" title={label}>
+        <Ring value={progress.day} size={26} label={label}>
+          <small>{percent}</small>
+        </Ring>
+        {size === "s" ? null : (
+          <span className="tile-text">
+            <span className="tile-primary">of today</span>
+            {size === "l" ? <span className="tile-secondary">{Math.round(progress.year * 100)}% of the year</span> : null}
+          </span>
+        )}
+      </span>
+    );
+  }
+  if (variant === "dots") {
+    return (
+      <span className="tile tile-progress is-ready" title={`${date.getHours()} of 24 hours`}>
+        <span className="tile-text">
+          <span className="tile-primary tabular">{label}</span>
+          <Dots count={size === "s" ? 12 : 24} filled={(size === "s" ? 12 : 24) * progress.day} label={`${date.getHours()} of 24 hours gone`} />
+        </span>
       </span>
     );
   }
   return (
     <span className="tile tile-progress is-ready">
       <span className="tile-text">
-        <span className="tile-primary tabular">{Math.round(progress.day * 100)}% of today</span>
+        <span className="tile-primary tabular">{label}</span>
         <Bar value={progress.day} label="Day progress" />
         {size === "l" ? <span className="tile-secondary">{Math.round(progress.year * 100)}% of the year</span> : null}
       </span>
@@ -363,8 +438,8 @@ function UnknownTile({ id }: { id: string }) {
   return <Tile compact={false} state="error" icon={<Icon name="warning" />} primary={id} title="Unknown widget" />;
 }
 
-export function TileContent({ id, size, compact }: { id: string } & TileProps) {
-  const props = { size, compact };
+export function TileContent({ id, size, compact, variant }: { id: string } & TileProps) {
+  const props = { size, compact, variant: resolveVariant(id, variant) ?? undefined };
   switch (id) {
     case "start":
       return <StartTile />;
@@ -396,6 +471,14 @@ export function TileContent({ id, size, compact }: { id: string } & TileProps) {
       return <TrayTile compact={compact} />;
     case "add-widget":
       return <AddTile />;
+    case "projects":
+      return <ProjectsTile {...props} />;
+    case "vault":
+      return <VaultTile {...props} />;
+    case "local-ai":
+      return <LocalAiTile {...props} />;
+    case "ci":
+      return <CiTile {...props} />;
     default:
       return <UnknownTile id={id} />;
   }

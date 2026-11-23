@@ -1,0 +1,10 @@
+{
+  "$comment": "Ways a widget can draw the same data. The first variant is the default. Read by the Zod and Rust validators and the tiles.",
+  "battery": ["standard", "ring", "dots", "gauge"],
+  "system": ["rings", "bars", "graph"],
+  "clock": ["digital", "stacked", "analog"],
+  "day-progress": ["bar", "ring", "dots"],
+  "media": ["card", "compact", "mini"],
+  "focus": ["ring", "bar"],
+  "weather": ["standard", "minimal"]
+}

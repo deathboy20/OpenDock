@@ -1,7 +1,7 @@
 {
   "valid": [
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -33,7 +33,7 @@
       "onboarded": true
     },
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "top",
         "size": "l",
@@ -58,7 +58,7 @@
       "onboarded": false
     },
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "left",
         "size": "s",
@@ -72,7 +72,7 @@
       }
     },
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -86,7 +86,7 @@
       }
     },
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "right",
         "size": "s",
@@ -100,7 +100,7 @@
       }
     },
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "l",
@@ -112,11 +112,54 @@
         "clock24h": false,
         "launchAtStartup": false
       }
-    }
+    },
+    {
+      "version": 7,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": {
+        "projects": { "roots": ["D:\\Gitfiles", "C:\\Users\\me\\code"] },
+        "vault": { "path": "C:\\Users\\me\\Documents\\Vault" },
+        "localAi": { "model": "qwen3:4b" },
+        "ci": { "enabled": true, "repos": ["deathboy20/OpenDock", "octo-org/hello.world_2"] }
+      }
+    },
+    {
+      "version": 7,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "projects": {}, "vault": {}, "localAi": {}, "ci": {} }
+    },
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"projects": {"label": "Repos", "layout": "detailed", "accent": "sky", "refreshSeconds": 60}, "clock": {"layout": "compact"}, "ci": {"label": "", "layout": "auto", "accent": "theme", "refreshSeconds": null}}}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"active": "dusk", "custom": []}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"active": "mine", "custom": [{"format": "opendock-skin", "version": 1, "id": "mine", "name": "Mine", "description": "Orange on black", "dark": {"accent": "#ff8800", "accentInk": "#1a0d00", "surfaceSolid": "#000000", "radiusLg": 12, "blur": 0, "font": "system", "shadow": "soft", "motionFast": 100, "border": "rgba(255, 255, 255, 0.2)"}, "light": {"accent": "#a34d00"}}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "scenes": {"active": "work", "items": [{"id": "work", "name": "Work", "dock": {"itemOrder": ["start", "apps", "projects", "ci", "add-widget"], "size": "m", "style": "glass", "spacing": "even", "position": "bottom"}, "theme": "dark", "skin": "graphite", "quietHours": false, "automations": true}, {"id": "present", "name": "Present", "dock": {"itemOrder": ["clock"], "size": "s", "style": "minimal", "spacing": "tight", "position": "top"}, "theme": "light", "skin": null, "quietHours": true, "automations": false}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "desktop": {"grid": 16, "widgets": [{"id": "clock", "monitorId": null, "x": 32, "y": 32}, {"id": "projects", "monitorId": "\\\\.\\DISPLAY2", "x": -400, "y": 128}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "desktop": {"grid": 8, "widgets": []}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "layout": "islands", "density": "slim", "tint": "strong", "monitorId": null, "itemOrder": ["clock", "battery"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"battery": {"variant": "gauge"}, "clock": {"variant": "analog"}}}, "updates": {"check": false}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"active": "mine", "custom": [{"format": "opendock-skin", "version": 1, "id": "mine", "name": "Mine", "interface": {"layout": "chips", "density": "regular", "tint": "medium", "style": "ink", "variants": {"system": "bars"}}}]}}
   ],
   "invalid": [
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -137,7 +180,7 @@
       "automation": { "enabled": true, "quietHours": { "enabled": false, "start": "22:00", "end": "07:00" } }
     },
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -158,7 +201,7 @@
       "automation": { "enabled": true, "quietHours": { "enabled": false, "start": "22:00", "end": "07:00" } }
     },
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -179,7 +222,7 @@
       "automation": { "enabled": true, "quietHours": { "enabled": false, "start": "22:00", "end": "07:00" } }
     },
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -221,7 +264,7 @@
       "automation": { "enabled": true, "quietHours": { "enabled": false, "start": "22:00", "end": "07:00" } }
     },
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -236,7 +279,7 @@
       }
     },
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -256,7 +299,7 @@
       }
     },
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -271,7 +314,7 @@
       "apps": { "pinned": [{ "name": "", "path": "C:\\Apps\\Nameless.exe", "target": null }] }
     },
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -286,7 +329,7 @@
       "taskbar": { "mode": "vanish" }
     },
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -300,7 +343,7 @@
       }
     },
     {
-      "version": 5,
+      "version": 7,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -327,6 +370,172 @@
         "clock24h": false,
         "launchAtStartup": false
       }
-    }
+    },
+    {
+      "version": 7,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "ci": { "enabled": true, "repos": ["not-a-repo"] } }
+    },
+    {
+      "version": 7,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "ci": { "enabled": true, "repos": ["owner/.."] } }
+    },
+    {
+      "version": 7,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "ci": { "repos": ["Owner/Repo", "owner/repo"] } }
+    },
+    {
+      "version": 7,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "projects": { "roots": ["D:\\Gitfiles", "d:\\gitfiles"] } }
+    },
+    {
+      "version": 7,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "projects": { "roots": [""] } }
+    },
+    {
+      "version": 7,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "projects": { "roots": ["a", "b", "c", "d", "e", "f", "g", "h", "i"] } }
+    },
+    {
+      "version": 7,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "localAi": { "model": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" } }
+    },
+    {
+      "version": 7,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "ci": { "enabled": "yes" } }
+    },
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"Bad Id": {"layout": "auto"}}}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"projects": {"refreshSeconds": 5}}}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"projects": {"refreshSeconds": 4000}}}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"projects": {"accent": "pink"}}}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"projects": {"layout": "huge"}}}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"projects": {"label": "a label that is far too long for a dock tile"}}}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"active": "nope", "custom": []}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "graphite", "name": "Copy"}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "a", "name": "A"}, {"format": "opendock-skin", "version": 1, "id": "a", "name": "B"}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 2, "id": "x", "name": "X"}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "css", "version": 1, "id": "x", "name": "X"}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "Bad Id", "name": "X"}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "x", "name": ""}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "x", "name": "X", "dark": {"accent": "url(https://example.com/a.png)"}}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "x", "name": "X", "dark": {"accent": "#000000; background: red"}}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "x", "name": "X", "dark": {"background-image": "#000000"}}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "x", "name": "X", "dark": {"radiusSm": 99}}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "x", "name": "X", "light": {"radiusSm": "8px"}}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "x", "name": "X", "dark": {"font": "Comic Sans MS"}}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "x", "name": "X", "dark": {"shadow": "0 0 99px red"}}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "x", "name": "X", "dark": {"accent": "rgba(300, 0, 0, 1)"}}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "scenes": {"active": "missing", "items": []}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "scenes": {"items": [{"id": "a", "name": "A", "dock": {"itemOrder": ["clock"], "size": "m", "style": "glass", "spacing": "even", "position": "bottom"}, "theme": "dark", "quietHours": false, "automations": true}, {"id": "a", "name": "B", "dock": {"itemOrder": ["clock"], "size": "m", "style": "glass", "spacing": "even", "position": "bottom"}, "theme": "dark", "quietHours": false, "automations": true}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "scenes": {"items": [{"id": "a", "name": "", "dock": {"itemOrder": ["clock"], "size": "m", "style": "glass", "spacing": "even", "position": "bottom"}, "theme": "dark", "quietHours": false, "automations": true}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "scenes": {"items": [{"id": "a", "name": "A", "dock": {"itemOrder": [], "size": "m", "style": "glass", "spacing": "even", "position": "bottom"}, "theme": "dark", "quietHours": false, "automations": true}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "scenes": {"items": [{"id": "a", "name": "A", "dock": {"itemOrder": ["clock", "clock"], "size": "m", "style": "glass", "spacing": "even", "position": "bottom"}, "theme": "dark", "quietHours": false, "automations": true}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "scenes": {"items": [{"id": "a", "name": "A", "dock": {"itemOrder": ["clock"], "size": "xl", "style": "glass", "spacing": "even", "position": "bottom"}, "theme": "dark", "quietHours": false, "automations": true}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "scenes": {"items": [{"id": "Bad Id", "name": "A", "dock": {"itemOrder": ["clock"], "size": "m", "style": "glass", "spacing": "even", "position": "bottom"}, "theme": "dark", "quietHours": false, "automations": true}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "scenes": {"items": [{"id": "a", "name": "A", "dock": {"itemOrder": ["clock"], "size": "m", "style": "glass", "spacing": "even", "position": "bottom"}, "theme": "dark", "quietHours": false}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "scenes": {"items": [{"id": "a", "name": "A", "dock": {"itemOrder": ["clock"], "size": "m", "style": "glass", "spacing": "even", "position": "bottom"}, "theme": "dark", "skin": "Not A Skin", "quietHours": false, "automations": true}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "desktop": {"grid": 4, "widgets": []}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "desktop": {"grid": 128, "widgets": []}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "desktop": {"grid": 16, "widgets": [{"id": "start", "monitorId": null, "x": 0, "y": 0}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "desktop": {"grid": 16, "widgets": [{"id": "clock", "monitorId": null, "x": 0, "y": 0}, {"id": "clock", "monitorId": null, "x": 16, "y": 0}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "desktop": {"grid": 16, "widgets": [{"id": "clock", "monitorId": null, "x": 99999, "y": 0}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "desktop": {"grid": 16, "widgets": [{"id": "clock", "monitorId": null, "x": 1.5, "y": 0}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "desktop": {"grid": 16, "widgets": [{"id": "Bad Id", "monitorId": null, "x": 0, "y": 0}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "layout": "spiral", "monitorId": null, "itemOrder": ["clock"], "clock24h": false, "launchAtStartup": false}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "density": "thin", "monitorId": null, "itemOrder": ["clock"], "clock24h": false, "launchAtStartup": false}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "tint": "opaque", "monitorId": null, "itemOrder": ["clock"], "clock24h": false, "launchAtStartup": false}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"battery": {"variant": "analog"}}}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "widgets": {"options": {"projects": {"variant": "ring"}}}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "updates": {"check": "daily"}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "x", "name": "X", "interface": {"layout": "spiral"}}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "x", "name": "X", "interface": {"css": "body{}"}}]}},
+    {"version": 7, "dock": {"position": "bottom", "size": "m", "mode": "pill", "theme": "dark", "style": "glass", "monitorId": null, "itemOrder": ["clock", "projects"], "clock24h": false, "launchAtStartup": false}, "skins": {"custom": [{"format": "opendock-skin", "version": 1, "id": "x", "name": "X", "interface": {"variants": {"battery": "hologram"}}}]}}
   ]
 }

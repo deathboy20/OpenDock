@@ -6,7 +6,7 @@ This page describes how OpenDock protects users and what it deliberately doesn't
 
 1. **No account, no backend.** OpenDock has no server. Nothing requires signing in.
 2. **No telemetry.** No analytics, usage tracking, remote crash reporting or remote configuration.
-3. **Declared network access only.** A widget can reach only the hosts it declares, and every request is logged locally.
+3. **Declared network access only.** A widget can reach only the hosts it declares, and every request is logged locally. The one request no widget makes is the daily update check to `api.github.com`, which is anonymous, logged the same way, and can be turned off.
 4. **Secrets stay in the OS keychain.** Never in settings files, the database or logs.
 5. **The taskbar always comes back.** OpenDock never leaves the system without its taskbar.
 
@@ -38,7 +38,8 @@ OpenDock runs as the signed-in user, without elevation. It reads window titles, 
 All HTTP goes through `apps/desktop/src-tauri/src/net.rs`:
 
 - The caller passes the list of allowed hosts; the URL's host must match exactly.
-- Only HTTPS is used for remote hosts (`webcal://` links are upgraded to `https://`).
+- Only HTTPS is used for remote hosts (`webcal://` links are upgraded to `https://`). Plain HTTP is allowed only to loopback hosts (`127.0.0.1`, `localhost`, `::1`), and only when the widget declares that exact host.
+- Request headers (for example an API token) are sent but never logged; the ledger records only the widget, host, time and result.
 - Response bodies are capped at 5 MB, with timeouts.
 - Each request is written to the `network_log` table with the widget, host, time and result.
 
@@ -49,8 +50,17 @@ Hosts contacted today:
 | Weather | `api.open-meteo.com` | Every 30 minutes while a city is set |
 | City search | `geocoding-api.open-meteo.com` | Only while you type in the city search |
 | Calendars | The host of each feed you add | Every 15 minutes, or when you press refresh |
+| Local AI | `127.0.0.1` (Ollama on this PC, plain HTTP on port 11434) | Every minute while the widget is on the dock, and for each question you ask |
+| CI status | `api.github.com` | Off by default. When turned on, every 5 minutes per listed repository while the widget is on the dock |
+| Update check | `api.github.com` (`/repos/deathboy20/OpenDock/releases/latest`) | Once a day, about 90 seconds after start-up, and when you press **Check now**. On by default; turn it off in Dock settings. See [ADR 0006](adr/0006-update-checks.md) |
 
-The installed app makes no other network requests. Installing, uninstalling and the first-run setup work offline (on Windows 10, the installer may download the WebView2 runtime from Microsoft if it's missing).
+The Projects widget makes no network requests: it runs `git status` (with `core.fsmonitor` turned off and no optional locks) in repositories under the folders you choose, and only opens or reads paths from its latest scan. Vault capture makes no network requests either: it appends to one file, `Inbox/YYYY-MM-DD.md`, inside the vault folder you set, and refuses links that point outside it.
+
+Apart from the update check above, the installed app makes no other network requests. Installing, uninstalling and the first-run setup work offline (on Windows 10, the installer may download the WebView2 runtime from Microsoft if it's missing).
+
+## Skins
+
+Skins are user-supplied JSON, so they are treated as untrusted. Rust (`settings/skins.rs`) and Zod (`packages/config-schema/src/skins.ts`) check every skin against the same list of tokens (`skin-tokens.json`). Colours must be `#rrggbb`, `#rrggbbaa` or `rgba()` with numeric channels; lengths and durations are bounded whole numbers; fonts and shadows are chosen from fixed presets. The UI applies them with `style.setProperty` on CSS custom properties only. A skin can't contain CSS, `url()`, `var()`, selectors or scripts, and is refused if it tries.
 
 ## Data at rest
 
@@ -59,6 +69,7 @@ The installed app makes no other network requests. Installing, uninstalling and 
 | Settings | `%APPDATA%\com.opendock.app\settings.json` | No secrets |
 | Todos, notes, focus history, rules, activity, calendar events, forecast cache, network log | `%APPDATA%\com.opendock.app\opendock.db` | SQLite, readable by your user account only (standard profile permissions) |
 | Calendar feed links | Windows Credential Manager | Service `OpenDock` |
+| GitHub token for CI status (optional) | Windows Credential Manager | Service `OpenDock`, account `github:token`; never returned to the UI |
 
 OpenDock doesn't encrypt the database itself; it relies on Windows profile permissions, like most desktop apps. Window titles are kept in memory and not saved, unless a user-written rule puts one in its message; rule messages are stored in the activity log, which the user can clear.
 
