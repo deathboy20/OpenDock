@@ -237,3 +237,34 @@ pub fn apply_skin(
     let next = crate::settings::skins::apply(&state.settings(), id.as_deref())?;
     persist_settings(&app, &state, next)
 }
+
+// ---------- updates ----------
+
+#[tauri::command]
+pub fn get_update_status(state: State<'_, AppState>) -> crate::services::updates::UpdateStatus {
+    state
+        .live
+        .updates
+        .lock()
+        .ok()
+        .and_then(|s| s.clone())
+        .unwrap_or_else(|| crate::services::updates::UpdateStatus {
+            current: crate::services::updates::current_version().to_string(),
+            ..Default::default()
+        })
+}
+
+#[tauri::command]
+pub fn check_for_updates(app: AppHandle) {
+    app.state::<Wakers>().wake_updates();
+}
+
+/// Opens the release page on github.com for this repository, never another link.
+#[tauri::command]
+pub async fn open_update_page(app: AppHandle) -> Result<(), String> {
+    let status = get_update_status(app.state::<AppState>());
+    let url = crate::services::updates::download_page(&status);
+    tauri::async_runtime::spawn_blocking(move || crate::platform::launch_path(&url))
+        .await
+        .map_err(|e| e.to_string())?
+}

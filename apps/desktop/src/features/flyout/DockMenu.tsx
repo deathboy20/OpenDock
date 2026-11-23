@@ -1,6 +1,7 @@
 import { removeDockItem, type AppSettings } from "@opendock/config-schema";
 import { useState } from "react";
-import { applyScene, errorText, openHub, quitApp, type HubPage } from "../../services/ipc";
+import { applyScene, errorText, openHub, openUpdatePage, quitApp, type HubPage } from "../../services/ipc";
+import { useUpdateStatus } from "../../services/updates";
 import { useSettings } from "../../services/settingsContext";
 import { StylePicker } from "../dock/StylePicker";
 import { ADD_WIDGET_ID, findWidget } from "../widgets/catalog";
@@ -62,6 +63,7 @@ function MenuItem({
 export function DockMenu({ target, onDone }: { target: string | null; onDone: () => void }) {
   const { settings, update } = useSettings();
   const [error, setError] = useState<string | null>(null);
+  const updateStatus = useUpdateStatus();
   const widget = target && target !== ADD_WIDGET_ID ? findWidget(target) : undefined;
 
   const change = (fn: (s: AppSettings) => AppSettings) => {
@@ -74,6 +76,18 @@ export function DockMenu({ target, onDone }: { target: string | null; onDone: ()
 
   return (
     <div className="dock-menu">
+      {updateStatus?.available && updateStatus.latest ? (
+        <section className="menu-section">
+          <MenuItem
+            icon="import"
+            label={`Download OpenDock ${updateStatus.latest.version}`}
+            onClick={() => {
+              void openUpdatePage().catch((e) => setError(errorText(e)));
+              onDone();
+            }}
+          />
+        </section>
+      ) : null}
       {widget ? (
         <section className="menu-section">
           <p className="menu-caption">{widget.name}</p>

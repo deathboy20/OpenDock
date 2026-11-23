@@ -43,6 +43,11 @@ const online = widgets.filter((widget) => widget.network.length > 0);
               ))
             }. Every request is listed in the app's Privacy Ledger.
           </li>
+          <li>
+            Once a day OpenDock asks GitHub (<code>api.github.com</code>) whether a newer release exists. The request
+            carries nothing about you or your PC, shows in the Privacy Ledger, and stops when you turn off
+            <strong>Check for updates</strong> in Dock settings.
+          </li>
         </ul>
         <p>
           The full technical details are in the <a href={repoLinks.docs("security.md")}>security and privacy model</a>.

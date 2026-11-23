@@ -1,6 +1,6 @@
 # Roadmap
 
-OpenDock is **the local-first smart dock you can read, extend and trust.** Widgets publish facts on a local event bus, and rules you can see turn those facts into helpful actions. Nothing leaves your machine unless a widget declares it.
+OpenDock is **the local-first smart dock you can read, extend and trust.** Widgets publish facts on a local event bus, and rules you can see turn those facts into helpful actions. Nothing leaves your machine unless a widget declares it, apart from an anonymous daily update check you can turn off.
 
 Three principles guide every decision:
 

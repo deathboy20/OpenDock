@@ -9,6 +9,7 @@ pub mod desktop;
 pub mod focus;
 pub mod local_ai;
 pub mod projects;
+pub mod updates;
 pub mod vault;
 pub mod weather;
 pub mod windows;
@@ -32,6 +33,8 @@ const CALENDAR_INTERVAL: Duration = Duration::from_secs(15 * 60);
 const PROJECTS_INTERVAL: Duration = Duration::from_secs(2 * 60);
 const LOCAL_AI_INTERVAL: Duration = Duration::from_secs(60);
 const CI_INTERVAL: Duration = Duration::from_secs(5 * 60);
+const UPDATE_INTERVAL: Duration = Duration::from_secs(24 * 60 * 60);
+const UPDATE_FIRST_DELAY: Duration = Duration::from_secs(90);
 
 /// A widget's own refresh setting, kept within what its source can bear.
 pub fn refresh_interval(
@@ -56,6 +59,7 @@ pub struct Wakers {
     projects: Mutex<Sender<()>>,
     local_ai: Mutex<Sender<()>>,
     ci: Mutex<Sender<()>>,
+    updates: Mutex<Sender<()>>,
 }
 
 impl Wakers {
@@ -88,6 +92,12 @@ impl Wakers {
             let _ = tx.send(());
         }
     }
+
+    pub fn wake_updates(&self) {
+        if let Ok(tx) = self.updates.lock() {
+            let _ = tx.send(());
+        }
+    }
 }
 
 pub fn emit_focus(app: &AppHandle, state: &AppState) {
@@ -100,12 +110,14 @@ pub fn start_all(app: &AppHandle) {
     let (projects_tx, projects_rx) = channel();
     let (local_ai_tx, local_ai_rx) = channel();
     let (ci_tx, ci_rx) = channel();
+    let (updates_tx, updates_rx) = channel();
     app.manage(Wakers {
         weather: Mutex::new(weather_tx),
         calendar: Mutex::new(calendar_tx),
         projects: Mutex::new(projects_tx),
         local_ai: Mutex::new(local_ai_tx),
         ci: Mutex::new(ci_tx),
+        updates: Mutex::new(updates_tx),
     });
     spawn_system(app.clone());
     spawn_media(app.clone());
@@ -119,6 +131,7 @@ pub fn start_all(app: &AppHandle) {
     spawn_projects(app.clone(), projects_rx);
     spawn_local_ai(app.clone(), local_ai_rx);
     spawn_ci(app.clone(), ci_rx);
+    spawn_updates(app.clone(), updates_rx);
 }
 
 fn spawn_system(app: AppHandle) {
@@ -434,6 +447,32 @@ fn spawn_ci(app: AppHandle, rx: Receiver<()>) {
             refresh_interval(&settings, ci::WIDGET, CI_INTERVAL, Duration::from_secs(60));
         if !wait_or_wake(&rx, interval) {
             break;
+        }
+    });
+}
+
+/// Checks for a newer release once a day while `updates.check` is on, starting a little after
+/// launch so it never slows sign-in. A wake checks at once, even when the switch is off.
+fn spawn_updates(app: AppHandle, rx: Receiver<()>) {
+    thread::spawn(move || {
+        let mut forced = matches!(rx.recv_timeout(UPDATE_FIRST_DELAY), Ok(()));
+        loop {
+            let state = app.state::<AppState>();
+            if forced || state.settings().updates.check {
+                let status = updates::check(&state.db);
+                if let Ok(mut slot) = state.live.updates.lock() {
+                    *slot = Some(status.clone());
+                }
+                let _ = app.emit("update:status", &status);
+            }
+            match rx.recv_timeout(UPDATE_INTERVAL) {
+                Ok(()) => {
+                    while rx.try_recv().is_ok() {}
+                    forced = true;
+                }
+                Err(RecvTimeoutError::Timeout) => forced = false,
+                Err(RecvTimeoutError::Disconnected) => break,
+            }
         }
     });
 }

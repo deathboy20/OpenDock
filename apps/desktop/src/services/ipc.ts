@@ -212,6 +212,14 @@ export type CiRun = {
 };
 export type CiRepoStatus = { repo: string; run: CiRun | null; error: string | null };
 export type CiSnapshot = { enabled: boolean; hasToken: boolean; repos: CiRepoStatus[]; checkedAt: number };
+export type Release = { version: string; name: string; url: string; publishedAt: number | null; notes: string };
+export type UpdateStatus = {
+  current: string;
+  latest: Release | null;
+  available: boolean;
+  checkedAt: number | null;
+  error: string | null;
+};
 export type ProjectTool = "cursor" | "vscode" | "terminal" | "githubDesktop" | "explorer";
 
 export type HubPage =
@@ -253,6 +261,9 @@ export const applyScene = (id: string) => invoke<AppSettings>("apply_scene", { i
 export const deleteScene = (id: string) => invoke<void>("delete_scene", { id });
 export const settleDesktopWidget = () => invoke<void>("settle_desktop_widget");
 export const applySkin = (id: string | null) => invoke<AppSettings>("apply_skin", { id });
+export const getUpdateStatus = () => invoke<UpdateStatus>("get_update_status");
+export const checkForUpdates = () => invoke<void>("check_for_updates");
+export const openUpdatePage = () => invoke<void>("open_update_page");
 
 // ---------- widgets ----------
 
@@ -375,6 +386,7 @@ export type EventMap = {
   "projects:update": ProjectsSnapshot;
   "localAi:update": LocalAiSnapshot;
   "ci:update": CiSnapshot;
+  "update:status": UpdateStatus;
 };
 
 /** Subscribes to a backend event. Outside Tauri (tests, plain browser) it is a no-op. */

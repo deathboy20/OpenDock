@@ -114,6 +114,7 @@ Desktop widget windows (`desk-*`, capability `desktop.json`) get `dock-core`, `w
 | Projects | 2 min, or on demand | Git status of the repositories under the project folders (`projects:update`) |
 | Local AI | 1 min while on the dock, or on demand | Ollama models and loaded models from `127.0.0.1:11434` (`localAi:update`) |
 | CI | 5 min while turned on and on the dock, or on demand | Latest GitHub Actions run per repository from `api.github.com` (`ci:update`) |
+| Updates | 24 h (first check 90 s after start), or on demand | Latest release of `deathboy20/OpenDock` from `api.github.com` (`update:status`) |
 
 ## Event bus and automations
 

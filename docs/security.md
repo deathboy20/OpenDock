@@ -6,7 +6,7 @@ This page describes how OpenDock protects users and what it deliberately doesn't
 
 1. **No account, no backend.** OpenDock has no server. Nothing requires signing in.
 2. **No telemetry.** No analytics, usage tracking, remote crash reporting or remote configuration.
-3. **Declared network access only.** A widget can reach only the hosts it declares, and every request is logged locally.
+3. **Declared network access only.** A widget can reach only the hosts it declares, and every request is logged locally. The one request no widget makes is the daily update check to `api.github.com`, which is anonymous, logged the same way, and can be turned off.
 4. **Secrets stay in the OS keychain.** Never in settings files, the database or logs.
 5. **The taskbar always comes back.** OpenDock never leaves the system without its taskbar.
 
@@ -52,10 +52,11 @@ Hosts contacted today:
 | Calendars | The host of each feed you add | Every 15 minutes, or when you press refresh |
 | Local AI | `127.0.0.1` (Ollama on this PC, plain HTTP on port 11434) | Every minute while the widget is on the dock, and for each question you ask |
 | CI status | `api.github.com` | Off by default. When turned on, every 5 minutes per listed repository while the widget is on the dock |
+| Update check | `api.github.com` (`/repos/deathboy20/OpenDock/releases/latest`) | Once a day, about 90 seconds after start-up, and when you press **Check now**. On by default; turn it off in Dock settings. See [ADR 0006](adr/0006-update-checks.md) |
 
 The Projects widget makes no network requests: it runs `git status` (with `core.fsmonitor` turned off and no optional locks) in repositories under the folders you choose, and only opens or reads paths from its latest scan. Vault capture makes no network requests either: it appends to one file, `Inbox/YYYY-MM-DD.md`, inside the vault folder you set, and refuses links that point outside it.
 
-The installed app makes no other network requests. Installing, uninstalling and the first-run setup work offline (on Windows 10, the installer may download the WebView2 runtime from Microsoft if it's missing).
+Apart from the update check above, the installed app makes no other network requests. Installing, uninstalling and the first-run setup work offline (on Windows 10, the installer may download the WebView2 runtime from Microsoft if it's missing).
 
 ## Skins
 

@@ -155,6 +155,12 @@ Right-click a widget and choose **Options for…** to jump here.
 
 Turn on any widget under **Desktop widgets** to put it on the desktop in its own small window, behind your other windows. Drag it to move it. When you let go it snaps to the grid (**Fine** 8 px, **Even** 16 px or **Wide** 32 px), and OpenDock saves where it sits relative to that monitor. If that monitor isn't connected next time, the widget goes to the main monitor and stays on screen. The Start, Apps, Quick actions, Volume and add buttons stay on the dock. You can place up to 12 widgets. A desktop widget uses its widget options (label, accent, icon-only layout) and the active skin; its panel opens from the dock.
 
+## Updates
+
+Once a day OpenDock asks GitHub whether a newer release exists. When one does, the dock menu shows **Download OpenDock x.y.z**, and **Dock settings → Updates** shows the version and the start of its release notes. Both open the release page, where you download and run the new installer. Your settings carry over.
+
+The check sends nothing about you or your PC and shows in the Privacy ledger as `updates`. Turn off **Check for updates** to stop it; **Check now** still works.
+
 ## Developer widgets
 
 Set these up in **Developer widgets** in the hub.

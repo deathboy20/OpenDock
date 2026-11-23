@@ -10,6 +10,7 @@ use crate::services::ci::CiSnapshot;
 use crate::services::focus::FocusTimer;
 use crate::services::local_ai::LocalAiSnapshot;
 use crate::services::projects::ProjectsSnapshot;
+use crate::services::updates::UpdateStatus;
 use crate::services::weather::WeatherSnapshot;
 use crate::settings::{AppSettings, SettingsStore};
 use crate::store::Database;
@@ -28,6 +29,7 @@ pub struct LiveState {
     pub projects: Mutex<Option<ProjectsSnapshot>>,
     pub local_ai: Mutex<Option<LocalAiSnapshot>>,
     pub ci: Mutex<Option<CiSnapshot>>,
+    pub updates: Mutex<Option<UpdateStatus>>,
 }
 
 pub struct AppState {
