@@ -1,3 +1,4 @@
+pub mod skins;
 pub mod store;
 pub mod types;
 

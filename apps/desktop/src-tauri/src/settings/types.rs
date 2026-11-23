@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
+use super::skins::SkinSettings;
 use crate::engine::rules::{is_valid_id, parse_clock};
 use crate::geometry::{DockMode, DockPosition, DockSize};
 
@@ -326,6 +327,8 @@ pub struct AppSettings {
     pub automation: AutomationSettings,
     #[serde(default)]
     pub apps: AppsSettings,
+    #[serde(default)]
+    pub skins: SkinSettings,
     /// False until the first-run welcome has been completed or skipped.
     #[serde(default)]
     pub onboarded: bool,
@@ -363,6 +366,7 @@ impl Default for AppSettings {
             widgets: WidgetSettings::default(),
             automation: AutomationSettings::default(),
             apps: AppsSettings::default(),
+            skins: SkinSettings::default(),
             onboarded: false,
         }
     }
@@ -488,6 +492,7 @@ impl AppSettings {
         if has_duplicates_ignoring_case(repos) {
             return Err("a CI repository is listed twice".into());
         }
+        self.skins.validate()?;
         let quiet = &self.automation.quiet_hours;
         if parse_clock(&quiet.start).is_none() || parse_clock(&quiet.end).is_none() {
             return Err("quiet hours need HH:MM times".into());

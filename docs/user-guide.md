@@ -71,6 +71,28 @@ Open the **Widget gallery** from the dock menu to add widgets. Each one shows wh
 
 Open **Customise** from the hub or the dock menu.
 
+### Skins
+
+A skin changes colours, corner radius, blur, shadows, font and motion speed on top of the dock style, in every OpenDock window. Five come built in: **Graphite**, **Paper**, **Dusk**, **Forest** and **High contrast**. Each has dark and light values, and keeps text at 4.5:1 contrast or more. **Dock style** turns skins off.
+
+To share one, choose it under **Your skins** and press **Export**, then **Copy**, and save the text as a `.json` file. To add one, paste its JSON or press **Open a .json file**. If its id is already taken, OpenDock gives it a new one. If its text would be hard to read, OpenDock says which pairs fall short.
+
+A skin file looks like this:
+
+```json
+{
+  "format": "opendock-skin",
+  "version": 1,
+  "id": "late-night",
+  "name": "Late night",
+  "description": "Optional, up to 160 characters",
+  "dark": { "accent": "#ff8800", "accentInk": "#1a0d00", "radiusLg": 12, "blur": 0, "font": "segoe", "shadow": "soft" },
+  "light": { "accent": "#a34d00" }
+}
+```
+
+Skins can only set the tokens listed in `packages/config-schema/src/skin-tokens.json`: colours as `#rrggbb`, `#rrggbbaa` or `rgba(r, g, b, a)`; radii and blur in whole pixels; motion in whole milliseconds; a font from `default`, `segoe`, `system` or `mono`; and a shadow from `none`, `soft` or `deep`. Anything else is refused, so a skin can't run code, add CSS or load files.
+
 ### Widget options
 
 Every widget on the dock has its own options. Select a widget to change:

@@ -737,3 +737,13 @@ p.callout {
 .dock-item[data-accent]:not([data-accent="theme"]) .tile-icon {
   color: var(--od-accent);
 }
+
+/* Read by screen readers, not shown. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

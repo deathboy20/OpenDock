@@ -31,6 +31,7 @@ Checks verified on 2026-11-23 (Windows 10 Pro, this PC): `pnpm lint`, `pnpm type
 Phase B, in progress:
 
 7. **Widget options** (settings v7, `widgets.options` keyed by widget id: `label` ≤ 40, `layout` auto/compact/detailed, `accent` theme/mint/sky/amber/rose/violet, `refreshSeconds` 15-3600 or null). The dock applies them in `features/dock/DockBar.tsx` (size, compact, `data-accent`, name); the flyout uses the label and accent. Rust `services::refresh_interval` applies the refresh with a floor per widget (Projects 30 s, Local AI 15 s, CI 60 s). Accent swatch tokens are in `styles/tokens.css`; `features/customise/widgetOptions.test.ts` measures their contrast. UI: hub page **Customise** (`features/customise/CustomisePage.tsx`), also linked from the dock menu.
+8. **Skins** (`skins.active`, `skins.custom` ≤ 20). Token list `packages/config-schema/src/skin-tokens.json` and built-ins `builtin-skins.json` (Graphite, Paper, Dusk, Forest, High contrast), both read by Zod (`skins.ts`) and Rust (`settings/skins.rs`, `include_str!`). Values: colour (`#rrggbb[aa]` or `rgba()`), length/duration with a max, font and shadow presets. `app/App.tsx` sets the active skin's CSS variables on every window's root. Import (paste or `.json` file), export (copy JSON), delete and contrast warnings in `features/customise/SkinsSection.tsx`; `skinChecks.test.ts` measures the built-ins and checks the base colours match `tokens.css`.
 
 ## Open items and known issues
 

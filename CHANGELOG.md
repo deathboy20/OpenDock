@@ -10,6 +10,7 @@ All notable changes to OpenDock are documented here. The format is based on [Kee
 - **Vault capture widget.** Type a note and it is added, with the time, to `Inbox/YYYY-MM-DD.md` in your Obsidian vault. Open today's note or the vault in Obsidian from the panel.
 - **Local AI widget.** Shows whether Ollama is running on this PC, your models and the ones in memory, and answers a quick question from the model you pick. It talks only to `127.0.0.1:11434`, and only while it is on the dock.
 - **CI status widget.** The latest GitHub Actions run for the repositories you list, with failing runs first. Off by default; it contacts only `api.github.com`, and an optional token is kept in Windows Credential Manager.
+- **Skins.** Five built-in skins (Graphite, Paper, Dusk, Forest and High contrast) restyle every OpenDock window on top of the dock style, with dark and light values measured for contrast. Import a skin from JSON or a file, and export your own. Skins can only set listed design tokens to checked values.
 - **Widget options.** A new **Customise** page gives each dock widget its own label, layout (dock size, icon only or detailed), accent swatch and, for Projects, Local AI and CI status, how often it checks.
 - The widget gallery labels widgets that only talk to apps on this PC as **This PC only**.
 
