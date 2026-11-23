@@ -1,6 +1,6 @@
 import type { DockSize } from "@opendock/config-schema";
 
-export type WidgetCategory = "Essentials" | "Productivity" | "System" | "Info";
+export type WidgetCategory = "Essentials" | "Productivity" | "Developer" | "System" | "Info";
 
 export type WidgetDefinition = {
   id: string;
@@ -15,7 +15,7 @@ export type WidgetDefinition = {
   /** Widget opens a panel on click; otherwise the click is the action. */
   panel: boolean;
   /** Settings page where the widget is configured, if any. */
-  configure?: "dock" | "calendars" | "apps";
+  configure?: "dock" | "calendars" | "apps" | "developer";
 };
 
 export const ADD_WIDGET_ID = "add-widget";
@@ -158,9 +158,19 @@ export const widgetCatalog: WidgetDefinition[] = [
     network: [],
     panel: true,
   },
+  {
+    id: "projects",
+    name: "Projects",
+    category: "Developer",
+    description: "Git repositories in your project folders: branch, uncommitted changes, ahead and behind. Open one in Cursor, VS Code, a terminal or GitHub Desktop, or read its HANDOFF.md.",
+    sizes: ["s", "m", "l"],
+    network: [],
+    panel: true,
+    configure: "developer",
+  },
 ];
 
-export const widgetCategories: WidgetCategory[] = ["Essentials", "Productivity", "System", "Info"];
+export const widgetCategories: WidgetCategory[] = ["Essentials", "Productivity", "Developer", "System", "Info"];
 
 export function findWidget(id: string): WidgetDefinition | undefined {
   return widgetCatalog.find((widget) => widget.id === id);

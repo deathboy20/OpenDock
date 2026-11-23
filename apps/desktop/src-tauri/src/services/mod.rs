@@ -5,6 +5,7 @@ pub mod apps;
 pub mod automation;
 pub mod calendar;
 pub mod focus;
+pub mod projects;
 pub mod weather;
 pub mod windows;
 
@@ -24,11 +25,13 @@ use crate::state::{notify_changed, AppState};
 
 const WEATHER_INTERVAL: Duration = Duration::from_secs(30 * 60);
 const CALENDAR_INTERVAL: Duration = Duration::from_secs(15 * 60);
+const PROJECTS_INTERVAL: Duration = Duration::from_secs(2 * 60);
 
 /// Lets commands ask a polling service to refresh now.
 pub struct Wakers {
     weather: Mutex<Sender<()>>,
     calendar: Mutex<Sender<()>>,
+    projects: Mutex<Sender<()>>,
 }
 
 impl Wakers {
@@ -43,6 +46,12 @@ impl Wakers {
             let _ = tx.send(());
         }
     }
+
+    pub fn wake_projects(&self) {
+        if let Ok(tx) = self.projects.lock() {
+            let _ = tx.send(());
+        }
+    }
 }
 
 pub fn emit_focus(app: &AppHandle, state: &AppState) {
@@ -52,9 +61,11 @@ pub fn emit_focus(app: &AppHandle, state: &AppState) {
 pub fn start_all(app: &AppHandle) {
     let (weather_tx, weather_rx) = channel();
     let (calendar_tx, calendar_rx) = channel();
+    let (projects_tx, projects_rx) = channel();
     app.manage(Wakers {
         weather: Mutex::new(weather_tx),
         calendar: Mutex::new(calendar_tx),
+        projects: Mutex::new(projects_tx),
     });
     spawn_system(app.clone());
     spawn_media(app.clone());
@@ -65,6 +76,7 @@ pub fn start_all(app: &AppHandle) {
     spawn_scheduler(app.clone());
     spawn_weather(app.clone(), weather_rx);
     spawn_calendar(app.clone(), calendar_rx);
+    spawn_projects(app.clone(), projects_rx);
 }
 
 fn spawn_system(app: AppHandle) {
@@ -296,6 +308,21 @@ fn spawn_calendar(app: AppHandle, rx: Receiver<()>) {
             Err(error) => tracing::warn!(%error, "calendar sync failed"),
         }
         if !wait_or_wake(&rx, CALENDAR_INTERVAL) {
+            break;
+        }
+    });
+}
+
+fn spawn_projects(app: AppHandle, rx: Receiver<()>) {
+    thread::spawn(move || loop {
+        let state = app.state::<AppState>();
+        let roots = state.settings().widgets.projects.roots;
+        let snapshot = projects::scan(&roots);
+        if let Ok(mut slot) = state.live.projects.lock() {
+            *slot = Some(snapshot.clone());
+        }
+        let _ = app.emit("projects:update", &snapshot);
+        if !wait_or_wake(&rx, PROJECTS_INTERVAL) {
             break;
         }
     });

@@ -50,9 +50,19 @@ export type IconName =
   | "import"
   | "arrow-up"
   | "arrow-down"
+  | "folder"
+  | "branch"
+  | "terminal"
+  | "code"
+  | "back"
   | WeatherKind;
 
 const paths: Record<IconName, string> = {
+  folder: "M3 6.5h6.5l2 2H21V19H3z",
+  branch: "M7 4v16M7 16c0-4 10-3 10-8M17 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
+  terminal: "M3 5h18v14H3zM7 9.5l3 2.5-3 2.5M12.5 15H17",
+  code: "M9 7l-5 5 5 5M15 7l5 5-5 5",
+  back: "M15 6l-6 6 6 6",
   start: "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z",
   clock: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2",
   play: "M8 5.5v13l10-6.5z",

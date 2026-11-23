@@ -1,6 +1,6 @@
 import type { IconName } from "./icons";
 
-export type WidgetCategory = "Essentials" | "Productivity" | "System" | "Info";
+export type WidgetCategory = "Essentials" | "Productivity" | "Developer" | "System" | "Info";
 
 export type Widget = {
   /** Must match the id in the desktop app's widget catalog. */
@@ -14,7 +14,7 @@ export type Widget = {
   stores?: string;
 };
 
-export const widgetCategories: WidgetCategory[] = ["Essentials", "Productivity", "System", "Info"];
+export const widgetCategories: WidgetCategory[] = ["Essentials", "Productivity", "Developer", "System", "Info"];
 
 export const widgets: Widget[] = [
   {
@@ -133,6 +133,14 @@ export const widgets: Widget[] = [
     icon: "progress",
     category: "Info",
     summary: "How much of the day, week and year has gone.",
+    network: [],
+  },
+  {
+    id: "projects",
+    name: "Projects",
+    icon: "folder",
+    category: "Developer",
+    summary: "Every git repository in your project folders, with branch, uncommitted changes and ahead or behind. Open one in Cursor, VS Code, a terminal or GitHub Desktop, or read its HANDOFF.md.",
     network: [],
   },
 ];

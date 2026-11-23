@@ -62,6 +62,19 @@ Open the **Widget gallery** from the dock menu to add widgets. Each one shows wh
 | Battery | Charge level and state | None |
 | Weather | Conditions, next hours and week | Open-Meteo |
 | Day progress | How much of the day, week and year has passed | None |
+| Projects | Git repositories in your project folders, with branch and changes | None |
+
+## Developer widgets
+
+Set these up in **Developer widgets** in the hub.
+
+### Projects
+
+Add the folders your repositories live in, for example `D:\Gitfiles`. OpenDock lists every git repository in each folder and one or two levels below it (so `D:\Gitfiles\SOKO\map-dashboard` is found too). Folders whose names start with a dot, and `node_modules`, `target`, `dist` and `build`, are skipped. The list refreshes every two minutes, when you change the folders, or when you press **Check again**.
+
+Each repository shows its branch, how many files have uncommitted changes, and how far it is ahead of or behind its upstream. Select one to open it in **Cursor**, **VS Code**, a **Terminal** (Windows Terminal if installed, otherwise PowerShell), **GitHub Desktop** or **Files** (File Explorer). If the repository has a `HANDOFF.md`, **HANDOFF.md** shows it in the panel as plain text.
+
+The widget needs Git for Windows. It runs `git status` in each repository and never fetches, so "behind" is measured against the last time you fetched. It only opens or reads folders it found in your project folders.
 
 ## Calendars
 

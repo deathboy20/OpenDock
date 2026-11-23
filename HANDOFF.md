@@ -19,6 +19,7 @@ Done on this branch:
 
 1. Settings version 6 in Rust (`src-tauri/src/settings/types.rs`) and Zod (`packages/config-schema/src/settings.ts`): `widgets.projects.roots`, `widgets.vault.path`, `widgets.localAi.model`, `widgets.ci.{enabled, repos}`. Migration 3/4/5 → 6 in both languages. Fixtures in `packages/config-schema/fixtures/settings.json`.
 2. `net.rs`: `send()` with headers and JSON POST bodies; plain `http://` only for declared loopback hosts. Headers are never logged.
+3. **Projects widget** (`id: projects`). Rust: `services/projects.rs` (scan two levels deep, `git status --porcelain=v2 --branch` with `core.fsmonitor=false`, HANDOFF.md reader capped at 512 KB), `commands/developer.rs` (`get_projects`, `refresh_projects`, `open_project`, `read_handoff`; actions accept only paths from the latest scan), `platform/process.rs` (no-console `git`, open a folder in Cursor, VS Code, Windows Terminal or PowerShell). GitHub Desktop opens via `x-github-client://openLocalRepo/`. UI: `features/developer/` (tile, panel, model, safe Markdown view) and the hub page **Developer widgets** (`features/hub/DeveloperPage.tsx`). The `Tile` helper moved to `features/widgets/Tile.tsx`.
 
 Verified on 2026-11-23 (Windows 10 Pro, this PC): `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm fmt:check`, `pnpm test:rust` and `cargo clippy --all-targets -- -D warnings` all pass. Rust builds offline from the local cargo cache.
 
@@ -27,6 +28,8 @@ Verified on 2026-11-23 (Windows 10 Pro, this PC): `pnpm lint`, `pnpm typecheck`,
 - One settings bump (v6) covers all four developer widgets instead of one bump per widget: v6 has not shipped, and each field defaults, so files written by an earlier commit on this branch still load. Decision by the agent; say if you want one bump per widget.
 - Project folders default to an empty list, not `D:\Gitfiles`, because the default ships to every user. Isaac adds `D:\Gitfiles` once in **Developer widgets**.
 - README links `isaacobenzy/OpenDock` while the canonical remote is `deathboy20/OpenDock`. Not changed.
+- Running `pnpm dev` on this PC uses the installed app's `%APPDATA%\com.opendock.app\settings.json`, which has taskbar mode `replace` and start-with-Windows on. A dev run hides the taskbar and migrates the file to v6, which the installed 0.3.0 would then reject. Back it up first.
+- Projects never fetches, so "behind" is relative to the last fetch. Each `git status` has a 10 s limit; a repo that takes longer shows "git status took too long".
 - Local `main` is behind `origin/release/0.3.0` by the two CI release fixes.
 
 ## How to work here
@@ -46,7 +49,7 @@ Verified on 2026-11-23 (Windows 10 Pro, this PC): `pnpm lint`, `pnpm typecheck`,
 
 ## Next steps
 
-1. Phase A widgets, one commit each: Projects, Vault capture, Local AI (Ollama), CI status (opt-in, token in the keychain).
+1. Phase A widgets, one commit each: Vault capture, Local AI (Ollama), CI status (opt-in, token in the keychain).
 2. Show them in `pnpm dev`, then Phase B: per-widget instance options, JSON skins (token overrides only), desktop widgets layer, Scenes.
 3. Phase C (taskbar mode) waits for Isaac and a recorded `docs/testing-matrix.md` on Windows 10.
 

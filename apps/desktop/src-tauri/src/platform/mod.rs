@@ -3,6 +3,7 @@
 
 #[cfg(not(windows))]
 mod fallback;
+pub mod process;
 pub mod taskbar;
 #[cfg(windows)]
 mod win;

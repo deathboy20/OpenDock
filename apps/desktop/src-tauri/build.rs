@@ -64,6 +64,10 @@ const COMMANDS: &[&str] = &[
     "power_action",
     "show_thumbnails",
     "clear_thumbnails",
+    "get_projects",
+    "refresh_projects",
+    "open_project",
+    "read_handoff",
 ];
 
 fn main() {

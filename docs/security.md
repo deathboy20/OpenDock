@@ -38,7 +38,8 @@ OpenDock runs as the signed-in user, without elevation. It reads window titles, 
 All HTTP goes through `apps/desktop/src-tauri/src/net.rs`:
 
 - The caller passes the list of allowed hosts; the URL's host must match exactly.
-- Only HTTPS is used for remote hosts (`webcal://` links are upgraded to `https://`).
+- Only HTTPS is used for remote hosts (`webcal://` links are upgraded to `https://`). Plain HTTP is allowed only to loopback hosts (`127.0.0.1`, `localhost`, `::1`), and only when the widget declares that exact host.
+- Request headers (for example an API token) are sent but never logged; the ledger records only the widget, host, time and result.
 - Response bodies are capped at 5 MB, with timeouts.
 - Each request is written to the `network_log` table with the widget, host, time and result.
 
@@ -49,6 +50,8 @@ Hosts contacted today:
 | Weather | `api.open-meteo.com` | Every 30 minutes while a city is set |
 | City search | `geocoding-api.open-meteo.com` | Only while you type in the city search |
 | Calendars | The host of each feed you add | Every 15 minutes, or when you press refresh |
+
+The Projects widget makes no network requests: it runs `git status` (with `core.fsmonitor` turned off and no optional locks) in repositories under the folders you choose, and only opens or reads paths from its latest scan.
 
 The installed app makes no other network requests. Installing, uninstalling and the first-run setup work offline (on Windows 10, the installer may download the WebView2 runtime from Microsoft if it's missing).
 

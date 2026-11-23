@@ -185,6 +185,10 @@ pub fn run() {
             commands::apps::power_action,
             commands::apps::show_thumbnails,
             commands::apps::clear_thumbnails,
+            commands::developer::get_projects,
+            commands::developer::refresh_projects,
+            commands::developer::open_project,
+            commands::developer::read_handoff,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

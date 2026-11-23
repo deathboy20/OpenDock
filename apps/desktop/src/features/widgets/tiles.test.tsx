@@ -1,4 +1,5 @@
-import { DEFAULT_ITEM_ORDER, dockItemIdSchema, type DockSize } from "@opendock/config-schema";
+import { DEFAULT_ITEM_ORDER, defaultAppSettings, dockItemIdSchema, type DockSize } from "@opendock/config-schema";
+import type { ReactNode } from "react";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type {
@@ -6,6 +7,7 @@ import type {
   FocusState,
   MediaState,
   Note,
+  ProjectsSnapshot,
   SystemStats,
   Todo,
   WeatherSnapshot,
@@ -13,6 +15,7 @@ import type {
 } from "../../services/ipc";
 import { emptyLive, LiveContext, type LiveData } from "../../services/liveContext";
 import { failed, ready } from "../../services/loadable";
+import { SettingsContext, type SettingsContextValue } from "../../services/settingsContext";
 import { ADD_WIDGET_ID, findWidget, searchWidgets, widgetCatalog } from "./catalog";
 import { TileContent } from "./tiles";
 
@@ -80,6 +83,49 @@ const windows: WindowsSnapshot = {
   active: 11,
 };
 
+const projects: ProjectsSnapshot = {
+  projects: [
+    {
+      name: "OpenDock",
+      path: "D:\\Gitfiles\\OpenDock",
+      root: "D:\\Gitfiles",
+      branch: "feat/developer-widgets",
+      detached: false,
+      upstream: null,
+      ahead: null,
+      behind: null,
+      dirty: 3,
+      hasHandoff: true,
+      error: null,
+    },
+  ],
+  missingRoots: [],
+  truncated: false,
+  gitAvailable: true,
+  scannedAt: now,
+};
+
+/** Developer widgets only show data once they are set up. */
+const configured: SettingsContextValue = {
+  settings: {
+    ...defaultAppSettings,
+    widgets: {
+      ...defaultAppSettings.widgets,
+      projects: { roots: ["D:\\Gitfiles"] },
+    },
+  },
+  ready: true,
+  update: async () => null,
+};
+
+function withData(live: LiveData, children: ReactNode) {
+  return (
+    <SettingsContext.Provider value={configured}>
+      <LiveContext.Provider value={live}>{children}</LiveContext.Provider>
+    </SettingsContext.Provider>
+  );
+}
+
 const readyLive: LiveData = {
   media: ready(media),
   stats: ready(stats),
@@ -92,6 +138,7 @@ const readyLive: LiveData = {
   events: ready(events),
   windows: ready(windows),
   volume: ready({ level: 40, muted: false }),
+  projects: ready(projects),
 };
 
 const emptyData: LiveData = {
@@ -106,6 +153,7 @@ const emptyData: LiveData = {
   events: ready([]),
   windows: ready({ windows: [], active: null }),
   volume: ready(null),
+  projects: ready({ ...projects, projects: [] }),
 };
 
 const errorLive: LiveData = {
@@ -120,6 +168,7 @@ const errorLive: LiveData = {
   events: failed("db locked"),
   windows: failed("enumeration failed"),
   volume: failed("no audio service"),
+  projects: failed("scan failed"),
 };
 
 const states: [string, LiveData][] = [
@@ -167,9 +216,7 @@ describe("dock tiles", () => {
         for (const size of sizes) {
           for (const compact of [false, true]) {
             const { container, unmount } = render(
-              <LiveContext.Provider value={live}>
-                <TileContent id={widget.id} size={size} compact={compact} />
-              </LiveContext.Provider>,
+              withData(live, <TileContent id={widget.id} size={size} compact={compact} />),
             );
             const tile = container.querySelector(".tile");
             expect(tile, `${widget.id} ${state} ${size}`).not.toBeNull();
@@ -234,6 +281,27 @@ describe("dock tiles", () => {
       </LiveContext.Provider>,
     );
     expect(getByText("40%")).toBeInTheDocument();
+  });
+
+  it("shows which projects have changes", () => {
+    const { getByText, container } = render(withData(readyLive, <TileContent id="projects" size="m" compact={false} />));
+    expect(getByText("1 with changes")).toBeInTheDocument();
+    expect(getByText("1 repos")).toBeInTheDocument();
+    expect(container.querySelector(".tile-count")?.textContent).toBe("1");
+  });
+
+  it("asks for project folders before scanning", () => {
+    const { getByText } = render(
+      <LiveContext.Provider value={readyLive}>
+        <TileContent id="projects" size="m" compact={false} />
+      </LiveContext.Provider>,
+    );
+    expect(getByText("Add a folder")).toBeInTheDocument();
+  });
+
+  it("marks a failed project scan as an error", () => {
+    const { container } = render(withData(errorLive, <TileContent id="projects" size="m" compact={false} />));
+    expect(container.querySelector(".tile.is-error")).not.toBeNull();
   });
 
   it("warns when the battery is low", () => {

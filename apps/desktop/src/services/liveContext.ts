@@ -4,6 +4,7 @@ import type {
   FocusState,
   MediaState,
   Note,
+  ProjectsSnapshot,
   SystemStats,
   Todo,
   VolumeState,
@@ -24,6 +25,7 @@ export type LiveData = {
   events: Loadable<CalendarEvent[]>;
   windows: Loadable<WindowsSnapshot>;
   volume: Loadable<VolumeState | null>;
+  projects: Loadable<ProjectsSnapshot | null>;
 };
 
 export const emptyLive: LiveData = {
@@ -38,6 +40,7 @@ export const emptyLive: LiveData = {
   events: loading,
   windows: loading,
   volume: loading,
+  projects: loading,
 };
 
 export const LiveContext = createContext<LiveData>(emptyLive);

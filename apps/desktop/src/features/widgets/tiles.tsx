@@ -1,5 +1,3 @@
-import type { DockSize } from "@opendock/config-schema";
-import type { ReactNode } from "react";
 import { AppsTile } from "../apps/AppsTile";
 import { TrayTile, VolumeTile } from "../apps/TrayTiles";
 import { mediaControl } from "../../services/ipc";
@@ -20,48 +18,11 @@ import {
   weatherLabel,
 } from "./format";
 import { Icon } from "./icons";
-import { Bar, Ring, Skeleton, Sparkline } from "./visuals";
+import { Tile, type TileProps } from "./Tile";
+import { Bar, Ring, Sparkline } from "./visuals";
+import { ProjectsTile } from "../developer/DeveloperTiles";
 
-export type TileProps = { size: DockSize; compact: boolean };
-
-type TileState = "ready" | "loading" | "empty" | "error";
-
-function Tile({
-  state,
-  icon,
-  primary,
-  secondary,
-  extra,
-  title,
-  compact,
-}: {
-  state: TileState;
-  icon: ReactNode;
-  primary?: ReactNode;
-  secondary?: ReactNode;
-  extra?: ReactNode;
-  title?: string;
-  compact: boolean;
-}) {
-  return (
-    <span className={`tile is-${state}`} title={title}>
-      <span className="tile-icon">{icon}</span>
-      {compact ? null : (
-        <span className="tile-text">
-          {state === "loading" ? (
-            <Skeleton width={52} />
-          ) : (
-            <>
-              {primary !== undefined ? <span className="tile-primary">{primary}</span> : null}
-              {secondary !== undefined ? <span className="tile-secondary">{secondary}</span> : null}
-            </>
-          )}
-        </span>
-      )}
-      {extra && !compact ? <span className="tile-extra">{extra}</span> : null}
-    </span>
-  );
-}
+export type { TileProps } from "./Tile";
 
 function StartTile() {
   return (
@@ -396,6 +357,8 @@ export function TileContent({ id, size, compact }: { id: string } & TileProps) {
       return <TrayTile compact={compact} />;
     case "add-widget":
       return <AddTile />;
+    case "projects":
+      return <ProjectsTile {...props} />;
     default:
       return <UnknownTile id={id} />;
   }

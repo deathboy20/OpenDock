@@ -78,7 +78,7 @@ On exit, OpenDock clears window previews, releases the reserved screen edge and 
 All communication goes through `apps/desktop/src/services/ipc.ts`, which wraps Tauri's `invoke` and event APIs with typed functions. Components never call Tauri directly.
 
 - **Commands** (UI → core) are Rust functions in `commands/`. Each validates its input, limits sizes and acts only on known objects. For example, window actions only accept windows the enumerator has seen, and launches only accept pinned, installed or running apps.
-- **Events** (core → UI) push live data: `system:stats`, `media:state`, `windows:changed`, `volume:state`, `weather:update`, `focus:state`, `settings:changed`, `data:changed` (a store table changed), `bus:event` (for the Studio's live view) and the fullscreen and window-control events. `services/live.tsx` loads initial values and keeps them current, exposing each as a `Loadable` (loading, ready or error) so every widget can render all three states.
+- **Events** (core → UI) push live data: `system:stats`, `media:state`, `windows:changed`, `volume:state`, `weather:update`, `focus:state`, `settings:changed`, `data:changed` (a store table changed), `projects:update`, `bus:event` (for the Studio's live view) and the fullscreen and window-control events. `services/live.tsx` loads initial values and keeps them current, exposing each as a `Loadable` (loading, ready or error) so every widget can render all three states.
 
 ### Permissions
 
@@ -108,6 +108,7 @@ Tauri capabilities grant each window only what it needs. Command groups are defi
 | Scheduler | to the next minute | `time.tick`, `sun.sunrise`, `sun.sunset` |
 | Weather | 30 min, or on demand | Forecast from Open-Meteo; `weather.rain.soon` |
 | Calendar | 15 min, or on demand | Upcoming events from iCal feeds; `calendar.event.starting` |
+| Projects | 2 min, or on demand | Git status of the repositories under the project folders (`projects:update`) |
 
 ## Event bus and automations
 
@@ -159,6 +160,7 @@ All OS-specific code lives under `src-tauri/src/platform/`. `platform/mod.rs` ex
 | `win_apps.rs` | Window enumeration, activation, minimise and close, app icons, shortcuts and launching, DWM thumbnails, AppBar edge reservation |
 | `win_system.rs` | Audio endpoint volume and mute, keyboard shortcuts, lock, sleep and shutdown |
 | `taskbar.rs` | Taskbar auto-hide and visibility, the restore marker and the guard process |
+| `process.rs` | Starting `git` without a console window, and opening a folder in Cursor, VS Code or a terminal |
 
 `fallback.rs` provides safe no-op or "unsupported" implementations for other platforms, so the rest of the code compiles and degrades gracefully. Adding Linux or macOS means writing a sibling module, not changing callers.
 
@@ -187,5 +189,6 @@ The UI is organised by feature under `apps/desktop/src/features/`. Each feature 
 - `flyout/` — the flyout root and every panel
 - `hub/` — hub pages, Automation Studio and the welcome flow
 - `toast/` — the toast window and its queue
+- `developer/` — the developer widgets (Projects), their models and panels
 
 Global styles live in `styles/`: `tokens.css` holds every colour, radius, shadow and motion value, and `base.css` holds shared primitives. Feature CSS uses tokens only.

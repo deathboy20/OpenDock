@@ -24,6 +24,7 @@ import { TodosPanel } from "./panels/TodosPanel";
 import { VolumePanel } from "./panels/VolumePanel";
 import { WeatherPanel } from "./panels/WeatherPanel";
 import { CalendarPanel } from "./panels/CalendarPanel";
+import { ProjectsPanel } from "../developer/ProjectsPanel";
 import "./flyout.css";
 
 function close(key: string | undefined) {
@@ -61,6 +62,8 @@ function Panel({ request, onDone }: { request: FlyoutRequest; onDone: () => void
       return <NotesPanel />;
     case "day-progress":
       return <DayProgressPanel />;
+    case "projects":
+      return <ProjectsPanel />;
     default:
       return <PanelState kind="error" title="This widget has no panel" />;
   }
