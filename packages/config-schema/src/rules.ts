@@ -1,6 +1,7 @@
 import { z } from "zod";
 import catalogJson from "./catalog.json";
 import { dockItemIdSchema } from "./settings";
+import { slugify } from "./text";
 
 const clockTimeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "expected HH:MM");
 const scalarSchema = z.union([z.number(), z.string().max(200), z.boolean()]);
@@ -112,12 +113,7 @@ export function describeComparator(field: string, comparator: Comparator): strin
 }
 
 export function slugifyRuleId(name: string, taken: string[]): string {
-  const base =
-    name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 56) || "rule";
+  const base = slugify(name, 56, "rule");
   let candidate = base;
   let n = 2;
   while (taken.includes(candidate)) {

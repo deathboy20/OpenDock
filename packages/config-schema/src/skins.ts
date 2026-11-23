@@ -1,6 +1,7 @@
 import { z } from "zod";
 import builtinSkinData from "./builtin-skins.json";
 import skinTokenData from "./skin-tokens.json";
+import { slugify } from "./text";
 import { isValidVariant } from "./variants";
 
 /**
@@ -140,13 +141,7 @@ export function skinVariables(skin: Skin | undefined, theme: "dark" | "light"): 
 }
 
 export function slugifySkinId(name: string, taken: string[]): string {
-  const base =
-    name
-      .toLowerCase()
-      .normalize("NFKD")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 32) || "skin";
+  const base = slugify(name.normalize("NFKD"), 32, "skin");
   let id = base;
   for (let n = 2; taken.includes(id); n += 1) id = `${base}-${n}`;
   return id;

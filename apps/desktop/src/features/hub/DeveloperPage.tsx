@@ -1,4 +1,4 @@
-import { MAX_CI_REPOS, MAX_PROJECT_ROOTS, type AppSettings } from "@opendock/config-schema";
+import { MAX_CI_REPOS, MAX_PROJECT_ROOTS, trimChars, type AppSettings } from "@opendock/config-schema";
 import { useEffect, useState } from "react";
 import {
   clearGithubToken,
@@ -100,7 +100,7 @@ function VaultFolder({ settings, change }: { settings: AppSettings; change: Chan
     };
   }, [saved]);
   const commit = () => {
-    const path = draft.trim().replace(/[\\/]+$/, "");
+    const path = trimChars(draft.trim(), "\\/", "end");
     if (path === saved) return;
     change((s) => ({ ...s, widgets: { ...s.widgets, vault: { ...s.widgets.vault, path } } }));
   };

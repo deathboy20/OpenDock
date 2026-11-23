@@ -1,3 +1,4 @@
+import { trimChars } from "@opendock/config-schema";
 import type { Project, ProjectsSnapshot } from "../../services/ipc";
 
 export type ProjectsSummary = { total: number; changed: number; behind: number; ahead: number; failed: number };
@@ -58,7 +59,7 @@ export function projectLocation(project: Project): string {
 
 /** Adds a folder path to a list, ignoring case and trailing slashes. */
 export function addFolder(list: string[], input: string): string[] {
-  const trimmed = input.trim().replace(/[\\/]+$/, "");
+  const trimmed = trimChars(input.trim(), "\\/", "end");
   // "D:" alone means the current folder on drive D, so a drive root keeps its backslash.
   const folder = /^[A-Za-z]:$/.test(trimmed) ? `${trimmed}\\` : trimmed;
   if (!folder || list.some((f) => f.toLowerCase() === folder.toLowerCase())) return list;
