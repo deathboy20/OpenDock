@@ -1150,3 +1150,16 @@
   margin-top: 0;
   flex-wrap: wrap;
 }
+
+.update-notes {
+  max-height: 160px;
+  margin: 8px 0;
+  padding: 10px 12px;
+  overflow: auto;
+  border-radius: var(--od-radius-sm);
+  background: var(--od-surface-deep);
+  color: var(--od-muted);
+  font-family: inherit;
+  font-size: 12.5px;
+  white-space: pre-wrap;
+}

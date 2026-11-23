@@ -84,6 +84,9 @@ const COMMANDS: &[&str] = &[
     "delete_scene",
     "settle_desktop_widget",
     "apply_skin",
+    "get_update_status",
+    "check_for_updates",
+    "open_update_page",
 ];
 
 fn main() {
