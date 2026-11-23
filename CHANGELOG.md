@@ -4,30 +4,36 @@ All notable changes to OpenDock are documented here. The format is based on [Kee
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-23
+
+Developer widgets, skins that can change the dock's shape and each widget's look, desktop widgets, scenes, and a daily check for new versions.
+
 ### Added
 
 - **Projects widget.** Lists the git repositories in the folders you choose, with branch, uncommitted changes and ahead or behind. Open one in Cursor, VS Code, a terminal, GitHub Desktop or File Explorer, or read its `HANDOFF.md` in the panel. A new **Developer widgets** page in the hub holds the folders.
 - **Vault capture widget.** Type a note and it is added, with the time, to `Inbox/YYYY-MM-DD.md` in your Obsidian vault. Open today's note or the vault in Obsidian from the panel.
 - **Local AI widget.** Shows whether Ollama is running on this PC, your models and the ones in memory, and answers a quick question from the model you pick. It talks only to `127.0.0.1:11434`, and only while it is on the dock.
 - **CI status widget.** The latest GitHub Actions run for the repositories you list, with failing runs first. Off by default; it contacts only `api.github.com`, and an optional token is kept in Windows Credential Manager.
-- **Desktop widgets.** Place widgets on the desktop in their own borderless windows behind your other windows. Drag to move; they snap to an 8, 16 or 32 px grid and remember their position per monitor.
-- **Scenes.** Save the dock's widgets, look, skin, quiet hours and automations as a named scene, and switch between scenes from Customise or the dock menu. Scenes never change the taskbar mode.
-- **Undo for skins and a reset per widget.** Switching skins offers Undo, which restores only the look. Each widget's options have a Reset button. First-run setup now offers a few skins to start with.
-- **Update checks.** Once a day OpenDock asks GitHub whether a newer release exists, and the dock menu and Dock settings offer the download. On by default, anonymous, shown in the Privacy ledger, and easy to turn off ([ADR 0006](docs/adr/0006-update-checks.md)).
-- **Skin interfaces.** Skins can now change the dock's shape and each widget's look, not only its colours. New layouts (one bar, islands of related widgets, or a chip per widget), a slim thickness, and a tint for bright or busy wallpapers, with a live preview over sample wallpapers. Battery, System, Clock, Day progress, Now playing, Focus and Weather each have two to four looks (for example a battery ring, dots or gauge, and an analog clock). Five more built-in skins use them: Islands, Daylight, Console, Instruments and Float.
-- **Skins.** Five built-in skins (Graphite, Paper, Dusk, Forest and High contrast) restyle every OpenDock window on top of the dock style, with dark and light values measured for contrast. Import a skin from JSON or a file, and export your own. Skins can only set listed design tokens to checked values.
 - **Widget options.** A new **Customise** page gives each dock widget its own label, layout (dock size, icon only or detailed), accent swatch and, for Projects, Local AI and CI status, how often it checks.
+- **Skins.** Five built-in skins (Graphite, Paper, Dusk, Forest and High contrast) restyle every OpenDock window on top of the dock style, with dark and light values measured for contrast. Import a skin from JSON or a file, and export your own. Skins can only set listed design tokens to checked values.
+- **Skin interfaces.** Skins can now change the dock's shape and each widget's look, not only its colours. New layouts (one bar, islands of related widgets, or a chip per widget), a slim thickness, and a tint for bright or busy wallpapers, with a live preview over sample wallpapers. Battery, System, Clock, Day progress, Now playing, Focus and Weather each have two to four looks (for example a battery ring, dots or gauge, and an analog clock). Five more built-in skins use them: Islands, Daylight, Console, Instruments and Float.
+- **Undo for skins and a reset per widget.** Switching skins offers Undo, which restores only the look. Each widget's options have a Reset button. First-run setup now offers a few skins to start with.
+- **Scenes.** Save the dock's widgets, look, skin, quiet hours and automations as a named scene, and switch between scenes from Customise or the dock menu. Scenes never change the taskbar mode.
+- **Desktop widgets.** Place widgets on the desktop in their own borderless windows behind your other windows. Drag to move; they snap to an 8, 16 or 32 px grid and remember their position per monitor.
+- **Update checks.** Once a day OpenDock asks GitHub whether a newer release exists, and the dock menu and Dock settings offer the download. On by default, anonymous, shown in the Privacy ledger, and easy to turn off ([ADR 0006](docs/adr/0006-update-checks.md)).
 - The widget gallery labels widgets that only talk to apps on this PC as **This PC only**.
 
 ### Changed
 
 - Settings move to version 7: version 6 adds the developer widgets and version 7 adds widget options, skins, scenes and desktop widgets. Older files are migrated automatically, and everything new starts empty or off.
 - `net.rs` can now send headers and JSON bodies, and allows plain `http://` only to declared hosts on this PC (`127.0.0.1`), for local services such as Ollama.
+- Going back to 0.3.0 after running 0.4.0 isn't supported: 0.3.0 can't read version 7 settings, so it sets the file aside as `settings.invalid-<time>.json` and starts with defaults.
 
 ### Fixed
 
 - The notification strip no longer appears with a native title bar. It is now a non-focusable window shown the normal way, so it still never takes focus.
 - App icons that Windows couldn't hand over at first (for example right after sign-in) are asked for again instead of staying as a letter until OpenDock restarts.
+- Very long names made of dashes or symbols no longer slow down naming a rule or a skin, or adding a folder or repository. Text is now trimmed without regular expressions that can backtrack.
 
 ## [0.3.0] - 2026-11-07
 
@@ -93,7 +99,8 @@ The first release that can stand in for the Windows taskbar.
 - Settings stored in `settings.json`, validated in Rust and with Zod.
 - Marketing website.
 
-[Unreleased]: https://github.com/isaacobenzy/OpenDock/compare/v0.3.0...develop
+[Unreleased]: https://github.com/isaacobenzy/OpenDock/compare/v0.4.0...develop
+[0.4.0]: https://github.com/isaacobenzy/OpenDock/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/isaacobenzy/OpenDock/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/isaacobenzy/OpenDock/compare/v0.1.0-milestone-2...v0.2.0
 [0.1.0-milestone-2]: https://github.com/isaacobenzy/OpenDock/releases/tag/v0.1.0-milestone-2
