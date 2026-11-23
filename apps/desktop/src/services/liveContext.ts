@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type {
   CalendarEvent,
   FocusState,
+  LocalAiSnapshot,
   MediaState,
   Note,
   ProjectsSnapshot,
@@ -28,6 +29,7 @@ export type LiveData = {
   volume: Loadable<VolumeState | null>;
   projects: Loadable<ProjectsSnapshot | null>;
   vault: Loadable<VaultStatus>;
+  localAi: Loadable<LocalAiSnapshot | null>;
 };
 
 export const emptyLive: LiveData = {
@@ -44,6 +46,7 @@ export const emptyLive: LiveData = {
   volume: loading,
   projects: loading,
   vault: loading,
+  localAi: loading,
 };
 
 export const LiveContext = createContext<LiveData>(emptyLive);

@@ -179,6 +179,21 @@ export type VaultStatus = {
   todayCount: number;
   recent: string[];
 };
+export type LocalModel = {
+  name: string;
+  sizeBytes: number;
+  family: string | null;
+  parameterSize: string | null;
+  quantization: string | null;
+};
+export type LoadedModel = { name: string; sizeVramBytes: number; expiresAt: string | null };
+export type LocalAiSnapshot = {
+  running: boolean;
+  models: LocalModel[];
+  loaded: LoadedModel[];
+  error: string | null;
+  checkedAt: number;
+};
 export type ProjectTool = "cursor" | "vscode" | "terminal" | "githubDesktop" | "explorer";
 
 export type HubPage =
@@ -305,6 +320,9 @@ export const readHandoff = (path: string) => invoke<string | null>("read_handoff
 export const getVaultStatus = () => invoke<VaultStatus>("get_vault_status");
 export const vaultCapture = (text: string) => invoke<void>("vault_capture", { text });
 export const openVault = (today: boolean) => invoke<void>("open_vault", { today });
+export const getLocalAi = () => invoke<LocalAiSnapshot | null>("get_local_ai");
+export const refreshLocalAi = () => invoke<void>("refresh_local_ai");
+export const askLocalAi = (model: string, prompt: string) => invoke<string>("ask_local_ai", { model, prompt });
 
 // ---------- events ----------
 
@@ -326,6 +344,7 @@ export type EventMap = {
   "windows:changed": WindowsSnapshot;
   "volume:state": VolumeState | null;
   "projects:update": ProjectsSnapshot;
+  "localAi:update": LocalAiSnapshot;
 };
 
 /** Subscribes to a backend event. Outside Tauri (tests, plain browser) it is a no-op. */

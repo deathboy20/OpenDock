@@ -26,6 +26,7 @@ import { WeatherPanel } from "./panels/WeatherPanel";
 import { CalendarPanel } from "./panels/CalendarPanel";
 import { ProjectsPanel } from "../developer/ProjectsPanel";
 import { VaultPanel } from "../developer/VaultPanel";
+import { LocalAiPanel } from "../developer/LocalAiPanel";
 import "./flyout.css";
 
 function close(key: string | undefined) {
@@ -67,6 +68,8 @@ function Panel({ request, onDone }: { request: FlyoutRequest; onDone: () => void
       return <ProjectsPanel />;
     case "vault":
       return <VaultPanel />;
+    case "local-ai":
+      return <LocalAiPanel />;
     default:
       return <PanelState kind="error" title="This widget has no panel" />;
   }

@@ -109,6 +109,7 @@ Tauri capabilities grant each window only what it needs. Command groups are defi
 | Weather | 30 min, or on demand | Forecast from Open-Meteo; `weather.rain.soon` |
 | Calendar | 15 min, or on demand | Upcoming events from iCal feeds; `calendar.event.starting` |
 | Projects | 2 min, or on demand | Git status of the repositories under the project folders (`projects:update`) |
+| Local AI | 1 min while on the dock, or on demand | Ollama models and loaded models from `127.0.0.1:11434` (`localAi:update`) |
 
 ## Event bus and automations
 
@@ -189,6 +190,6 @@ The UI is organised by feature under `apps/desktop/src/features/`. Each feature 
 - `flyout/` — the flyout root and every panel
 - `hub/` — hub pages, Automation Studio and the welcome flow
 - `toast/` — the toast window and its queue
-- `developer/` — the developer widgets (Projects, Vault capture), their models and panels
+- `developer/` — the developer widgets (Projects, Vault capture, Local AI), their models and panels
 
 Global styles live in `styles/`: `tokens.css` holds every colour, radius, shadow and motion value, and `base.css` holds shared primitives. Feature CSS uses tokens only.

@@ -50,6 +50,7 @@ Hosts contacted today:
 | Weather | `api.open-meteo.com` | Every 30 minutes while a city is set |
 | City search | `geocoding-api.open-meteo.com` | Only while you type in the city search |
 | Calendars | The host of each feed you add | Every 15 minutes, or when you press refresh |
+| Local AI | `127.0.0.1` (Ollama on this PC, plain HTTP on port 11434) | Every minute while the widget is on the dock, and for each question you ask |
 
 The Projects widget makes no network requests: it runs `git status` (with `core.fsmonitor` turned off and no optional locks) in repositories under the folders you choose, and only opens or reads paths from its latest scan. Vault capture makes no network requests either: it appends to one file, `Inbox/YYYY-MM-DD.md`, inside the vault folder you set, and refuses links that point outside it.
 

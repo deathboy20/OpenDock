@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import {
   errorText,
   getFocusState,
+  getLocalAi,
   getMediaState,
   getProjects,
   getVaultStatus,
@@ -15,6 +16,7 @@ import {
   upcomingEvents,
   type CalendarEvent,
   type FocusState,
+  type LocalAiSnapshot,
   type MediaState,
   type Note,
   type ProjectsSnapshot,
@@ -49,6 +51,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
   const [volume, setVolume] = useState<Loadable<VolumeState | null>>(loading);
   const [projects, setProjects] = useState<Loadable<ProjectsSnapshot | null>>(loading);
   const [vault, setVault] = useState<Loadable<VaultStatus>>(loading);
+  const [localAi, setLocalAi] = useState<Loadable<LocalAiSnapshot | null>>(loading);
 
   useEffect(() => {
     load(listWindows, setWindows);
@@ -62,6 +65,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
     load(() => upcomingEvents(72), setEvents);
     load(getProjects, setProjects);
     load(getVaultStatus, setVault);
+    load(getLocalAi, setLocalAi);
 
     const offs = [
       on("media:state", (m) => setMedia(ready(m))),
@@ -75,6 +79,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       on("windows:changed", (w) => setWindows(ready(w))),
       on("volume:state", (v) => setVolume(ready(v))),
       on("projects:update", (p) => setProjects(ready(p))),
+      on("localAi:update", (a) => setLocalAi(ready(a))),
       // The vault path lives in settings, and today's file changes at midnight.
       on("settings:changed", () => load(getVaultStatus, setVault)),
       on("data:changed", (topic) => {
@@ -97,7 +102,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
 
   return (
     <LiveContext.Provider
-      value={{ media, stats, cpuHistory, memoryHistory, focus, weather, todos, notes, events, windows, volume, projects, vault }}
+      value={{ media, stats, cpuHistory, memoryHistory, focus, weather, todos, notes, events, windows, volume, projects, vault, localAi }}
     >
       {children}
     </LiveContext.Provider>

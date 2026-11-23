@@ -179,7 +179,21 @@ export const widgetCatalog: WidgetDefinition[] = [
     panel: true,
     configure: "developer",
   },
+  {
+    id: "local-ai",
+    name: "Local AI",
+    category: "Developer",
+    description: "Whether Ollama is running on this PC, your models and the ones loaded in memory. Ask a model a quick question; the answer never leaves the machine.",
+    sizes: ["s", "m", "l"],
+    network: ["127.0.0.1"],
+    panel: true,
+  },
 ];
+
+/** Hosts on this PC. A widget that only talks to them never leaves the device. */
+export function isLoopbackHost(host: string): boolean {
+  return host === "127.0.0.1" || host === "localhost" || host === "::1";
+}
 
 export const widgetCategories: WidgetCategory[] = ["Essentials", "Productivity", "Developer", "System", "Info"];
 

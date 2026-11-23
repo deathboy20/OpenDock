@@ -5,6 +5,7 @@ pub mod apps;
 pub mod automation;
 pub mod calendar;
 pub mod focus;
+pub mod local_ai;
 pub mod projects;
 pub mod vault;
 pub mod weather;
@@ -27,12 +28,14 @@ use crate::state::{notify_changed, AppState};
 const WEATHER_INTERVAL: Duration = Duration::from_secs(30 * 60);
 const CALENDAR_INTERVAL: Duration = Duration::from_secs(15 * 60);
 const PROJECTS_INTERVAL: Duration = Duration::from_secs(2 * 60);
+const LOCAL_AI_INTERVAL: Duration = Duration::from_secs(60);
 
 /// Lets commands ask a polling service to refresh now.
 pub struct Wakers {
     weather: Mutex<Sender<()>>,
     calendar: Mutex<Sender<()>>,
     projects: Mutex<Sender<()>>,
+    local_ai: Mutex<Sender<()>>,
 }
 
 impl Wakers {
@@ -53,6 +56,12 @@ impl Wakers {
             let _ = tx.send(());
         }
     }
+
+    pub fn wake_local_ai(&self) {
+        if let Ok(tx) = self.local_ai.lock() {
+            let _ = tx.send(());
+        }
+    }
 }
 
 pub fn emit_focus(app: &AppHandle, state: &AppState) {
@@ -63,10 +72,12 @@ pub fn start_all(app: &AppHandle) {
     let (weather_tx, weather_rx) = channel();
     let (calendar_tx, calendar_rx) = channel();
     let (projects_tx, projects_rx) = channel();
+    let (local_ai_tx, local_ai_rx) = channel();
     app.manage(Wakers {
         weather: Mutex::new(weather_tx),
         calendar: Mutex::new(calendar_tx),
         projects: Mutex::new(projects_tx),
+        local_ai: Mutex::new(local_ai_tx),
     });
     spawn_system(app.clone());
     spawn_media(app.clone());
@@ -78,6 +89,7 @@ pub fn start_all(app: &AppHandle) {
     spawn_weather(app.clone(), weather_rx);
     spawn_calendar(app.clone(), calendar_rx);
     spawn_projects(app.clone(), projects_rx);
+    spawn_local_ai(app.clone(), local_ai_rx);
 }
 
 fn spawn_system(app: AppHandle) {
@@ -324,6 +336,30 @@ fn spawn_projects(app: AppHandle, rx: Receiver<()>) {
         }
         let _ = app.emit("projects:update", &snapshot);
         if !wait_or_wake(&rx, PROJECTS_INTERVAL) {
+            break;
+        }
+    });
+}
+
+/// Ollama is checked only while its widget is on the dock, so a PC without it sees no
+/// requests at all, and the Privacy Ledger stays quiet.
+fn spawn_local_ai(app: AppHandle, rx: Receiver<()>) {
+    thread::spawn(move || loop {
+        let state = app.state::<AppState>();
+        let on_dock = state
+            .settings()
+            .dock
+            .item_order
+            .iter()
+            .any(|id| id == local_ai::WIDGET);
+        if on_dock {
+            let snapshot = local_ai::check(&state.db);
+            if let Ok(mut slot) = state.live.local_ai.lock() {
+                *slot = Some(snapshot.clone());
+            }
+            let _ = app.emit("localAi:update", &snapshot);
+        }
+        if !wait_or_wake(&rx, LOCAL_AI_INTERVAL) {
             break;
         }
     });

@@ -64,6 +64,7 @@ Open the **Widget gallery** from the dock menu to add widgets. Each one shows wh
 | Day progress | How much of the day, week and year has passed | None |
 | Projects | Git repositories in your project folders, with branch and changes | None |
 | Vault capture | A quick note box for your Obsidian vault's Inbox | None |
+| Local AI | Ollama status, models and a quick prompt | Only Ollama on this PC (`127.0.0.1`) |
 
 ## Developer widgets
 
@@ -82,6 +83,12 @@ The widget needs Git for Windows. It runs `git status` in each repository and ne
 Enter your Obsidian vault folder, for example `C:\Users\you\Documents\Vault`. Each capture is added to `Inbox/YYYY-MM-DD.md` in that folder as a list item with the time, such as `- 09:30 Call Ama`; lines after the first are indented under it. The note and the `Inbox` folder are created the first time. OpenDock writes nothing else in the vault, and refuses to write through a link that points outside it.
 
 **Open today's note** and **Open vault in Obsidian** use Obsidian's `obsidian://open` link, so Obsidian must be installed. Ctrl+Enter saves.
+
+### Local AI
+
+Shows whether [Ollama](https://ollama.com) is running on this PC, the models you have pulled, and the ones loaded in memory with how much GPU memory they use. Pick a model, type a question and press **Ask**; the answer appears in the panel. The first answer from a model that isn't loaded takes longer while Ollama loads it.
+
+OpenDock talks only to `http://127.0.0.1:11434`, the address Ollama listens on, and only while the Local AI widget is on the dock (every minute, or when you press **Check again**). Each check shows in the Privacy Ledger under `local-ai`. Prompts and answers are not saved.
 
 ## Calendars
 
