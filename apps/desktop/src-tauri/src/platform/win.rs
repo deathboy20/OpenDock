@@ -27,14 +27,10 @@ use windows::Win32::UI::Shell::{
 use windows::Win32::UI::WindowsAndMessaging::{
     EnumWindows, FindWindowW, GetClassNameW, GetForegroundWindow, GetWindowRect, IsWindowVisible,
     SendMessageTimeoutW, ShowWindow, HWND_BROADCAST, SMTO_ABORTIFHUNG, SW_HIDE, SW_SHOWNA,
-    SW_SHOWNOACTIVATE, WM_SETTINGCHANGE,
+    WM_SETTINGCHANGE,
 };
 
 use super::{Battery, MediaCommand, MediaState};
-
-fn hwnd(raw: isize) -> HWND {
-    HWND(raw as *mut c_void)
-}
 
 // ---------- fullscreen ----------
 
@@ -178,12 +174,6 @@ pub fn wait_for_process_exit(pid: u32) {
 }
 
 // ---------- window helpers ----------
-
-pub fn show_no_activate(raw: isize) {
-    unsafe {
-        let _ = ShowWindow(hwnd(raw), SW_SHOWNOACTIVATE);
-    }
-}
 
 pub fn open_start_menu() -> Result<(), String> {
     let key = |flags| INPUT {

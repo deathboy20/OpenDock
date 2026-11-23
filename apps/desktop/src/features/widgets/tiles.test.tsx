@@ -1,19 +1,25 @@
-import { DEFAULT_ITEM_ORDER, dockItemIdSchema, type DockSize } from "@opendock/config-schema";
+import { DEFAULT_ITEM_ORDER, defaultAppSettings, dockItemIdSchema, widgetVariants, type DockSize } from "@opendock/config-schema";
+import type { ReactNode } from "react";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type {
   CalendarEvent,
+  CiSnapshot,
   FocusState,
+  LocalAiSnapshot,
   MediaState,
   Note,
+  ProjectsSnapshot,
   SystemStats,
   Todo,
+  VaultStatus,
   WeatherSnapshot,
   WindowsSnapshot,
 } from "../../services/ipc";
 import { emptyLive, LiveContext, type LiveData } from "../../services/liveContext";
 import { failed, ready } from "../../services/loadable";
-import { ADD_WIDGET_ID, findWidget, searchWidgets, widgetCatalog } from "./catalog";
+import { SettingsContext, type SettingsContextValue } from "../../services/settingsContext";
+import { ADD_WIDGET_ID, findWidget, isLoopbackHost, searchWidgets, widgetCatalog } from "./catalog";
 import { TileContent } from "./tiles";
 
 const now = Date.now();
@@ -80,6 +86,88 @@ const windows: WindowsSnapshot = {
   active: 11,
 };
 
+const projects: ProjectsSnapshot = {
+  projects: [
+    {
+      name: "OpenDock",
+      path: "D:\\Gitfiles\\OpenDock",
+      root: "D:\\Gitfiles",
+      branch: "feat/developer-widgets",
+      detached: false,
+      upstream: null,
+      ahead: null,
+      behind: null,
+      dirty: 3,
+      hasHandoff: true,
+      error: null,
+    },
+  ],
+  missingRoots: [],
+  truncated: false,
+  gitAvailable: true,
+  scannedAt: now,
+};
+
+const vault: VaultStatus = {
+  configured: true,
+  exists: true,
+  isObsidian: true,
+  todayFile: "Inbox/2026-11-23.md",
+  todayCount: 2,
+  recent: ["Ship the vault widget", "Call Ama"],
+};
+
+const localAi: LocalAiSnapshot = {
+  running: true,
+  models: [{ name: "qwen3:4b", sizeBytes: 2_497_281_474, family: "qwen3", parameterSize: "4.0B", quantization: "Q4_K_M" }],
+  loaded: [{ name: "qwen3:4b", sizeVramBytes: 3_000_000_000, expiresAt: null }],
+  error: null,
+  checkedAt: now,
+};
+
+const ci: CiSnapshot = {
+  enabled: true,
+  hasToken: false,
+  repos: [
+    {
+      repo: "deathboy20/OpenDock",
+      run: {
+        workflow: "CI",
+        branch: "main",
+        event: "push",
+        status: "completed",
+        conclusion: "failure",
+        url: "https://github.com/deathboy20/OpenDock/actions/runs/1",
+        updatedAt: now,
+      },
+      error: null,
+    },
+  ],
+  checkedAt: now,
+};
+
+/** Developer widgets only show data once they are set up. */
+const configured: SettingsContextValue = {
+  settings: {
+    ...defaultAppSettings,
+    widgets: {
+      ...defaultAppSettings.widgets,
+      projects: { roots: ["D:\\Gitfiles"] },
+      ci: { enabled: true, repos: ["deathboy20/OpenDock"] },
+    },
+  },
+  ready: true,
+  update: async () => null,
+};
+
+function withData(live: LiveData, children: ReactNode) {
+  return (
+    <SettingsContext.Provider value={configured}>
+      <LiveContext.Provider value={live}>{children}</LiveContext.Provider>
+    </SettingsContext.Provider>
+  );
+}
+
 const readyLive: LiveData = {
   media: ready(media),
   stats: ready(stats),
@@ -92,6 +180,10 @@ const readyLive: LiveData = {
   events: ready(events),
   windows: ready(windows),
   volume: ready({ level: 40, muted: false }),
+  projects: ready(projects),
+  vault: ready(vault),
+  localAi: ready(localAi),
+  ci: ready(ci),
 };
 
 const emptyData: LiveData = {
@@ -106,6 +198,10 @@ const emptyData: LiveData = {
   events: ready([]),
   windows: ready({ windows: [], active: null }),
   volume: ready(null),
+  projects: ready({ ...projects, projects: [] }),
+  vault: ready({ ...vault, configured: false, exists: false, todayCount: 0, recent: [] }),
+  localAi: ready({ ...localAi, running: false, models: [], loaded: [] }),
+  ci: ready({ ...ci, repos: [] }),
 };
 
 const errorLive: LiveData = {
@@ -120,6 +216,10 @@ const errorLive: LiveData = {
   events: failed("db locked"),
   windows: failed("enumeration failed"),
   volume: failed("no audio service"),
+  projects: failed("scan failed"),
+  vault: failed("vault unreadable"),
+  localAi: failed("no ledger"),
+  ci: failed("keychain locked"),
 };
 
 const states: [string, LiveData][] = [
@@ -151,6 +251,10 @@ describe("widget catalog", () => {
   it("declares hosts for every widget that uses the network", () => {
     expect(findWidget("weather")?.network).toContain("api.open-meteo.com");
     expect(findWidget("todos")?.network).toEqual([]);
+    expect(findWidget("local-ai")?.network).toEqual(["127.0.0.1"]);
+    expect(findWidget("local-ai")?.network.every(isLoopbackHost)).toBe(true);
+    expect(isLoopbackHost("api.github.com")).toBe(false);
+    expect(findWidget("ci")?.network).toEqual(["api.github.com"]);
   });
 
   it("searches by name, description and category", () => {
@@ -167,9 +271,7 @@ describe("dock tiles", () => {
         for (const size of sizes) {
           for (const compact of [false, true]) {
             const { container, unmount } = render(
-              <LiveContext.Provider value={live}>
-                <TileContent id={widget.id} size={size} compact={compact} />
-              </LiveContext.Provider>,
+              withData(live, <TileContent id={widget.id} size={size} compact={compact} />),
             );
             const tile = container.querySelector(".tile");
             expect(tile, `${widget.id} ${state} ${size}`).not.toBeNull();
@@ -180,6 +282,37 @@ describe("dock tiles", () => {
       });
     }
   }
+
+  for (const [id, variants] of Object.entries(widgetVariants)) {
+    for (const variant of variants) {
+      it(`${id} draws its ${variant} variant in every state and size`, () => {
+        for (const [, live] of states) {
+          for (const size of sizes) {
+            for (const compact of [false, true]) {
+              const { container, unmount } = render(
+                withData(live, <TileContent id={id} size={size} compact={compact} variant={variant} />),
+              );
+              expect(container.querySelector(".tile"), `${id} ${variant} ${size}`).not.toBeNull();
+              unmount();
+            }
+          }
+        }
+      });
+    }
+  }
+
+  it("draws battery variants with an accessible name", () => {
+    for (const variant of ["ring", "dots", "gauge"]) {
+      const { getByRole, unmount } = render(withData(readyLive, <TileContent id="battery" size="m" compact={false} variant={variant} />));
+      expect(getByRole("img", { name: "Battery 15%" })).toBeInTheDocument();
+      unmount();
+    }
+  });
+
+  it("falls back to the default variant for an unknown one", () => {
+    const { container } = render(withData(readyLive, <TileContent id="battery" size="m" compact={false} variant="hologram" />));
+    expect(container.querySelector(".battery-glyph")).not.toBeNull();
+  });
 
   it("shows real data when ready", () => {
     const { getByText } = render(
@@ -234,6 +367,74 @@ describe("dock tiles", () => {
       </LiveContext.Provider>,
     );
     expect(getByText("40%")).toBeInTheDocument();
+  });
+
+  it("shows which projects have changes", () => {
+    const { getByText, container } = render(withData(readyLive, <TileContent id="projects" size="m" compact={false} />));
+    expect(getByText("1 with changes")).toBeInTheDocument();
+    expect(getByText("1 repos")).toBeInTheDocument();
+    expect(container.querySelector(".tile-count")?.textContent).toBe("1");
+  });
+
+  it("asks for project folders before scanning", () => {
+    const { getByText } = render(
+      <LiveContext.Provider value={readyLive}>
+        <TileContent id="projects" size="m" compact={false} />
+      </LiveContext.Provider>,
+    );
+    expect(getByText("Add a folder")).toBeInTheDocument();
+  });
+
+  it("marks a failed project scan as an error", () => {
+    const { container } = render(withData(errorLive, <TileContent id="projects" size="m" compact={false} />));
+    expect(container.querySelector(".tile.is-error")).not.toBeNull();
+  });
+
+  it("counts today's vault captures", () => {
+    const { getByText } = render(withData(readyLive, <TileContent id="vault" size="l" compact={false} />));
+    expect(getByText("2 captures")).toBeInTheDocument();
+    expect(getByText("Ship the vault widget")).toBeInTheDocument();
+  });
+
+  it("asks for a vault and flags a missing one", () => {
+    const empty = render(withData(emptyData, <TileContent id="vault" size="m" compact={false} />));
+    expect(empty.getByText("Set your vault")).toBeInTheDocument();
+    empty.unmount();
+    const missing = render(
+      withData({ ...readyLive, vault: ready({ ...vault, exists: false }) }, <TileContent id="vault" size="m" compact={false} />),
+    );
+    expect(missing.container.querySelector(".tile.is-error")).not.toBeNull();
+  });
+
+  it("shows the loaded local model", () => {
+    const { getByText } = render(withData(readyLive, <TileContent id="local-ai" size="l" compact={false} />));
+    expect(getByText("1 loaded")).toBeInTheDocument();
+    expect(getByText("qwen3:4b")).toBeInTheDocument();
+  });
+
+  it("says when Ollama is stopped or failing", () => {
+    const stopped = render(withData(emptyData, <TileContent id="local-ai" size="m" compact={false} />));
+    expect(stopped.getByText("Ollama stopped")).toBeInTheDocument();
+    stopped.unmount();
+    const failing = render(
+      withData({ ...readyLive, localAi: ready({ ...localAi, error: "bad json" }) }, <TileContent id="local-ai" size="m" compact={false} />),
+    );
+    expect(failing.container.querySelector(".tile.is-error")).not.toBeNull();
+  });
+
+  it("leads with failing CI runs", () => {
+    const { getByText, container } = render(withData(readyLive, <TileContent id="ci" size="m" compact={false} />));
+    expect(getByText("1 failing")).toBeInTheDocument();
+    expect(container.querySelector(".ci-tile.is-failing")).not.toBeNull();
+  });
+
+  it("keeps CI off until it is turned on", () => {
+    const { getByText } = render(
+      <LiveContext.Provider value={readyLive}>
+        <TileContent id="ci" size="m" compact={false} />
+      </LiveContext.Provider>,
+    );
+    expect(getByText("Turn on CI")).toBeInTheDocument();
   });
 
   it("warns when the battery is low", () => {

@@ -4,7 +4,13 @@
 pub mod apps;
 pub mod automation;
 pub mod calendar;
+pub mod ci;
+pub mod desktop;
 pub mod focus;
+pub mod local_ai;
+pub mod projects;
+pub mod updates;
+pub mod vault;
 pub mod weather;
 pub mod windows;
 
@@ -24,11 +30,36 @@ use crate::state::{notify_changed, AppState};
 
 const WEATHER_INTERVAL: Duration = Duration::from_secs(30 * 60);
 const CALENDAR_INTERVAL: Duration = Duration::from_secs(15 * 60);
+const PROJECTS_INTERVAL: Duration = Duration::from_secs(2 * 60);
+const LOCAL_AI_INTERVAL: Duration = Duration::from_secs(60);
+const CI_INTERVAL: Duration = Duration::from_secs(5 * 60);
+const UPDATE_INTERVAL: Duration = Duration::from_secs(24 * 60 * 60);
+const UPDATE_FIRST_DELAY: Duration = Duration::from_secs(90);
+
+/// A widget's own refresh setting, kept within what its source can bear.
+pub fn refresh_interval(
+    settings: &crate::settings::AppSettings,
+    widget: &str,
+    default: Duration,
+    min: Duration,
+) -> Duration {
+    settings
+        .widgets
+        .options
+        .get(widget)
+        .and_then(|o| o.refresh_seconds)
+        .map(|s| Duration::from_secs(u64::from(s)).max(min))
+        .unwrap_or(default)
+}
 
 /// Lets commands ask a polling service to refresh now.
 pub struct Wakers {
     weather: Mutex<Sender<()>>,
     calendar: Mutex<Sender<()>>,
+    projects: Mutex<Sender<()>>,
+    local_ai: Mutex<Sender<()>>,
+    ci: Mutex<Sender<()>>,
+    updates: Mutex<Sender<()>>,
 }
 
 impl Wakers {
@@ -43,6 +74,30 @@ impl Wakers {
             let _ = tx.send(());
         }
     }
+
+    pub fn wake_projects(&self) {
+        if let Ok(tx) = self.projects.lock() {
+            let _ = tx.send(());
+        }
+    }
+
+    pub fn wake_local_ai(&self) {
+        if let Ok(tx) = self.local_ai.lock() {
+            let _ = tx.send(());
+        }
+    }
+
+    pub fn wake_ci(&self) {
+        if let Ok(tx) = self.ci.lock() {
+            let _ = tx.send(());
+        }
+    }
+
+    pub fn wake_updates(&self) {
+        if let Ok(tx) = self.updates.lock() {
+            let _ = tx.send(());
+        }
+    }
 }
 
 pub fn emit_focus(app: &AppHandle, state: &AppState) {
@@ -52,9 +107,17 @@ pub fn emit_focus(app: &AppHandle, state: &AppState) {
 pub fn start_all(app: &AppHandle) {
     let (weather_tx, weather_rx) = channel();
     let (calendar_tx, calendar_rx) = channel();
+    let (projects_tx, projects_rx) = channel();
+    let (local_ai_tx, local_ai_rx) = channel();
+    let (ci_tx, ci_rx) = channel();
+    let (updates_tx, updates_rx) = channel();
     app.manage(Wakers {
         weather: Mutex::new(weather_tx),
         calendar: Mutex::new(calendar_tx),
+        projects: Mutex::new(projects_tx),
+        local_ai: Mutex::new(local_ai_tx),
+        ci: Mutex::new(ci_tx),
+        updates: Mutex::new(updates_tx),
     });
     spawn_system(app.clone());
     spawn_media(app.clone());
@@ -65,6 +128,10 @@ pub fn start_all(app: &AppHandle) {
     spawn_scheduler(app.clone());
     spawn_weather(app.clone(), weather_rx);
     spawn_calendar(app.clone(), calendar_rx);
+    spawn_projects(app.clone(), projects_rx);
+    spawn_local_ai(app.clone(), local_ai_rx);
+    spawn_ci(app.clone(), ci_rx);
+    spawn_updates(app.clone(), updates_rx);
 }
 
 fn spawn_system(app: AppHandle) {
@@ -297,6 +364,115 @@ fn spawn_calendar(app: AppHandle, rx: Receiver<()>) {
         }
         if !wait_or_wake(&rx, CALENDAR_INTERVAL) {
             break;
+        }
+    });
+}
+
+fn spawn_projects(app: AppHandle, rx: Receiver<()>) {
+    thread::spawn(move || loop {
+        let state = app.state::<AppState>();
+        let roots = state.settings().widgets.projects.roots;
+        let snapshot = projects::scan(&roots);
+        if let Ok(mut slot) = state.live.projects.lock() {
+            *slot = Some(snapshot.clone());
+        }
+        let _ = app.emit("projects:update", &snapshot);
+        let interval = refresh_interval(
+            &state.settings(),
+            "projects",
+            PROJECTS_INTERVAL,
+            Duration::from_secs(30),
+        );
+        if !wait_or_wake(&rx, interval) {
+            break;
+        }
+    });
+}
+
+/// Ollama is checked only while its widget is on the dock, so a PC without it sees no
+/// requests at all, and the Privacy Ledger stays quiet.
+fn spawn_local_ai(app: AppHandle, rx: Receiver<()>) {
+    thread::spawn(move || loop {
+        let state = app.state::<AppState>();
+        let on_dock = state
+            .settings()
+            .dock
+            .item_order
+            .iter()
+            .any(|id| id == local_ai::WIDGET);
+        if on_dock {
+            let snapshot = local_ai::check(&state.db);
+            if let Ok(mut slot) = state.live.local_ai.lock() {
+                *slot = Some(snapshot.clone());
+            }
+            let _ = app.emit("localAi:update", &snapshot);
+        }
+        let interval = refresh_interval(
+            &state.settings(),
+            local_ai::WIDGET,
+            LOCAL_AI_INTERVAL,
+            Duration::from_secs(15),
+        );
+        if !wait_or_wake(&rx, interval) {
+            break;
+        }
+    });
+}
+
+/// CI status is opt-in: GitHub is contacted only while the widget is turned on in
+/// settings, has repositories, and is on the dock.
+fn spawn_ci(app: AppHandle, rx: Receiver<()>) {
+    thread::spawn(move || loop {
+        let state = app.state::<AppState>();
+        let settings = state.settings();
+        let ci_settings = &settings.widgets.ci;
+        let on_dock = settings.dock.item_order.iter().any(|id| id == ci::WIDGET);
+        let token = ci::token();
+        let snapshot = if ci_settings.enabled && on_dock && !ci_settings.repos.is_empty() {
+            ci::check(&state.db, &ci_settings.repos, token.as_deref())
+        } else {
+            ci::CiSnapshot {
+                enabled: ci_settings.enabled,
+                has_token: token.is_some(),
+                checked_at: crate::store::now_ms(),
+                ..Default::default()
+            }
+        };
+        if let Ok(mut slot) = state.live.ci.lock() {
+            *slot = Some(snapshot.clone());
+        }
+        let _ = app.emit("ci:update", &snapshot);
+        // GitHub allows 60 unauthenticated requests an hour, so CI never polls faster than 1 min.
+        let interval =
+            refresh_interval(&settings, ci::WIDGET, CI_INTERVAL, Duration::from_secs(60));
+        if !wait_or_wake(&rx, interval) {
+            break;
+        }
+    });
+}
+
+/// Checks for a newer release once a day while `updates.check` is on, starting a little after
+/// launch so it never slows sign-in. A wake checks at once, even when the switch is off.
+fn spawn_updates(app: AppHandle, rx: Receiver<()>) {
+    thread::spawn(move || {
+        let mut forced = matches!(rx.recv_timeout(UPDATE_FIRST_DELAY), Ok(()));
+        loop {
+            let state = app.state::<AppState>();
+            if forced || state.settings().updates.check {
+                let status = updates::check(&state.db);
+                if let Ok(mut slot) = state.live.updates.lock() {
+                    *slot = Some(status.clone());
+                }
+                let _ = app.emit("update:status", &status);
+            }
+            match rx.recv_timeout(UPDATE_INTERVAL) {
+                Ok(()) => {
+                    while rx.try_recv().is_ok() {}
+                    forced = true;
+                }
+                Err(RecvTimeoutError::Timeout) => forced = false,
+                Err(RecvTimeoutError::Disconnected) => break,
+            }
         }
     });
 }

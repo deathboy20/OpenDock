@@ -1,5 +1,6 @@
 pub mod apps;
 pub mod automation;
+pub mod developer;
 pub mod widgets;
 pub mod windows;
 
@@ -12,6 +13,7 @@ use crate::dock_layout::{apply_dock_layout, sync_autostart};
 use crate::platform::monitor_id;
 use crate::platform::taskbar::TaskbarStatus;
 use crate::services::Wakers;
+use crate::settings::scenes::{self, Scene};
 use crate::settings::AppSettings;
 use crate::state::AppState;
 
@@ -68,6 +70,25 @@ pub fn persist_settings(
     }
     if previous.widgets.weather != settings.widgets.weather {
         app.state::<Wakers>().wake_weather();
+    }
+    if previous.widgets.projects != settings.widgets.projects
+        || previous.widgets.options != settings.widgets.options
+    {
+        app.state::<Wakers>().wake_projects();
+    }
+    if previous.dock.item_order != settings.dock.item_order
+        || previous.widgets.options != settings.widgets.options
+    {
+        app.state::<Wakers>().wake_local_ai();
+    }
+    if previous.widgets.ci != settings.widgets.ci
+        || previous.widgets.options != settings.widgets.options
+        || previous.dock.item_order != settings.dock.item_order
+    {
+        app.state::<Wakers>().wake_ci();
+    }
+    if previous.desktop != settings.desktop {
+        crate::services::desktop::sync(app, &settings);
     }
     let _ = app.emit("settings:changed", &settings);
     Ok(settings)
@@ -141,4 +162,109 @@ pub fn set_launch_at_startup(
 #[tauri::command]
 pub fn get_taskbar_status(state: State<'_, AppState>) -> TaskbarStatus {
     state.taskbar.status()
+}
+
+// ---------- scenes ----------
+
+/// Saves the current setup as a scene, replacing one with the same name.
+#[tauri::command]
+pub fn save_scene(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    name: String,
+) -> Result<Scene, String> {
+    if name.chars().count() > 80 {
+        return Err("Give the scene a name of up to 40 characters".into());
+    }
+    let (next, scene) = scenes::save_current(&state.settings(), &name)?;
+    persist_settings(&app, &state, next)?;
+    Ok(scene)
+}
+
+#[tauri::command]
+pub fn apply_scene(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    id: String,
+) -> Result<AppSettings, String> {
+    let settings = state.settings();
+    let scene = settings
+        .scenes
+        .items
+        .iter()
+        .find(|s| s.id == id)
+        .cloned()
+        .ok_or_else(|| "That scene no longer exists".to_string())?;
+    persist_settings(&app, &state, scenes::apply(&settings, &scene))
+}
+
+#[tauri::command]
+pub fn delete_scene(app: AppHandle, state: State<'_, AppState>, id: String) -> Result<(), String> {
+    let next = scenes::delete(&state.settings(), &id);
+    persist_settings(&app, &state, next).map(|_| ())
+}
+
+// ---------- desktop widgets ----------
+
+/// A desktop widget window reports that the user dropped it; Rust snaps and saves it.
+#[tauri::command]
+pub fn settle_desktop_widget(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    window: WebviewWindow,
+) -> Result<(), String> {
+    if crate::services::desktop::widget_id(window.label()).is_none() {
+        return Err("only desktop widgets can do that".into());
+    }
+    let Some(next) = crate::services::desktop::settle(&app, &window, &state.settings()) else {
+        return Ok(());
+    };
+    persist_settings(&app, &state, next).map(|_| ())
+}
+
+// ---------- skins ----------
+
+/// Makes a skin active and copies its layout choices into settings. `None` turns skins off.
+#[tauri::command]
+pub fn apply_skin(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    id: Option<String>,
+) -> Result<AppSettings, String> {
+    if id.as_ref().is_some_and(|i| i.len() > 64) {
+        return Err("That skin no longer exists".into());
+    }
+    let next = crate::settings::skins::apply(&state.settings(), id.as_deref())?;
+    persist_settings(&app, &state, next)
+}
+
+// ---------- updates ----------
+
+#[tauri::command]
+pub fn get_update_status(state: State<'_, AppState>) -> crate::services::updates::UpdateStatus {
+    state
+        .live
+        .updates
+        .lock()
+        .ok()
+        .and_then(|s| s.clone())
+        .unwrap_or_else(|| crate::services::updates::UpdateStatus {
+            current: crate::services::updates::current_version().to_string(),
+            ..Default::default()
+        })
+}
+
+#[tauri::command]
+pub fn check_for_updates(app: AppHandle) {
+    app.state::<Wakers>().wake_updates();
+}
+
+/// Opens the release page on github.com for this repository, never another link.
+#[tauri::command]
+pub async fn open_update_page(app: AppHandle) -> Result<(), String> {
+    let status = get_update_status(app.state::<AppState>());
+    let url = crate::services::updates::download_page(&status);
+    tauri::async_runtime::spawn_blocking(move || crate::platform::launch_path(&url))
+        .await
+        .map_err(|e| e.to_string())?
 }

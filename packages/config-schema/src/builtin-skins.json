@@ -1,0 +1,395 @@
+[
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "graphite",
+    "name": "Graphite",
+    "description": "Neutral greys with a cool blue accent and tighter corners.",
+    "dark": {
+      "surface": "rgba(23, 24, 27, 0.78)",
+      "surfaceSolid": "#17181b",
+      "surfaceDeep": "#101113",
+      "text": "#ececee",
+      "muted": "#a9adb6",
+      "faint": "#767b86",
+      "accent": "#9cc2ff",
+      "accentStrong": "#7aabff",
+      "accentInk": "#0b1a33",
+      "accentSoft": "rgba(156, 194, 255, 0.14)",
+      "accentGlow": "rgba(156, 194, 255, 0.32)",
+      "radiusSm": 8,
+      "radiusMd": 12,
+      "radiusLg": 16,
+      "radiusXl": 20,
+      "blur": 18,
+      "font": "segoe"
+    },
+    "light": {
+      "accent": "#2558c4",
+      "accentStrong": "#1e4aa8",
+      "accentInk": "#ffffff",
+      "accentSoft": "rgba(37, 88, 196, 0.1)",
+      "accentGlow": "rgba(37, 88, 196, 0.22)",
+      "radiusSm": 8,
+      "radiusMd": 12,
+      "radiusLg": 16,
+      "radiusXl": 20,
+      "font": "segoe"
+    }
+  },
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "paper",
+    "name": "Paper",
+    "description": "Warm, matte surfaces with an amber accent and no glass.",
+    "dark": {
+      "surface": "rgba(28, 25, 21, 0.94)",
+      "surfaceSolid": "#1c1915",
+      "surfaceDeep": "#14120f",
+      "text": "#f3ede4",
+      "muted": "#c3b8a8",
+      "faint": "#8c8273",
+      "accent": "#f0b870",
+      "accentStrong": "#e5a24f",
+      "accentInk": "#2a1800",
+      "accentSoft": "rgba(240, 184, 112, 0.14)",
+      "accentGlow": "rgba(240, 184, 112, 0.3)",
+      "radiusSm": 6,
+      "radiusMd": 10,
+      "radiusLg": 14,
+      "radiusXl": 18,
+      "blur": 0,
+      "shadow": "soft"
+    },
+    "light": {
+      "surface": "rgba(251, 248, 242, 0.96)",
+      "surfaceSolid": "#fbf8f2",
+      "surfaceDeep": "#f2ece1",
+      "text": "#221d16",
+      "muted": "#5e5446",
+      "faint": "#8d8270",
+      "border": "rgba(34, 29, 22, 0.12)",
+      "accent": "#8a5000",
+      "accentStrong": "#744300",
+      "accentInk": "#ffffff",
+      "accentSoft": "rgba(138, 80, 0, 0.1)",
+      "accentGlow": "rgba(138, 80, 0, 0.2)",
+      "radiusSm": 6,
+      "radiusMd": 10,
+      "radiusLg": 14,
+      "radiusXl": 18,
+      "blur": 0,
+      "shadow": "soft"
+    }
+  },
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "dusk",
+    "name": "Dusk",
+    "description": "Deep indigo glass with a violet accent and soft, round corners.",
+    "dark": {
+      "surface": "rgba(23, 20, 42, 0.76)",
+      "surfaceSolid": "#17142a",
+      "surfaceDeep": "#100e1f",
+      "text": "#eeeaff",
+      "muted": "#b4acd6",
+      "faint": "#7d76a0",
+      "accent": "#c4a8ff",
+      "accentStrong": "#ad8cff",
+      "accentInk": "#1c0b3d",
+      "accentSoft": "rgba(196, 168, 255, 0.15)",
+      "accentGlow": "rgba(196, 168, 255, 0.35)",
+      "radiusSm": 12,
+      "radiusMd": 16,
+      "radiusLg": 22,
+      "radiusXl": 28,
+      "blur": 26
+    },
+    "light": {
+      "accent": "#6b3fd4",
+      "accentStrong": "#5a32b8",
+      "accentInk": "#ffffff",
+      "accentSoft": "rgba(107, 63, 212, 0.1)",
+      "accentGlow": "rgba(107, 63, 212, 0.22)",
+      "radiusSm": 12,
+      "radiusMd": 16,
+      "radiusLg": 22,
+      "radiusXl": 28
+    }
+  },
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "forest",
+    "name": "Forest",
+    "description": "Dark green surfaces with a leaf accent. Calm for long sessions.",
+    "dark": {
+      "surface": "rgba(18, 26, 22, 0.8)",
+      "surfaceSolid": "#121a16",
+      "surfaceDeep": "#0c120f",
+      "text": "#e9f2ec",
+      "muted": "#a7bcae",
+      "faint": "#72877a",
+      "accent": "#8fe0a8",
+      "accentStrong": "#6fd08f",
+      "accentInk": "#062312",
+      "accentSoft": "rgba(143, 224, 168, 0.14)",
+      "accentGlow": "rgba(143, 224, 168, 0.3)"
+    },
+    "light": {
+      "accent": "#1f7a45",
+      "accentStrong": "#19663a",
+      "accentInk": "#ffffff",
+      "accentSoft": "rgba(31, 122, 69, 0.1)",
+      "accentGlow": "rgba(31, 122, 69, 0.22)"
+    }
+  },
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "contrast",
+    "name": "High contrast",
+    "description": "Pure black or white, strong borders, no blur and quick motion.",
+    "dark": {
+      "surface": "rgba(0, 0, 0, 0.94)",
+      "surfaceSolid": "#000000",
+      "surfaceDeep": "#000000",
+      "text": "#ffffff",
+      "muted": "#e6e6e6",
+      "faint": "#bdbdbd",
+      "border": "rgba(255, 255, 255, 0.35)",
+      "borderStrong": "rgba(255, 255, 255, 0.7)",
+      "accent": "#ffd400",
+      "accentStrong": "#ffe14d",
+      "accentInk": "#000000",
+      "accentSoft": "rgba(255, 212, 0, 0.18)",
+      "accentGlow": "rgba(255, 212, 0, 0.4)",
+      "radiusSm": 4,
+      "radiusMd": 6,
+      "radiusLg": 8,
+      "radiusXl": 10,
+      "blur": 0,
+      "shadow": "none",
+      "motionFast": 80,
+      "motionSlow": 120
+    },
+    "light": {
+      "surface": "rgba(255, 255, 255, 0.98)",
+      "surfaceSolid": "#ffffff",
+      "surfaceDeep": "#ffffff",
+      "text": "#000000",
+      "muted": "#1a1a1a",
+      "faint": "#4d4d4d",
+      "border": "rgba(0, 0, 0, 0.4)",
+      "borderStrong": "rgba(0, 0, 0, 0.75)",
+      "accent": "#0040c1",
+      "accentStrong": "#00308f",
+      "accentInk": "#ffffff",
+      "accentSoft": "rgba(0, 64, 193, 0.12)",
+      "accentGlow": "rgba(0, 64, 193, 0.25)",
+      "radiusSm": 4,
+      "radiusMd": 6,
+      "radiusLg": 8,
+      "radiusXl": 10,
+      "blur": 0,
+      "shadow": "none",
+      "motionFast": 80,
+      "motionSlow": 120
+    }
+  },
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "islands",
+    "name": "Islands",
+    "description": "Related widgets in their own slim capsules, tinted so they read on any wallpaper.",
+    "dark": {
+      "surfaceSolid": "#121418",
+      "surfaceDeep": "#0c0d10",
+      "text": "#f1f3f6",
+      "muted": "#b0b6c2",
+      "accent": "#7cf2c8",
+      "accentInk": "#052419",
+      "radiusSm": 10,
+      "radiusMd": 14,
+      "radiusLg": 18,
+      "radiusXl": 22,
+      "blur": 24
+    },
+    "light": {
+      "surfaceSolid": "#ffffff",
+      "text": "#0f1218",
+      "muted": "#4f5868",
+      "accent": "#0b7a5a",
+      "accentInk": "#ffffff"
+    },
+    "interface": {
+      "layout": "islands",
+      "density": "slim",
+      "tint": "strong",
+      "style": "glass"
+    }
+  },
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "daylight",
+    "name": "Daylight",
+    "description": "Made for bright photos: opaque chips, dark text and a deep blue accent.",
+    "dark": {
+      "surfaceSolid": "#1a1d23",
+      "text": "#f4f6f9",
+      "muted": "#b7bdc8",
+      "accent": "#8ab4ff",
+      "accentInk": "#0a1a33"
+    },
+    "light": {
+      "surface": "rgba(255, 255, 255, 0.97)",
+      "surfaceSolid": "#ffffff",
+      "surfaceDeep": "#f1f3f7",
+      "text": "#0d1117",
+      "muted": "#3f4756",
+      "faint": "#5d6676",
+      "border": "rgba(13, 17, 23, 0.16)",
+      "borderStrong": "rgba(13, 17, 23, 0.3)",
+      "accent": "#2558c4",
+      "accentStrong": "#1e4aa8",
+      "accentInk": "#ffffff",
+      "accentSoft": "rgba(37, 88, 196, 0.1)",
+      "shadow": "soft"
+    },
+    "interface": {
+      "layout": "chips",
+      "density": "regular",
+      "tint": "strong",
+      "style": "solid"
+    }
+  },
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "console",
+    "name": "Console",
+    "description": "Monospace numbers, square corners and bar meters, like a status line.",
+    "dark": {
+      "surface": "rgba(14, 14, 12, 0.94)",
+      "surfaceSolid": "#0e0e0c",
+      "surfaceDeep": "#080807",
+      "text": "#ecebe4",
+      "muted": "#bdbab0",
+      "faint": "#8a877d",
+      "accent": "#f2c14e",
+      "accentStrong": "#e5ad2b",
+      "accentInk": "#1f1600",
+      "accentSoft": "rgba(242, 193, 78, 0.14)",
+      "radiusSm": 3,
+      "radiusMd": 4,
+      "radiusLg": 6,
+      "radiusXl": 8,
+      "blur": 0,
+      "font": "mono",
+      "shadow": "none",
+      "motionFast": 100,
+      "motionSlow": 160
+    },
+    "light": {
+      "surfaceSolid": "#fbfaf5",
+      "text": "#15140f",
+      "muted": "#4a473d",
+      "accent": "#7a5200",
+      "accentInk": "#ffffff",
+      "radiusSm": 3,
+      "radiusMd": 4,
+      "radiusLg": 6,
+      "radiusXl": 8,
+      "blur": 0,
+      "font": "mono",
+      "shadow": "none"
+    },
+    "interface": {
+      "layout": "bar",
+      "density": "slim",
+      "tint": "strong",
+      "style": "ink",
+      "variants": {
+        "system": "bars",
+        "battery": "dots",
+        "clock": "stacked",
+        "day-progress": "dots",
+        "focus": "bar"
+      }
+    }
+  },
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "instruments",
+    "name": "Instruments",
+    "description": "Dials everywhere: an analog clock, a battery gauge and rings for the rest.",
+    "dark": {
+      "surfaceSolid": "#141821",
+      "surfaceDeep": "#0d1017",
+      "text": "#eef1f6",
+      "muted": "#adb5c4",
+      "accent": "#ffb86b",
+      "accentStrong": "#ffa64a",
+      "accentInk": "#2b1600",
+      "accentSoft": "rgba(255, 184, 107, 0.14)",
+      "accentGlow": "rgba(255, 184, 107, 0.3)",
+      "radiusLg": 22,
+      "radiusXl": 28
+    },
+    "light": {
+      "accent": "#9a4f00",
+      "accentStrong": "#844300",
+      "accentInk": "#ffffff",
+      "accentSoft": "rgba(154, 79, 0, 0.1)"
+    },
+    "interface": {
+      "layout": "islands",
+      "density": "regular",
+      "tint": "medium",
+      "style": "midnight",
+      "variants": {
+        "clock": "analog",
+        "battery": "gauge",
+        "system": "rings",
+        "day-progress": "ring",
+        "focus": "ring"
+      }
+    }
+  },
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "float",
+    "name": "Float",
+    "description": "Widgets as separate chips straight on the wallpaper, with compact media and weather.",
+    "dark": {
+      "text": "#ffffff",
+      "muted": "#e3e7ee",
+      "surfaceSolid": "#101318",
+      "accent": "#a8d8ff",
+      "accentInk": "#06243b"
+    },
+    "light": {
+      "text": "#0b0e13",
+      "muted": "#2c3340",
+      "accent": "#1f5fae",
+      "accentInk": "#ffffff"
+    },
+    "interface": {
+      "layout": "chips",
+      "density": "slim",
+      "tint": "medium",
+      "style": "glass",
+      "variants": {
+        "media": "compact",
+        "weather": "minimal",
+        "battery": "ring"
+      }
+    }
+  }
+]

@@ -775,3 +775,108 @@
 .preview-dock .dock-track {
   margin: 0;
 }
+
+/* ---------- density ---------- */
+
+.dock-shell.density-slim.size-s {
+  --tile-h: 30px;
+}
+
+.dock-shell.density-slim.size-m {
+  --tile-h: 36px;
+}
+
+.dock-shell.density-slim.size-l {
+  --tile-h: 44px;
+}
+
+/* ---------- tint: how see-through the surface is, for bright or busy wallpapers ---------- */
+
+.dock-shell.tint-medium {
+  --od-surface: color-mix(in srgb, var(--od-surface-solid) 88%, transparent);
+}
+
+.dock-shell.tint-strong {
+  --od-surface: color-mix(in srgb, var(--od-surface-solid) 97%, transparent);
+}
+
+/* ---------- islands and chips ----------
+   The track stays one flat list so reordering and length reports keep working. Each item
+   island is measured from its first to its last item and drawn as one capsule behind the
+   track (.dock-islands), so a translucent island has one blur and no seams. */
+
+.dock-shell.style-glass {
+  --island-bg: var(--od-surface);
+  --island-blur: blur(var(--od-blur)) saturate(1.4);
+  --island-edge: var(--od-border);
+}
+
+.dock-shell.style-solid {
+  --island-bg: var(--od-surface-solid);
+  --island-edge: var(--od-border);
+}
+
+.dock-shell.style-midnight {
+  --island-bg: var(--od-midnight);
+  --island-edge: var(--od-midnight-edge);
+}
+
+.dock-shell.style-minimal {
+  --island-bg: transparent;
+  --island-edge: transparent;
+}
+
+.dock-shell.style-neon {
+  --island-bg: var(--od-neon-ground);
+  --island-edge: var(--od-neon-edge);
+}
+
+.dock-shell.style-ink {
+  --island-bg: var(--od-ink-ground);
+  --island-edge: var(--od-ink-edge);
+}
+
+.dock-shell.layout-islands,
+.dock-shell.layout-chips {
+  /* Island surfaces sit at z-index -1; keep them inside the dock, above whatever is behind it. */
+  isolation: isolate;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.dock-shell.horizontal .dock-item[data-island="start"]:not(:first-child),
+.dock-shell.horizontal .dock-item[data-island="solo"]:not(:first-child) {
+  margin-left: 14px;
+}
+
+.dock-shell.vertical .dock-item[data-island="start"]:not(:first-child),
+.dock-shell.vertical .dock-item[data-island="solo"]:not(:first-child) {
+  margin-top: 14px;
+}
+
+.dock-islands {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.dock-island {
+  position: absolute;
+  border: 1px solid var(--island-edge);
+  border-radius: calc(var(--tile-h) / 2 + 5px);
+  background: var(--island-bg);
+  backdrop-filter: var(--island-blur, none);
+}
+
+.dock-shell.style-neon .dock-island {
+  box-shadow: var(--od-neon-glow);
+}
+
+.dock-shell.layout-islands .dock-track,
+.dock-shell.layout-chips .dock-track {
+  position: relative;
+  z-index: 1;
+}

@@ -3,6 +3,7 @@
 
 #[cfg(not(windows))]
 mod fallback;
+pub mod process;
 pub mod taskbar;
 #[cfg(windows)]
 mod win;
@@ -329,15 +330,6 @@ pub fn raw_handle(window: &WebviewWindow) -> Option<isize> {
 }
 
 /// Shows a window without stealing focus from the app the user is typing in.
-pub fn show_without_focus(window: &WebviewWindow) {
-    match raw_handle(window) {
-        Some(handle) => imp::show_no_activate(handle),
-        None => {
-            let _ = window.show();
-        }
-    }
-}
-
 pub fn work_area_from_window(window: &WebviewWindow) -> Option<crate::geometry::WorkArea> {
     let monitor = window.current_monitor().ok().flatten()?;
     let scale = monitor.scale_factor();

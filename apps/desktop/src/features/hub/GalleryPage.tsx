@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { HubPage } from "../../services/ipc";
 import { useSettings } from "../../services/settingsContext";
 import {
+  isLoopbackHost,
   searchWidgets,
   widgetCatalog,
   widgetCategories,
@@ -43,7 +44,8 @@ function WidgetCard({
 }) {
   const { settings } = useSettings();
   const [previewSize, setPreviewSize] = useState<DockSize>(settings.dock.size);
-  const local = widget.network.length === 0;
+  const local = widget.network.every(isLoopbackHost);
+  const localLabel = widget.network.length === 0 ? "Local only" : "This PC only";
 
   return (
     <article className={`widget-card ${added ? "is-added" : ""}`}>
@@ -71,9 +73,9 @@ function WidgetCard({
               </button>
             ))}
           </div>
-          <span className={`privacy-badge ${local ? "is-local" : "is-network"}`} title={local ? undefined : widget.network.join(", ")}>
+          <span className={`privacy-badge ${local ? "is-local" : "is-network"}`} title={widget.network.length === 0 ? undefined : widget.network.join(", ")}>
             <Icon name={local ? "lock" : "shield"} size={12} />
-            {local ? "Local only" : `Connects to ${widget.network[0]}`}
+            {local ? localLabel : `Connects to ${widget.network[0]}`}
           </span>
         </div>
         {widget.stores ? <p className="small muted">Stores: {widget.stores}</p> : null}

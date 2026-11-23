@@ -48,7 +48,7 @@ flowchart TB
 
 ## Processes and windows
 
-OpenDock is a single Tauri application. One frontend bundle serves four windows; `main.tsx` picks the root component from the window label.
+OpenDock is a single Tauri application. One frontend bundle serves every window; `main.tsx` picks the root component from the window label.
 
 | Window | Label | Purpose | Lifetime |
 | --- | --- | --- | --- |
@@ -56,6 +56,7 @@ OpenDock is a single Tauri application. One frontend bundle serves four windows;
 | Flyout | `flyout` | Panels above the dock: widget panels, Start launcher, app window previews, dock menu | Created on demand, hidden when it loses focus |
 | Hub | `hub` | Widget gallery, Automation Studio, activity, settings, welcome setup | Opened from the dock menu or on first run |
 | Toast | `toast` | Short notifications from automations, with Undo | Shown by the rule engine, auto-dismissed |
+| Desktop widget | `desk-<widget id>` | One widget on the desktop: borderless, transparent, always on the bottom, skips the taskbar | Opened and closed by `services/desktop.rs` to match `settings.desktop` |
 
 A second, short-lived process, the **taskbar guard**, is started whenever OpenDock hides the taskbar. It waits for the main process to exit and restores the taskbar from a marker file if the main process didn't do it itself, for example after a crash. The same executable also accepts `--restore-taskbar`, which the uninstaller calls.
 
@@ -78,7 +79,7 @@ On exit, OpenDock clears window previews, releases the reserved screen edge and 
 All communication goes through `apps/desktop/src/services/ipc.ts`, which wraps Tauri's `invoke` and event APIs with typed functions. Components never call Tauri directly.
 
 - **Commands** (UI → core) are Rust functions in `commands/`. Each validates its input, limits sizes and acts only on known objects. For example, window actions only accept windows the enumerator has seen, and launches only accept pinned, installed or running apps.
-- **Events** (core → UI) push live data: `system:stats`, `media:state`, `windows:changed`, `volume:state`, `weather:update`, `focus:state`, `settings:changed`, `data:changed` (a store table changed), `bus:event` (for the Studio's live view) and the fullscreen and window-control events. `services/live.tsx` loads initial values and keeps them current, exposing each as a `Loadable` (loading, ready or error) so every widget can render all three states.
+- **Events** (core → UI) push live data: `system:stats`, `media:state`, `windows:changed`, `volume:state`, `weather:update`, `focus:state`, `settings:changed`, `data:changed` (a store table changed), `projects:update`, `bus:event` (for the Studio's live view) and the fullscreen and window-control events. `services/live.tsx` loads initial values and keeps them current, exposing each as a `Loadable` (loading, ready or error) so every widget can render all three states.
 
 ### Permissions
 
@@ -92,6 +93,8 @@ Tauri capabilities grant each window only what it needs. Command groups are defi
 | `apps-control` (switch, launch, volume, shortcuts) | ✓ | ✓ | | |
 | `previews`, `power` | | ✓ | | |
 | `apps-setup`, `widget-config`, `automation` | | | ✓ | |
+
+Desktop widget windows (`desk-*`, capability `desktop.json`) get `dock-core`, `widget-read`, `navigation` and `desktop-widget` (`settle_desktop_widget`), plus `core:window:allow-start-dragging`.
 
 ## Background services
 
@@ -108,6 +111,10 @@ Tauri capabilities grant each window only what it needs. Command groups are defi
 | Scheduler | to the next minute | `time.tick`, `sun.sunrise`, `sun.sunset` |
 | Weather | 30 min, or on demand | Forecast from Open-Meteo; `weather.rain.soon` |
 | Calendar | 15 min, or on demand | Upcoming events from iCal feeds; `calendar.event.starting` |
+| Projects | 2 min, or on demand | Git status of the repositories under the project folders (`projects:update`) |
+| Local AI | 1 min while on the dock, or on demand | Ollama models and loaded models from `127.0.0.1:11434` (`localAi:update`) |
+| CI | 5 min while turned on and on the dock, or on demand | Latest GitHub Actions run per repository from `api.github.com` (`ci:update`) |
+| Updates | 24 h (first check 90 s after start), or on demand | Latest release of `deathboy20/OpenDock` from `api.github.com` (`update:status`) |
 
 ## Event bus and automations
 
@@ -138,7 +145,7 @@ The **rule engine** (`engine/rules.rs`) matches events against enabled rules, ch
 | --- | --- | --- |
 | Settings | `%APPDATA%\com.opendock.app\settings.json` | Versioned JSON, validated by Rust types and Zod |
 | Todos, notes, focus sessions, rules, activity, calendars and events, forecast cache, network log | `%APPDATA%\com.opendock.app\opendock.db` | SQLite with append-only migrations |
-| Calendar feed links and other secrets | Windows Credential Manager, service `OpenDock` | OS keychain via the `keyring` crate |
+| Calendar feed links, the GitHub token and other secrets | Windows Credential Manager, service `OpenDock` | OS keychain via the `keyring` crate |
 | Taskbar restore marker | `%APPDATA%\com.opendock.app\taskbar-restore.json` | JSON written before the taskbar is hidden |
 
 **Settings** carry a `version`. On load, older files are migrated step by step (the same migration exists in Rust and TypeScript), then validated. A file that fails validation is moved aside as `settings.invalid-<timestamp>.json` and defaults are used.
@@ -159,6 +166,7 @@ All OS-specific code lives under `src-tauri/src/platform/`. `platform/mod.rs` ex
 | `win_apps.rs` | Window enumeration, activation, minimise and close, app icons, shortcuts and launching, DWM thumbnails, AppBar edge reservation |
 | `win_system.rs` | Audio endpoint volume and mute, keyboard shortcuts, lock, sleep and shutdown |
 | `taskbar.rs` | Taskbar auto-hide and visibility, the restore marker and the guard process |
+| `process.rs` | Starting `git` without a console window, and opening a folder in Cursor, VS Code or a terminal |
 
 `fallback.rs` provides safe no-op or "unsupported" implementations for other platforms, so the rest of the code compiles and degrades gracefully. Adding Linux or macOS means writing a sibling module, not changing callers.
 
@@ -187,5 +195,8 @@ The UI is organised by feature under `apps/desktop/src/features/`. Each feature 
 - `flyout/` — the flyout root and every panel
 - `hub/` — hub pages, Automation Studio and the welcome flow
 - `toast/` — the toast window and its queue
+- `developer/` — the developer widgets (Projects, Vault capture, Local AI, CI status), their models and panels
+- `customise/` — the Customise hub page: scenes, skins, per-widget options and desktop widgets, with their models and contrast checks
+- `desktop/` — the desktop widget window: one tile, drag to move
 
-Global styles live in `styles/`: `tokens.css` holds every colour, radius, shadow and motion value, and `base.css` holds shared primitives. Feature CSS uses tokens only.
+Global styles live in `styles/`: `tokens.css` holds every colour, radius, shadow and motion value, and `base.css` holds shared primitives. Feature CSS uses tokens only. The active skin overrides a listed subset of those tokens on the document root of every window (`app/App.tsx`). A skin's optional `interface` (layout, density, tint, style, widget looks) is copied into settings by Rust (`settings::skins::apply`, command `apply_skin`), so the dock only ever reads settings. Widget looks come from `packages/config-schema/src/widget-variants.json`, read by both validators and by `features/widgets/tiles.tsx`; islands are computed in `features/dock/islands.ts` and drawn in CSS on a flat track, so reordering and length reports are unchanged.

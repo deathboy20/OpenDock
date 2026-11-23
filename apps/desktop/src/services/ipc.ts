@@ -1,6 +1,13 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { defaultAppSettings, parseAppSettings, type AppSettings, type Rule, type RuleAction } from "@opendock/config-schema";
+import {
+  defaultAppSettings,
+  parseAppSettings,
+  type AppSettings,
+  type Rule,
+  type RuleAction,
+  type Scene,
+} from "@opendock/config-schema";
 
 // ---------- shapes returned by the Rust side ----------
 
@@ -151,6 +158,70 @@ export type Shortcut = "quickSettings" | "notifications" | "showDesktop" | "task
 export type PowerAction = "lock" | "sleep" | "signOut" | "restart" | "shutDown";
 export type ThumbnailSlot = { id: number; x: number; y: number; width: number; height: number };
 
+export type Project = {
+  name: string;
+  path: string;
+  root: string;
+  branch: string | null;
+  detached: boolean;
+  upstream: string | null;
+  ahead: number | null;
+  behind: number | null;
+  dirty: number;
+  hasHandoff: boolean;
+  error: string | null;
+};
+export type ProjectsSnapshot = {
+  projects: Project[];
+  missingRoots: string[];
+  truncated: boolean;
+  gitAvailable: boolean;
+  scannedAt: number;
+};
+export type VaultStatus = {
+  configured: boolean;
+  exists: boolean;
+  isObsidian: boolean;
+  todayFile: string;
+  todayCount: number;
+  recent: string[];
+};
+export type LocalModel = {
+  name: string;
+  sizeBytes: number;
+  family: string | null;
+  parameterSize: string | null;
+  quantization: string | null;
+};
+export type LoadedModel = { name: string; sizeVramBytes: number; expiresAt: string | null };
+export type LocalAiSnapshot = {
+  running: boolean;
+  models: LocalModel[];
+  loaded: LoadedModel[];
+  error: string | null;
+  checkedAt: number;
+};
+export type CiRun = {
+  workflow: string;
+  branch: string;
+  event: string;
+  status: string;
+  conclusion: string | null;
+  url: string;
+  updatedAt: number | null;
+};
+export type CiRepoStatus = { repo: string; run: CiRun | null; error: string | null };
+export type CiSnapshot = { enabled: boolean; hasToken: boolean; repos: CiRepoStatus[]; checkedAt: number };
+export type Release = { version: string; name: string; url: string; publishedAt: number | null; notes: string };
+export type UpdateStatus = {
+  current: string;
+  latest: Release | null;
+  available: boolean;
+  checkedAt: number | null;
+  error: string | null;
+};
+export type ProjectTool = "cursor" | "vscode" | "terminal" | "githubDesktop" | "explorer";
+
 export type HubPage =
   | "welcome"
   | "apps"
@@ -159,8 +230,10 @@ export type HubPage =
   | "activity"
   | "dock"
   | "calendars"
-  | "privacy";
-export type DataTopic = "todos" | "notes" | "calendar" | "rules" | "activity";
+  | "privacy"
+  | "developer"
+  | "customise";
+export type DataTopic = "todos" | "notes" | "calendar" | "rules" | "activity" | "vault";
 
 // ---------- settings and dock ----------
 
@@ -183,6 +256,14 @@ export const quitApp = () => invoke<void>("quit_app");
 export const setLaunchAtStartup = (enabled: boolean) =>
   invoke<boolean>("set_launch_at_startup", { enabled });
 export const getTaskbarStatus = () => invoke<TaskbarStatus>("get_taskbar_status");
+export const saveScene = (name: string) => invoke<Scene>("save_scene", { name });
+export const applyScene = (id: string) => invoke<AppSettings>("apply_scene", { id });
+export const deleteScene = (id: string) => invoke<void>("delete_scene", { id });
+export const settleDesktopWidget = () => invoke<void>("settle_desktop_widget");
+export const applySkin = (id: string | null) => invoke<AppSettings>("apply_skin", { id });
+export const getUpdateStatus = () => invoke<UpdateStatus>("get_update_status");
+export const checkForUpdates = () => invoke<void>("check_for_updates");
+export const openUpdatePage = () => invoke<void>("open_update_page");
 
 // ---------- widgets ----------
 
@@ -265,6 +346,24 @@ export const hideFlyout = () => invoke<void>("hide_flyout");
 export const takePendingToasts = () => invoke<ToastPayload[]>("take_pending_toasts");
 export const hideToast = () => invoke<void>("hide_toast");
 
+// ---------- developer widgets ----------
+
+export const getProjects = () => invoke<ProjectsSnapshot | null>("get_projects");
+export const refreshProjects = () => invoke<void>("refresh_projects");
+export const openProject = (path: string, tool: ProjectTool) => invoke<void>("open_project", { path, tool });
+export const readHandoff = (path: string) => invoke<string | null>("read_handoff", { path });
+export const getVaultStatus = () => invoke<VaultStatus>("get_vault_status");
+export const vaultCapture = (text: string) => invoke<void>("vault_capture", { text });
+export const openVault = (today: boolean) => invoke<void>("open_vault", { today });
+export const getLocalAi = () => invoke<LocalAiSnapshot | null>("get_local_ai");
+export const refreshLocalAi = () => invoke<void>("refresh_local_ai");
+export const askLocalAi = (model: string, prompt: string) => invoke<string>("ask_local_ai", { model, prompt });
+export const getCiStatus = () => invoke<CiSnapshot | null>("get_ci_status");
+export const refreshCi = () => invoke<void>("refresh_ci");
+export const openCiRun = (repo: string) => invoke<void>("open_ci_run", { repo });
+export const setGithubToken = (token: string) => invoke<void>("set_github_token", { token });
+export const clearGithubToken = () => invoke<void>("clear_github_token");
+
 // ---------- events ----------
 
 export type EventMap = {
@@ -284,6 +383,10 @@ export type EventMap = {
   "dock:fullscreen-visible": null;
   "windows:changed": WindowsSnapshot;
   "volume:state": VolumeState | null;
+  "projects:update": ProjectsSnapshot;
+  "localAi:update": LocalAiSnapshot;
+  "ci:update": CiSnapshot;
+  "update:status": UpdateStatus;
 };
 
 /** Subscribes to a backend event. Outside Tauri (tests, plain browser) it is a no-op. */

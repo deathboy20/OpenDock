@@ -17,6 +17,12 @@ import {
   reorderDockItems,
   ruleRecipes,
   ruleSchema,
+  SETTINGS_VERSION,
+  resolveVariant,
+  variantsFor,
+  setWidgetOptions,
+  widgetOptionsFor,
+  defaultWidgetOptions,
   slugifyRuleId,
 } from "./index";
 
@@ -48,7 +54,7 @@ describe("appSettingsSchema", () => {
         launchAtStartup: false,
       },
     });
-    expect(migrated.version).toBe(5);
+    expect(migrated.version).toBe(SETTINGS_VERSION);
     expect(migrated.dock.position).toBe("top");
     expect(migrated.dock.style).toBe("glass");
     expect(migrated.dock.spacing).toBe("even");
@@ -82,7 +88,7 @@ describe("appSettingsSchema", () => {
   it("migrates version 3 documents without changing them", () => {
     const v3 = { ...defaultAppSettings, version: 3, onboarded: false, dock: { ...defaultAppSettings.dock, style: "midnight" } };
     const migrated = migrateAppSettings(v3);
-    expect(migrated).toEqual({ ...v3, version: 5 });
+    expect(migrated).toEqual({ ...v3, version: SETTINGS_VERSION });
   });
 
   it("migrates version 4 documents and defaults spacing", () => {
@@ -100,15 +106,59 @@ describe("appSettingsSchema", () => {
         launchAtStartup: false,
       },
     });
-    expect(migrated.version).toBe(5);
+    expect(migrated.version).toBe(SETTINGS_VERSION);
     expect(migrated.dock.style).toBe("ink");
     expect(migrated.dock.spacing).toBe("even");
     expect(migrated.dock.position).toBe("left");
   });
 
+  it("migrates version 5 documents with the developer widgets off", () => {
+    const { weather, focus } = defaultAppSettings.widgets;
+    const migrated = migrateAppSettings({ ...defaultAppSettings, version: 5, widgets: { weather, focus } });
+    expect(migrated.version).toBe(SETTINGS_VERSION);
+    expect(migrated.widgets.projects.roots).toEqual([]);
+    expect(migrated.widgets.vault.path).toBe("");
+    expect(migrated.widgets.localAi.model).toBe("");
+    expect(migrated.widgets.ci).toEqual({ enabled: false, repos: [] });
+  });
+
+  it("migrates version 6 documents with no widget options", () => {
+    const { options: _unused, ...v6Widgets } = defaultAppSettings.widgets;
+    void _unused;
+    const migrated = migrateAppSettings({ ...defaultAppSettings, version: 6, widgets: v6Widgets });
+    expect(migrated.version).toBe(SETTINGS_VERSION);
+    expect(migrated.widgets.options).toEqual({});
+  });
+
   it("greets new installs", () => {
     expect(defaultAppSettings.onboarded).toBe(false);
     expect(defaultAppSettings.dock.itemOrder).toEqual(DEFAULT_ITEM_ORDER);
+  });
+});
+
+describe("widget options", () => {
+  it("stores only options that differ from the defaults", () => {
+    const set = setWidgetOptions(defaultAppSettings, "projects", { layout: "detailed", refreshSeconds: 60 });
+    expect(widgetOptionsFor(set, "projects")).toEqual({ label: "", layout: "detailed", accent: "theme", refreshSeconds: 60, variant: null });
+    expect(widgetOptionsFor(set, "clock")).toEqual(defaultWidgetOptions);
+    const reset = setWidgetOptions(set, "projects", { layout: "auto", refreshSeconds: null });
+    expect(reset.widgets.options).toEqual({});
+  });
+});
+
+describe("widget variants", () => {
+  it("reads the shared catalog and falls back to the default", () => {
+    expect(variantsFor("battery")).toEqual(["standard", "ring", "dots", "gauge"]);
+    expect(resolveVariant("battery", "dots")).toBe("dots");
+    expect(resolveVariant("battery", "hologram")).toBe("standard");
+    expect(resolveVariant("projects", "ring")).toBeNull();
+  });
+
+  it("refuses a variant a widget doesn't have", () => {
+    const withVariant = (variant: string) =>
+      appSettingsSchema.safeParse({ ...defaultAppSettings, widgets: { ...defaultAppSettings.widgets, options: { battery: { variant } } } }).success;
+    expect(withVariant("gauge")).toBe(true);
+    expect(withVariant("analog")).toBe(false);
   });
 });
 

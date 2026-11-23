@@ -1,10 +1,18 @@
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 
+use super::desktop::DesktopSettings;
+use super::scenes::SceneSettings;
+use super::skins::SkinSettings;
 use crate::engine::rules::{is_valid_id, parse_clock};
-use crate::geometry::{DockMode, DockPosition, DockSize};
+use crate::geometry::{DockDensity, DockMode, DockPosition, DockSize};
 
-pub const SETTINGS_VERSION: u32 = 5;
+pub const SETTINGS_VERSION: u32 = 7;
 pub const MAX_PINNED_APPS: usize = 24;
+pub const MAX_PROJECT_ROOTS: usize = 8;
+pub const MAX_CI_REPOS: usize = 10;
+pub const MAX_WIDGET_OPTIONS: usize = 40;
 
 fn default_true() -> bool {
     true
@@ -30,6 +38,26 @@ pub enum DockStyle {
     Neon,
     /// Opaque and high contrast.
     Ink,
+}
+
+/// One bar, separate capsules for runs of related widgets, or a capsule per widget.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum DockLayout {
+    #[default]
+    Bar,
+    Islands,
+    Chips,
+}
+
+/// How opaque the dock's surface is; stronger reads better on bright or busy wallpapers.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum DockTint {
+    #[default]
+    Soft,
+    Medium,
+    Strong,
 }
 
 /// Gap between dock items. Independent of icon size.
@@ -87,6 +115,12 @@ pub struct DockSettings {
     pub style: DockStyle,
     #[serde(default)]
     pub spacing: DockSpacing,
+    #[serde(default)]
+    pub layout: DockLayout,
+    #[serde(default)]
+    pub density: DockDensity,
+    #[serde(default)]
+    pub tint: DockTint,
     #[serde(default)]
     pub monitor_id: Option<String>,
     pub item_order: Vec<String>,
@@ -165,13 +199,126 @@ impl Default for FocusSettings {
     }
 }
 
+/// How a widget fills its dock slot: follow the dock size, icon only, or the large layout.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum WidgetLayout {
+    #[default]
+    Auto,
+    Compact,
+    Detailed,
+}
+
+/// Accent swatches from tokens.css. `Theme` keeps the dock's accent.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum WidgetAccent {
+    #[default]
+    Theme,
+    Mint,
+    Sky,
+    Amber,
+    Rose,
+    Violet,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct WidgetOptions {
+    /// Shown as the widget's name in tooltips and panel titles. Empty uses the widget's name.
+    pub label: String,
+    pub layout: WidgetLayout,
+    pub accent: WidgetAccent,
+    /// Seconds between checks for widgets that poll. `None` uses the widget's default.
+    pub refresh_seconds: Option<u32>,
+    /// How the widget draws its data (see widget-variants.json). `None` uses its default.
+    pub variant: Option<String>,
+}
+
+/// Asks GitHub once a day whether a newer release exists. Nothing else is sent.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase", default)]
+pub struct UpdateSettings {
+    pub check: bool,
+}
+
+impl Default for UpdateSettings {
+    fn default() -> Self {
+        Self { check: true }
+    }
+}
+
+/// Folders whose git repositories the Projects widget lists, one or two levels deep.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct ProjectsSettings {
+    pub roots: Vec<String>,
+}
+
+/// The Obsidian vault the capture box writes to. Empty until the user picks one.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct VaultSettings {
+    pub path: String,
+}
+
+/// The Ollama model quick prompts go to. Empty means the first installed model.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct LocalAiSettings {
+    pub model: String,
+}
+
+/// Off by default: CI status is the only developer widget that leaves the device.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct CiSettings {
+    pub enabled: bool,
+    pub repos: Vec<String>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct WidgetSettings {
+    /// Options per dock widget, keyed by widget id.
+    #[serde(default)]
+    pub options: BTreeMap<String, WidgetOptions>,
     #[serde(default)]
     pub weather: WeatherSettings,
     #[serde(default)]
     pub focus: FocusSettings,
+    #[serde(default)]
+    pub projects: ProjectsSettings,
+    #[serde(default)]
+    pub vault: VaultSettings,
+    #[serde(default)]
+    pub local_ai: LocalAiSettings,
+    #[serde(default)]
+    pub ci: CiSettings,
+}
+
+/// `owner/name`, as GitHub allows them. Mirrors `githubRepoSchema`.
+pub fn is_valid_github_repo(repo: &str) -> bool {
+    let Some((owner, name)) = repo.split_once('/') else {
+        return false;
+    };
+    let owner_ok = (1..=39).contains(&owner.len())
+        && owner.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
+        && !owner.starts_with('-');
+    let name_ok = (1..=100).contains(&name.len())
+        && name
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
+        && name != "."
+        && name != "..";
+    owner_ok && name_ok
+}
+
+fn has_duplicates_ignoring_case(values: &[String]) -> bool {
+    values.iter().enumerate().any(|(index, value)| {
+        let key = value.to_lowercase();
+        values[..index].iter().any(|v| v.to_lowercase() == key)
+    })
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -223,6 +370,14 @@ pub struct AppSettings {
     pub automation: AutomationSettings,
     #[serde(default)]
     pub apps: AppsSettings,
+    #[serde(default)]
+    pub skins: SkinSettings,
+    #[serde(default)]
+    pub scenes: SceneSettings,
+    #[serde(default)]
+    pub desktop: DesktopSettings,
+    #[serde(default)]
+    pub updates: UpdateSettings,
     /// False until the first-run welcome has been completed or skipped.
     #[serde(default)]
     pub onboarded: bool,
@@ -249,6 +404,9 @@ impl Default for AppSettings {
                 theme: Theme::Dark,
                 style: DockStyle::Glass,
                 spacing: DockSpacing::Even,
+                layout: DockLayout::Bar,
+                density: DockDensity::Regular,
+                tint: DockTint::Soft,
                 monitor_id: None,
                 item_order: DEFAULT_ITEM_ORDER.iter().map(|s| s.to_string()).collect(),
                 clock24h: false,
@@ -260,6 +418,10 @@ impl Default for AppSettings {
             widgets: WidgetSettings::default(),
             automation: AutomationSettings::default(),
             apps: AppsSettings::default(),
+            skins: SkinSettings::default(),
+            scenes: SceneSettings::default(),
+            desktop: DesktopSettings::default(),
+            updates: UpdateSettings::default(),
             onboarded: false,
         }
     }
@@ -269,8 +431,10 @@ impl AppSettings {
     /// Upgrades an older settings document in place. Returns true if anything changed.
     pub fn migrate(value: &mut serde_json::Value) -> bool {
         let version = value.get("version").and_then(|v| v.as_u64());
-        // Version 4 added dock styles. Version 5 adds spacing, which defaults to even.
-        if matches!(version, Some(3) | Some(4)) {
+        // Version 4 added dock styles, version 5 spacing (even), version 6 the developer
+        // widgets (projects, vault, local AI and CI, all empty or off), version 7 per-widget
+        // options, skins, scenes and desktop widgets (all empty). Each defaults on load.
+        if matches!(version, Some(3) | Some(4) | Some(5) | Some(6)) {
             value["version"] = serde_json::json!(SETTINGS_VERSION);
             return true;
         }
@@ -334,6 +498,63 @@ impl AppSettings {
         if !(1..=180).contains(&focus.focus_minutes) || !(1..=60).contains(&focus.break_minutes) {
             return Err("focus lengths out of range".into());
         }
+        let options = &self.widgets.options;
+        if options.len() > MAX_WIDGET_OPTIONS {
+            return Err("too many widget options".into());
+        }
+        for (id, option) in options {
+            if !is_valid_id(id) {
+                return Err(format!("invalid widget id in options: {id}"));
+            }
+            if option.label.chars().count() > 40 {
+                return Err("widget labels must be at most 40 characters".into());
+            }
+            if option
+                .refresh_seconds
+                .is_some_and(|s| !(15..=3600).contains(&s))
+            {
+                return Err("refresh must be 15-3600 seconds".into());
+            }
+            if let Some(variant) = &option.variant {
+                if !super::variants::is_valid_variant(id, variant) {
+                    return Err(format!("{id} has no {variant} variant"));
+                }
+            }
+        }
+        let roots = &self.widgets.projects.roots;
+        if roots.len() > MAX_PROJECT_ROOTS {
+            return Err(format!("at most {MAX_PROJECT_ROOTS} project folders"));
+        }
+        if roots
+            .iter()
+            .any(|r| r.trim().is_empty() || r.chars().count() > 1024)
+        {
+            return Err("project folders must be 1-1024 characters".into());
+        }
+        if has_duplicates_ignoring_case(roots) {
+            return Err("a project folder is listed twice".into());
+        }
+        let vault = &self.widgets.vault.path;
+        if vault.chars().count() > 1024 {
+            return Err("the vault path must be at most 1024 characters".into());
+        }
+        let model = &self.widgets.local_ai.model;
+        if model.chars().count() > 128 {
+            return Err("the local AI model name must be at most 128 characters".into());
+        }
+        let repos = &self.widgets.ci.repos;
+        if repos.len() > MAX_CI_REPOS {
+            return Err(format!("at most {MAX_CI_REPOS} CI repositories"));
+        }
+        if let Some(repo) = repos.iter().find(|r| !is_valid_github_repo(r)) {
+            return Err(format!("{repo} is not an owner/name repository"));
+        }
+        if has_duplicates_ignoring_case(repos) {
+            return Err("a CI repository is listed twice".into());
+        }
+        self.skins.validate()?;
+        self.scenes.validate()?;
+        self.desktop.validate()?;
         let quiet = &self.automation.quiet_hours;
         if parse_clock(&quiet.start).is_none() || parse_clock(&quiet.end).is_none() {
             return Err("quiet hours need HH:MM times".into());
@@ -455,11 +676,11 @@ mod tests {
         let mut value = original.clone();
         assert!(AppSettings::migrate(&mut value));
         let settings = parse(&value).unwrap();
-        assert_eq!(settings.version, 5);
+        assert_eq!(settings.version, SETTINGS_VERSION);
         assert_eq!(settings.dock.style, DockStyle::Midnight);
         assert_eq!(settings.dock.spacing, DockSpacing::Even);
         assert!(!settings.onboarded);
-        original["version"] = serde_json::json!(5);
+        original["version"] = serde_json::json!(SETTINGS_VERSION);
         assert_eq!(value, original);
         assert!(!AppSettings::migrate(&mut value));
     }
@@ -477,11 +698,50 @@ mod tests {
         });
         assert!(AppSettings::migrate(&mut value));
         let settings = parse(&value).unwrap();
-        assert_eq!(settings.version, 5);
+        assert_eq!(settings.version, SETTINGS_VERSION);
         assert_eq!(settings.dock.style, DockStyle::Ink);
         assert_eq!(settings.dock.spacing, DockSpacing::Even);
         assert_eq!(settings.dock.position, crate::geometry::DockPosition::Left);
         assert!(!AppSettings::migrate(&mut value));
+    }
+
+    #[test]
+    fn migrates_version_five_and_leaves_developer_widgets_off() {
+        let mut value = serde_json::to_value(AppSettings::default()).unwrap();
+        value["version"] = serde_json::json!(5);
+        value["widgets"]
+            .as_object_mut()
+            .unwrap()
+            .retain(|key, _| key == "weather" || key == "focus");
+        assert!(AppSettings::migrate(&mut value));
+        let settings = parse(&value).unwrap();
+        assert_eq!(settings.version, SETTINGS_VERSION);
+        assert!(settings.widgets.projects.roots.is_empty());
+        assert!(settings.widgets.vault.path.is_empty());
+        assert!(!settings.widgets.ci.enabled);
+        assert!(!AppSettings::migrate(&mut value));
+    }
+
+    #[test]
+    fn migrates_version_six_without_widget_options() {
+        let mut value = serde_json::to_value(AppSettings::default()).unwrap();
+        value["version"] = serde_json::json!(6);
+        value["widgets"].as_object_mut().unwrap().remove("options");
+        assert!(AppSettings::migrate(&mut value));
+        let settings = parse(&value).unwrap();
+        assert_eq!(settings.version, SETTINGS_VERSION);
+        assert!(settings.widgets.options.is_empty());
+    }
+
+    #[test]
+    fn checks_github_repo_names() {
+        assert!(is_valid_github_repo("deathboy20/OpenDock"));
+        assert!(is_valid_github_repo("a-b/c.d_e"));
+        assert!(!is_valid_github_repo("OpenDock"));
+        assert!(!is_valid_github_repo("-x/y"));
+        assert!(!is_valid_github_repo("x/.."));
+        assert!(!is_valid_github_repo("x/y/z"));
+        assert!(!is_valid_github_repo("x/a b"));
     }
 
     #[test]

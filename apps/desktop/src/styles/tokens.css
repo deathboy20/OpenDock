@@ -43,6 +43,18 @@
   --od-float-text: 0 1px 2px rgba(0, 0, 0, 0.75), 0 0 10px rgba(0, 0, 0, 0.45);
   --od-float-drop: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
   --od-blur: 22px;
+  /* Accent swatches a widget can pick in Customise. Each ink colour is measured against
+     its swatch at 4.5:1 or more. */
+  --od-swatch-mint: #7cf2c8;
+  --od-swatch-mint-ink: #052419;
+  --od-swatch-sky: #8ab4ff;
+  --od-swatch-sky-ink: #0a1a33;
+  --od-swatch-amber: #ffc56b;
+  --od-swatch-amber-ink: #2b1a00;
+  --od-swatch-rose: #ff9bb5;
+  --od-swatch-rose-ink: #33060f;
+  --od-swatch-violet: #c4a8ff;
+  --od-swatch-violet-ink: #1c0b3d;
 }
 
 [data-theme="light"] {
@@ -85,6 +97,16 @@
   --od-ink-edge: rgba(16, 20, 28, 0.55);
   --od-float-text: 0 1px 2px rgba(255, 255, 255, 0.85), 0 0 10px rgba(255, 255, 255, 0.6);
   --od-float-drop: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.7));
+  --od-swatch-mint: #0b7a5a;
+  --od-swatch-mint-ink: #ffffff;
+  --od-swatch-sky: #2558c4;
+  --od-swatch-sky-ink: #ffffff;
+  --od-swatch-amber: #8a5000;
+  --od-swatch-amber-ink: #ffffff;
+  --od-swatch-rose: #b4234d;
+  --od-swatch-rose-ink: #ffffff;
+  --od-swatch-violet: #6b3fd4;
+  --od-swatch-violet-ink: #ffffff;
 }
 
 :root {
@@ -102,6 +124,15 @@
   --od-gap-tight: 2px;
   --od-gap-even: 6px;
   --od-gap-roomy: 14px;
+  /* Sample wallpapers for the Customise preview only, so people can judge tint and contrast
+     before they apply a look. Never used behind real UI. */
+  --od-preview-dark: linear-gradient(160deg, #1b2433 0%, #0b0f17 70%);
+  --od-preview-bright: linear-gradient(160deg, #fff4d6 0%, #bfe3f2 55%, #7fc4e8 100%);
+  --od-preview-busy:
+    radial-gradient(circle at 18% 30%, #ff9f68 0 12%, transparent 13%),
+    radial-gradient(circle at 70% 60%, #4fb7a8 0 18%, transparent 19%),
+    radial-gradient(circle at 45% 85%, #f5e663 0 10%, transparent 11%),
+    linear-gradient(120deg, #2f4f8f 0%, #c94b7c 50%, #f0a35e 100%);
   --od-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --od-fast: 140ms;
   --od-slow: 260ms;

@@ -1,6 +1,6 @@
 import type { DockSize } from "@opendock/config-schema";
 
-export type WidgetCategory = "Essentials" | "Productivity" | "System" | "Info";
+export type WidgetCategory = "Essentials" | "Productivity" | "Developer" | "System" | "Info";
 
 export type WidgetDefinition = {
   id: string;
@@ -15,7 +15,7 @@ export type WidgetDefinition = {
   /** Widget opens a panel on click; otherwise the click is the action. */
   panel: boolean;
   /** Settings page where the widget is configured, if any. */
-  configure?: "dock" | "calendars" | "apps";
+  configure?: "dock" | "calendars" | "apps" | "developer";
 };
 
 export const ADD_WIDGET_ID = "add-widget";
@@ -158,9 +158,55 @@ export const widgetCatalog: WidgetDefinition[] = [
     network: [],
     panel: true,
   },
+  {
+    id: "projects",
+    name: "Projects",
+    category: "Developer",
+    description: "Git repositories in your project folders: branch, uncommitted changes, ahead and behind. Open one in Cursor, VS Code, a terminal or GitHub Desktop, or read its HANDOFF.md.",
+    sizes: ["s", "m", "l"],
+    network: [],
+    panel: true,
+    configure: "developer",
+  },
+  {
+    id: "vault",
+    name: "Vault capture",
+    category: "Developer",
+    description: "A quick note box that adds a timestamped line to today's Inbox note in your Obsidian vault, and opens the vault in Obsidian.",
+    sizes: ["s", "m", "l"],
+    network: [],
+    stores: "Your notes, in Inbox/YYYY-MM-DD.md inside your vault",
+    panel: true,
+    configure: "developer",
+  },
+  {
+    id: "local-ai",
+    name: "Local AI",
+    category: "Developer",
+    description: "Whether Ollama is running on this PC, your models and the ones loaded in memory. Ask a model a quick question; the answer never leaves the machine.",
+    sizes: ["s", "m", "l"],
+    network: ["127.0.0.1"],
+    panel: true,
+  },
+  {
+    id: "ci",
+    name: "CI status",
+    category: "Developer",
+    description: "The latest GitHub Actions run for the repositories you list: passing, failing or running. Off until you turn it on; a token for private repositories stays in the system keychain.",
+    sizes: ["s", "m", "l"],
+    network: ["api.github.com"],
+    stores: "Your repository list (the token goes in the system keychain)",
+    panel: true,
+    configure: "developer",
+  },
 ];
 
-export const widgetCategories: WidgetCategory[] = ["Essentials", "Productivity", "System", "Info"];
+/** Hosts on this PC. A widget that only talks to them never leaves the device. */
+export function isLoopbackHost(host: string): boolean {
+  return host === "127.0.0.1" || host === "localhost" || host === "::1";
+}
+
+export const widgetCategories: WidgetCategory[] = ["Essentials", "Productivity", "Developer", "System", "Info"];
 
 export function findWidget(id: string): WidgetDefinition | undefined {
   return widgetCatalog.find((widget) => widget.id === id);

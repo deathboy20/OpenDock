@@ -25,7 +25,7 @@ const PREVIEW_WIDTH: f64 = 420.0;
 fn flyout_width(kind: &str) -> f64 {
     match kind {
         "start" => LAUNCHER_WIDTH,
-        "app" => PREVIEW_WIDTH,
+        "app" | "projects" => PREVIEW_WIDTH,
         _ => FLYOUT_WIDTH,
     }
 }
@@ -203,7 +203,7 @@ fn toast_window(app: &AppHandle) -> Result<WebviewWindow, String> {
     if let Some(window) = app.get_webview_window(TOAST) {
         return Ok(window);
     }
-    builder(app, TOAST)
+    let window = builder(app, TOAST)
         .title("OpenDock notification")
         .inner_size(TOAST_WIDTH, TOAST_HEIGHT)
         .decorations(false)
@@ -213,9 +213,14 @@ fn toast_window(app: &AppHandle) -> Result<WebviewWindow, String> {
         .skip_taskbar(true)
         .resizable(false)
         .focused(false)
+        // Not focusable (WS_EX_NOACTIVATE): showing it never steals focus, and its buttons
+        // still take clicks. A raw ShowWindow would skip the window library's own show step
+        // and draw a native title bar on a fresh toast.
+        .focusable(false)
         .visible(false)
         .build()
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string())?;
+    Ok(window)
 }
 
 pub fn show_toast(app: &AppHandle, toast: ToastPayload) {
@@ -239,7 +244,7 @@ pub fn show_toast(app: &AppHandle, toast: ToastPayload) {
     if !created {
         let _ = window.emit("toast:show", &toast);
     }
-    platform::show_without_focus(&window);
+    let _ = window.show();
 }
 
 pub fn take_pending_toasts(app: &AppHandle) -> Vec<ToastPayload> {

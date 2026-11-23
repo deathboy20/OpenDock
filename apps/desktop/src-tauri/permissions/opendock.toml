@@ -3,9 +3,14 @@
 
 [[set]]
 identifier = "dock-core"
-description = "Read and save settings and lay out the dock."
+description = "Read and save settings, switch scenes and skins, check for updates and lay out the dock."
 permissions = [
   "allow-get-settings",
+  "allow-apply-scene",
+  "allow-apply-skin",
+  "allow-get-update-status",
+  "allow-check-for-updates",
+  "allow-open-update-page",
   "allow-save-settings",
   "allow-apply-dock-layout-command",
   "allow-set-dock-length",
@@ -14,7 +19,7 @@ permissions = [
 
 [[set]]
 identifier = "widget-read"
-description = "Read local widget data: media, system stats, focus, todos, notes, weather and calendar events."
+description = "Read local widget data: media, system stats, focus, todos, notes, weather, calendar events, projects and their handoff notes, today's vault captures, the local AI status and CI status."
 permissions = [
   "allow-get-media-state",
   "allow-get-system-stats",
@@ -24,11 +29,16 @@ permissions = [
   "allow-get-weather",
   "allow-upcoming-events",
   "allow-list-calendars",
+  "allow-get-projects",
+  "allow-read-handoff",
+  "allow-get-vault-status",
+  "allow-get-local-ai",
+  "allow-get-ci-status",
 ]
 
 [[set]]
 identifier = "widget-control"
-description = "Act on widgets: media keys, Start, focus rounds, todos, notes and refreshes."
+description = "Act on widgets: media keys, Start, focus rounds, todos, notes, refreshes and opening a listed project in an editor or terminal, and capturing a note to the vault Inbox, prompting a local Ollama model, and opening the latest CI run."
 permissions = [
   "allow-media-control",
   "allow-open-start-menu",
@@ -45,11 +55,19 @@ permissions = [
   "allow-delete-note",
   "allow-refresh-weather",
   "allow-sync-calendars",
+  "allow-refresh-projects",
+  "allow-open-project",
+  "allow-vault-capture",
+  "allow-open-vault",
+  "allow-refresh-local-ai",
+  "allow-ask-local-ai",
+  "allow-refresh-ci",
+  "allow-open-ci-run",
 ]
 
 [[set]]
 identifier = "widget-config"
-description = "Configure widgets and the shell: city search, calendar feeds, startup, taskbar status and quitting."
+description = "Configure widgets and the shell: city search, calendar feeds, the GitHub token, scenes, startup, taskbar status and quitting."
 permissions = [
   "allow-search-city",
   "allow-add-calendar",
@@ -57,6 +75,10 @@ permissions = [
   "allow-set-launch-at-startup",
   "allow-get-taskbar-status",
   "allow-quit-app",
+  "allow-set-github-token",
+  "allow-clear-github-token",
+  "allow-save-scene",
+  "allow-delete-scene",
 ]
 
 [[set]]
@@ -130,3 +152,8 @@ permissions = ["allow-get-flyout-request", "allow-resize-flyout", "allow-hide-fl
 identifier = "toast-window"
 description = "Commands only the notification strip uses."
 permissions = ["allow-take-pending-toasts", "allow-hide-toast", "allow-undo-activity"]
+
+[[set]]
+identifier = "desktop-widget"
+description = "Commands only desktop widget windows use: save where the user dropped the widget."
+permissions = ["allow-settle-desktop-widget"]

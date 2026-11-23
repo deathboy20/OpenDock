@@ -3,8 +3,10 @@ import { isTauri } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { previewShell, type ShellPlacement } from "../dock/appearance";
 import {
+  checkForUpdates,
   errorText,
   getTaskbarStatus,
+  openUpdatePage,
   quitApp,
   searchCity,
   setLaunchAtStartup,
@@ -12,6 +14,7 @@ import {
   type TaskbarStatus,
 } from "../../services/ipc";
 import { useSettings } from "../../services/settingsContext";
+import { updateSummary, useUpdateStatus } from "../../services/updates";
 import { Icon } from "../widgets/icons";
 import { AppearanceEditor } from "./AppearanceEditor";
 import { Choice, Row, TaskbarOptions, Toggle } from "./controls";
@@ -195,6 +198,52 @@ function WeatherSection({ settings, change }: { settings: AppSettings; change: (
   );
 }
 
+function UpdatesSection({ settings, change }: { settings: AppSettings; change: (fn: (s: AppSettings) => AppSettings) => void }) {
+  const status = useUpdateStatus();
+  const [checking, setChecking] = useState(false);
+  const check = settings.updates.check;
+  useEffect(() => {
+    if (status) setChecking(false);
+  }, [status]);
+  return (
+    <section className="settings-card">
+      <h2>Updates</h2>
+      <Row
+        label="Check for updates"
+        hint="Once a day, OpenDock asks api.github.com for the newest release. Nothing about you or this PC is sent, and each check shows in the Privacy ledger."
+      >
+        <Toggle
+          label="Check for updates"
+          checked={check}
+          onChange={(value) => change((s) => ({ ...s, updates: { ...s.updates, check: value } }))}
+        />
+      </Row>
+      <p className="small muted" role="status">
+        {checking ? "Checking…" : updateSummary(status, check)}
+      </p>
+      {status?.available && status.latest?.notes ? <pre className="update-notes">{status.latest.notes}</pre> : null}
+      <div className="button-row">
+        {status?.available ? (
+          <button type="button" className="button is-primary" onClick={() => void openUpdatePage()}>
+            <Icon name="import" size={14} /> Download {status.latest?.version}
+          </button>
+        ) : null}
+        <button
+          type="button"
+          className="button"
+          disabled={checking}
+          onClick={() => {
+            setChecking(true);
+            void checkForUpdates().catch(() => setChecking(false));
+          }}
+        >
+          <Icon name="refresh" size={14} /> Check now
+        </button>
+      </div>
+    </section>
+  );
+}
+
 export function DockSettingsPage() {
   const { settings, update } = useSettings();
   const [error, setError] = useState<string | null>(null);
@@ -304,6 +353,8 @@ export function DockSettingsPage() {
           </span>
         </Row>
       </section>
+
+      <UpdatesSection settings={settings} change={change} />
 
       <section className="settings-card">
         <h2>OpenDock</h2>

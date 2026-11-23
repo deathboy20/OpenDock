@@ -9,6 +9,7 @@ An architecture decision record (ADR) captures one significant decision: the con
 | [0003](0003-taskbar-replacement-with-guaranteed-restore.md) | Taskbar replacement with a guaranteed restore | Accepted |
 | [0004](0004-rules-are-data.md) | Automation rules are data, not code | Accepted |
 | [0005](0005-local-first-no-telemetry.md) | Local-first, no telemetry | Accepted |
+| [0006](0006-update-checks.md) | Check for updates without an updater service | Proposed |
 
 ## Writing one
 

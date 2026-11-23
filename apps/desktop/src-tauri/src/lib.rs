@@ -111,6 +111,7 @@ pub fn run() {
 
             services::automation::start(app.handle().clone(), automation);
             services::start_all(app.handle());
+            services::desktop::sync(app.handle(), &app.state::<AppState>().settings());
             if taskbar_failed || !settings.onboarded {
                 let page = if taskbar_failed { "dock" } else { "welcome" };
                 if let Err(error) = services::windows::open_hub(app.handle(), page) {
@@ -128,6 +129,14 @@ pub fn run() {
             commands::quit_app,
             commands::set_launch_at_startup,
             commands::get_taskbar_status,
+            commands::save_scene,
+            commands::apply_scene,
+            commands::delete_scene,
+            commands::settle_desktop_widget,
+            commands::apply_skin,
+            commands::get_update_status,
+            commands::check_for_updates,
+            commands::open_update_page,
             commands::widgets::get_media_state,
             commands::widgets::media_control,
             commands::widgets::get_system_stats,
@@ -185,6 +194,21 @@ pub fn run() {
             commands::apps::power_action,
             commands::apps::show_thumbnails,
             commands::apps::clear_thumbnails,
+            commands::developer::get_projects,
+            commands::developer::refresh_projects,
+            commands::developer::open_project,
+            commands::developer::read_handoff,
+            commands::developer::get_vault_status,
+            commands::developer::vault_capture,
+            commands::developer::open_vault,
+            commands::developer::get_local_ai,
+            commands::developer::refresh_local_ai,
+            commands::developer::ask_local_ai,
+            commands::developer::get_ci_status,
+            commands::developer::refresh_ci,
+            commands::developer::open_ci_run,
+            commands::developer::set_github_token,
+            commands::developer::clear_github_token,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

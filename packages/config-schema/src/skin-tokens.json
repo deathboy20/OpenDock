@@ -1,0 +1,43 @@
+{
+  "$comment": "The only design tokens a skin may set, shared by the Rust and TypeScript validators. Kinds: color (#rrggbb, #rrggbbaa or rgba()), length (whole px up to max), duration (whole ms up to max), font and shadow (one of the listed presets).",
+  "tokens": {
+    "accent": { "var": "--od-accent", "kind": "color" },
+    "accentStrong": { "var": "--od-accent-strong", "kind": "color" },
+    "accentInk": { "var": "--od-accent-ink", "kind": "color" },
+    "accentSoft": { "var": "--od-accent-soft", "kind": "color" },
+    "accentGlow": { "var": "--od-accent-glow", "kind": "color" },
+    "text": { "var": "--od-text", "kind": "color" },
+    "muted": { "var": "--od-muted", "kind": "color" },
+    "faint": { "var": "--od-faint", "kind": "color" },
+    "surface": { "var": "--od-surface", "kind": "color" },
+    "surfaceSolid": { "var": "--od-surface-solid", "kind": "color" },
+    "surfaceDeep": { "var": "--od-surface-deep", "kind": "color" },
+    "raised": { "var": "--od-raised", "kind": "color" },
+    "hover": { "var": "--od-hover", "kind": "color" },
+    "border": { "var": "--od-border", "kind": "color" },
+    "borderStrong": { "var": "--od-border-strong", "kind": "color" },
+    "info": { "var": "--od-info", "kind": "color" },
+    "warn": { "var": "--od-warn", "kind": "color" },
+    "danger": { "var": "--od-danger", "kind": "color" },
+    "radiusSm": { "var": "--od-radius-sm", "kind": "length", "max": 24 },
+    "radiusMd": { "var": "--od-radius-md", "kind": "length", "max": 28 },
+    "radiusLg": { "var": "--od-radius-lg", "kind": "length", "max": 32 },
+    "radiusXl": { "var": "--od-radius-xl", "kind": "length", "max": 40 },
+    "blur": { "var": "--od-blur", "kind": "length", "max": 60 },
+    "motionFast": { "var": "--od-fast", "kind": "duration", "max": 400 },
+    "motionSlow": { "var": "--od-slow", "kind": "duration", "max": 600 },
+    "font": { "var": "--od-font", "kind": "font" },
+    "shadow": { "var": "--od-shadow", "kind": "shadow" }
+  },
+  "fonts": {
+    "default": "\"Inter\", \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif",
+    "segoe": "\"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif",
+    "system": "system-ui, sans-serif",
+    "mono": "\"Cascadia Mono\", \"JetBrains Mono\", Consolas, monospace"
+  },
+  "shadows": {
+    "none": "none",
+    "soft": "0 8px 24px rgba(0, 0, 0, 0.28)",
+    "deep": "0 18px 48px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.3)"
+  }
+}
