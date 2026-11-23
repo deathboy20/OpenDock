@@ -1,6 +1,6 @@
 import { widgetOptionsFor, type AppSettings, type DockDensity, type DockLayout, type DockTint } from "@opendock/config-schema";
-import { useState } from "react";
-import { islandEdges } from "../dock/islands";
+import { useRef, useState } from "react";
+import { islandEdges, islandStyle, useIslandRects } from "../dock/islands";
 import { Choice, Row } from "../hub/controls";
 import { ADD_WIDGET_ID } from "../widgets/catalog";
 import { TileContent } from "../widgets/tiles";
@@ -34,12 +34,26 @@ function InterfacePreview({ settings, backdrop }: { settings: AppSettings; backd
   const dock = settings.dock;
   const ids = dock.itemOrder.filter((id) => id !== ADD_WIDGET_ID).slice(0, 8);
   const islands = islandEdges(ids, dock.layout);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const rects = useIslandRects(
+    trackRef,
+    false,
+    islands !== null,
+    `${ids.join(",")}|${dock.layout}|${dock.size}|${dock.density}|${dock.spacing}`,
+  );
   return (
     <div className={`interface-preview backdrop-${backdrop}`} aria-hidden>
       <div
         className={`preview-dock dock-shell size-${dock.size} spacing-${dock.spacing} style-${dock.style} layout-${dock.layout} density-${dock.density} tint-${dock.tint} horizontal`}
       >
-        <div className="dock-track">
+        {rects.length > 0 ? (
+          <div className="dock-islands">
+            {rects.map((rect, i) => (
+              <span key={i} className="dock-island" style={islandStyle(rect)} />
+            ))}
+          </div>
+        ) : null}
+        <div className="dock-track" ref={trackRef}>
           {ids.map((id) => {
             const options = widgetOptionsFor(settings, id);
             return (

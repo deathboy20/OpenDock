@@ -802,7 +802,8 @@
 
 /* ---------- islands and chips ----------
    The track stays one flat list so reordering and length reports keep working. Each item
-   paints its slice of an island with ::before; only the ends of a run are rounded. */
+   island is measured from its first to its last item and drawn as one capsule behind the
+   track (.dock-islands), so a translucent island has one blur and no seams. */
 
 .dock-shell.style-glass {
   --island-bg: var(--od-surface);
@@ -837,38 +838,12 @@
 
 .dock-shell.layout-islands,
 .dock-shell.layout-chips {
+  /* Island surfaces sit at z-index -1; keep them inside the dock, above whatever is behind it. */
+  isolation: isolate;
   background: transparent;
   border-color: transparent;
   box-shadow: none;
   backdrop-filter: none;
-}
-
-.dock-shell.layout-islands .dock-item[data-island]::before,
-.dock-shell.layout-chips .dock-item[data-island]::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: -5px calc(var(--tile-gap) / -2 - 0.5px);
-  border-block: 1px solid var(--island-edge);
-  background: var(--island-bg);
-  backdrop-filter: var(--island-blur, none);
-  pointer-events: none;
-}
-
-.dock-shell.horizontal .dock-item[data-island="start"]::before,
-.dock-shell.horizontal .dock-item[data-island="solo"]::before {
-  left: -6px;
-  border-left: 1px solid var(--island-edge);
-  border-top-left-radius: calc(var(--tile-h) / 2 + 5px);
-  border-bottom-left-radius: calc(var(--tile-h) / 2 + 5px);
-}
-
-.dock-shell.horizontal .dock-item[data-island="end"]::before,
-.dock-shell.horizontal .dock-item[data-island="solo"]::before {
-  right: -6px;
-  border-right: 1px solid var(--island-edge);
-  border-top-right-radius: calc(var(--tile-h) / 2 + 5px);
-  border-bottom-right-radius: calc(var(--tile-h) / 2 + 5px);
 }
 
 .dock-shell.horizontal .dock-item[data-island="start"]:not(:first-child),
@@ -876,34 +851,32 @@
   margin-left: 14px;
 }
 
-.dock-shell.vertical .dock-item[data-island]::before {
-  inset: calc(var(--tile-gap) / -2 - 0.5px) -5px;
-  border-block: 0;
-  border-inline: 1px solid var(--island-edge);
-}
-
-.dock-shell.vertical .dock-item[data-island="start"]::before,
-.dock-shell.vertical .dock-item[data-island="solo"]::before {
-  top: -6px;
-  border-top: 1px solid var(--island-edge);
-  border-top-left-radius: calc(var(--tile-h) / 2 + 5px);
-  border-top-right-radius: calc(var(--tile-h) / 2 + 5px);
-}
-
-.dock-shell.vertical .dock-item[data-island="end"]::before,
-.dock-shell.vertical .dock-item[data-island="solo"]::before {
-  bottom: -6px;
-  border-bottom: 1px solid var(--island-edge);
-  border-bottom-left-radius: calc(var(--tile-h) / 2 + 5px);
-  border-bottom-right-radius: calc(var(--tile-h) / 2 + 5px);
-}
-
 .dock-shell.vertical .dock-item[data-island="start"]:not(:first-child),
 .dock-shell.vertical .dock-item[data-island="solo"]:not(:first-child) {
   margin-top: 14px;
 }
 
-.dock-shell.style-neon.layout-islands .dock-item[data-island]::before,
-.dock-shell.style-neon.layout-chips .dock-item[data-island]::before {
+.dock-islands {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.dock-island {
+  position: absolute;
+  border: 1px solid var(--island-edge);
+  border-radius: calc(var(--tile-h) / 2 + 5px);
+  background: var(--island-bg);
+  backdrop-filter: var(--island-blur, none);
+}
+
+.dock-shell.style-neon .dock-island {
   box-shadow: var(--od-neon-glow);
+}
+
+.dock-shell.layout-islands .dock-track,
+.dock-shell.layout-chips .dock-track {
+  position: relative;
+  z-index: 1;
 }

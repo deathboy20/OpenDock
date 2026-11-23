@@ -113,8 +113,6 @@ pub fn wait_for_process_exit(pid: u32) {
     let _ = pid;
 }
 
-pub fn show_no_activate(_raw: isize) {}
-
 pub fn open_start_menu() -> Result<(), String> {
     Err("Start is only available on Windows".into())
 }
