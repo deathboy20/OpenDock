@@ -203,7 +203,7 @@ fn toast_window(app: &AppHandle) -> Result<WebviewWindow, String> {
     if let Some(window) = app.get_webview_window(TOAST) {
         return Ok(window);
     }
-    builder(app, TOAST)
+    let window = builder(app, TOAST)
         .title("OpenDock notification")
         .inner_size(TOAST_WIDTH, TOAST_HEIGHT)
         .decorations(false)
@@ -215,7 +215,13 @@ fn toast_window(app: &AppHandle) -> Result<WebviewWindow, String> {
         .focused(false)
         .visible(false)
         .build()
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string())?;
+    // The toast is shown with a raw no-activate ShowWindow so it never steals focus, which
+    // skips the window library's own show step. Apply the borderless style now, or a fresh
+    // toast can appear once with a native title bar.
+    let _ = window.set_decorations(false);
+    let _ = window.set_shadow(false);
+    Ok(window)
 }
 
 pub fn show_toast(app: &AppHandle, toast: ToastPayload) {
