@@ -5,6 +5,7 @@ import { Choice } from "../hub/controls";
 import { PageHeader } from "../hub/PageHeader";
 import { ADD_WIDGET_ID, findWidget } from "../widgets/catalog";
 import { Icon } from "../widgets/icons";
+import { DesktopSection } from "./DesktopSection";
 import { ScenesSection } from "./ScenesSection";
 import { SkinsSection } from "./SkinsSection";
 import { ACCENTS, effectiveRefresh, formatSeconds, LAYOUTS, POLLING, refreshChoices } from "./widgetOptions";
@@ -140,7 +141,7 @@ export function CustomisePage() {
   const change: Change = (fn) => void update(fn).then(setError);
   return (
     <div className="page settings-page">
-      <PageHeader title="Customise" subtitle="Scenes, skins and options for each widget. Changes apply straight away." />
+      <PageHeader title="Customise" subtitle="Scenes, skins, widget options and desktop widgets. Changes apply straight away." />
       {error ? (
         <p className="callout is-error" role="alert">
           {error}
@@ -149,6 +150,7 @@ export function CustomisePage() {
       <ScenesSection settings={settings} />
       <SkinsSection settings={settings} change={change} />
       <WidgetOptionsSection settings={settings} change={change} />
+      <DesktopSection settings={settings} change={change} />
     </div>
   );
 }

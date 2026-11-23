@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { desktopSettingsSchema } from "./desktop";
 import { sceneSettingsSchema } from "./scenes";
 import { skinSettingsSchema } from "./skins";
 
@@ -168,6 +169,7 @@ export const appSettingsSchema = z.object({
   apps: appsSettingsSchema.default({}),
   skins: skinSettingsSchema.default({}),
   scenes: sceneSettingsSchema.default({}),
+  desktop: desktopSettingsSchema.default({}),
   /** False until the first-run welcome has been completed or skipped. */
   onboarded: z.boolean().default(false),
 });

@@ -1,0 +1,14 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "desktop",
+  "description": "Widgets placed on the desktop, one window each",
+  "windows": ["desk-*"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "dock-core",
+    "widget-read",
+    "navigation",
+    "desktop-widget"
+  ]
+}

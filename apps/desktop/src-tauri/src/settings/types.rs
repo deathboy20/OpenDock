@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
+use super::desktop::DesktopSettings;
 use super::scenes::SceneSettings;
 use super::skins::SkinSettings;
 use crate::engine::rules::{is_valid_id, parse_clock};
@@ -332,6 +333,8 @@ pub struct AppSettings {
     pub skins: SkinSettings,
     #[serde(default)]
     pub scenes: SceneSettings,
+    #[serde(default)]
+    pub desktop: DesktopSettings,
     /// False until the first-run welcome has been completed or skipped.
     #[serde(default)]
     pub onboarded: bool,
@@ -371,6 +374,7 @@ impl Default for AppSettings {
             apps: AppsSettings::default(),
             skins: SkinSettings::default(),
             scenes: SceneSettings::default(),
+            desktop: DesktopSettings::default(),
             onboarded: false,
         }
     }
@@ -498,6 +502,7 @@ impl AppSettings {
         }
         self.skins.validate()?;
         self.scenes.validate()?;
+        self.desktop.validate()?;
         let quiet = &self.automation.quiet_hours;
         if parse_clock(&quiet.start).is_none() || parse_clock(&quiet.end).is_none() {
             return Err("quiet hours need HH:MM times".into());

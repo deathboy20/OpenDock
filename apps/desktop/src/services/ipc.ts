@@ -251,6 +251,7 @@ export const getTaskbarStatus = () => invoke<TaskbarStatus>("get_taskbar_status"
 export const saveScene = (name: string) => invoke<Scene>("save_scene", { name });
 export const applyScene = (id: string) => invoke<AppSettings>("apply_scene", { id });
 export const deleteScene = (id: string) => invoke<void>("delete_scene", { id });
+export const settleDesktopWidget = () => invoke<void>("settle_desktop_widget");
 
 // ---------- widgets ----------
 

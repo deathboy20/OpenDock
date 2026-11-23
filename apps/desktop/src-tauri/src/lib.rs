@@ -111,6 +111,7 @@ pub fn run() {
 
             services::automation::start(app.handle().clone(), automation);
             services::start_all(app.handle());
+            services::desktop::sync(app.handle(), &app.state::<AppState>().settings());
             if taskbar_failed || !settings.onboarded {
                 let page = if taskbar_failed { "dock" } else { "welcome" };
                 if let Err(error) = services::windows::open_hub(app.handle(), page) {
@@ -131,6 +132,7 @@ pub fn run() {
             commands::save_scene,
             commands::apply_scene,
             commands::delete_scene,
+            commands::settle_desktop_widget,
             commands::widgets::get_media_state,
             commands::widgets::media_control,
             commands::widgets::get_system_stats,

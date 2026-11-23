@@ -148,3 +148,8 @@ permissions = ["allow-get-flyout-request", "allow-resize-flyout", "allow-hide-fl
 identifier = "toast-window"
 description = "Commands only the notification strip uses."
 permissions = ["allow-take-pending-toasts", "allow-hide-toast", "allow-undo-activity"]
+
+[[set]]
+identifier = "desktop-widget"
+description = "Commands only desktop widget windows use: save where the user dropped the widget."
+permissions = ["allow-settle-desktop-widget"]

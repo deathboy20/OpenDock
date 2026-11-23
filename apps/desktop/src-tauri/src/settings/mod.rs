@@ -1,3 +1,4 @@
+pub mod desktop;
 pub mod scenes;
 pub mod skins;
 pub mod store;

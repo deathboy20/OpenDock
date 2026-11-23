@@ -82,6 +82,7 @@ const COMMANDS: &[&str] = &[
     "save_scene",
     "apply_scene",
     "delete_scene",
+    "settle_desktop_widget",
 ];
 
 fn main() {

@@ -87,6 +87,9 @@ pub fn persist_settings(
     {
         app.state::<Wakers>().wake_ci();
     }
+    if previous.desktop != settings.desktop {
+        crate::services::desktop::sync(app, &settings);
+    }
     let _ = app.emit("settings:changed", &settings);
     Ok(settings)
 }
@@ -198,5 +201,23 @@ pub fn apply_scene(
 #[tauri::command]
 pub fn delete_scene(app: AppHandle, state: State<'_, AppState>, id: String) -> Result<(), String> {
     let next = scenes::delete(&state.settings(), &id);
+    persist_settings(&app, &state, next).map(|_| ())
+}
+
+// ---------- desktop widgets ----------
+
+/// A desktop widget window reports that the user dropped it; Rust snaps and saves it.
+#[tauri::command]
+pub fn settle_desktop_widget(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    window: WebviewWindow,
+) -> Result<(), String> {
+    if crate::services::desktop::widget_id(window.label()).is_none() {
+        return Err("only desktop widgets can do that".into());
+    }
+    let Some(next) = crate::services::desktop::settle(&app, &window, &state.settings()) else {
+        return Ok(());
+    };
     persist_settings(&app, &state, next).map(|_| ())
 }

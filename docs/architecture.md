@@ -48,7 +48,7 @@ flowchart TB
 
 ## Processes and windows
 
-OpenDock is a single Tauri application. One frontend bundle serves four windows; `main.tsx` picks the root component from the window label.
+OpenDock is a single Tauri application. One frontend bundle serves every window; `main.tsx` picks the root component from the window label.
 
 | Window | Label | Purpose | Lifetime |
 | --- | --- | --- | --- |
@@ -56,6 +56,7 @@ OpenDock is a single Tauri application. One frontend bundle serves four windows;
 | Flyout | `flyout` | Panels above the dock: widget panels, Start launcher, app window previews, dock menu | Created on demand, hidden when it loses focus |
 | Hub | `hub` | Widget gallery, Automation Studio, activity, settings, welcome setup | Opened from the dock menu or on first run |
 | Toast | `toast` | Short notifications from automations, with Undo | Shown by the rule engine, auto-dismissed |
+| Desktop widget | `desk-<widget id>` | One widget on the desktop: borderless, transparent, always on the bottom, skips the taskbar | Opened and closed by `services/desktop.rs` to match `settings.desktop` |
 
 A second, short-lived process, the **taskbar guard**, is started whenever OpenDock hides the taskbar. It waits for the main process to exit and restores the taskbar from a marker file if the main process didn't do it itself, for example after a crash. The same executable also accepts `--restore-taskbar`, which the uninstaller calls.
 
@@ -92,6 +93,8 @@ Tauri capabilities grant each window only what it needs. Command groups are defi
 | `apps-control` (switch, launch, volume, shortcuts) | ✓ | ✓ | | |
 | `previews`, `power` | | ✓ | | |
 | `apps-setup`, `widget-config`, `automation` | | | ✓ | |
+
+Desktop widget windows (`desk-*`, capability `desktop.json`) get `dock-core`, `widget-read`, `navigation` and `desktop-widget` (`settle_desktop_widget`), plus `core:window:allow-start-dragging`.
 
 ## Background services
 
@@ -192,6 +195,7 @@ The UI is organised by feature under `apps/desktop/src/features/`. Each feature 
 - `hub/` — hub pages, Automation Studio and the welcome flow
 - `toast/` — the toast window and its queue
 - `developer/` — the developer widgets (Projects, Vault capture, Local AI, CI status), their models and panels
-- `customise/` — the Customise hub page: scenes, skins and per-widget options, with their models and contrast checks
+- `customise/` — the Customise hub page: scenes, skins, per-widget options and desktop widgets, with their models and contrast checks
+- `desktop/` — the desktop widget window: one tile, drag to move
 
 Global styles live in `styles/`: `tokens.css` holds every colour, radius, shadow and motion value, and `base.css` holds shared primitives. Feature CSS uses tokens only. The active skin overrides a listed subset of those tokens on the document root of every window (`app/App.tsx`).
