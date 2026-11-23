@@ -21,7 +21,8 @@ body,
 html[data-window="main"],
 html[data-window="main"] body,
 html[data-window="flyout"] body,
-html[data-window="toast"] body {
+html[data-window="toast"] body,
+html[data-window="desktop"] body {
   overflow: hidden;
 }
 

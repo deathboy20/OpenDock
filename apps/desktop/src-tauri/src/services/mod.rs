@@ -5,6 +5,7 @@ pub mod apps;
 pub mod automation;
 pub mod calendar;
 pub mod ci;
+pub mod desktop;
 pub mod focus;
 pub mod local_ai;
 pub mod projects;

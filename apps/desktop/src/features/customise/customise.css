@@ -242,3 +242,22 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ---------- desktop widgets ---------- */
+
+.desktop-list {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 4px 16px;
+}
+
+.desktop-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  border-bottom: 1px solid var(--od-border);
+}

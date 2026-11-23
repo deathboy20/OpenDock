@@ -8,6 +8,7 @@ function windowKind(): WindowKind {
   if (isTauri()) {
     const label = getCurrentWindow().label;
     if (label === "hub" || label === "flyout" || label === "toast") return label;
+    if (label.startsWith("desk-")) return "desktop";
     return "main";
   }
   const requested = new URLSearchParams(window.location.search).get("window");

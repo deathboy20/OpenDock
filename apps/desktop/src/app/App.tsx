@@ -1,5 +1,6 @@
 import { findSkin, skinVariables } from "@opendock/config-schema";
 import { useEffect, useRef, type ReactNode } from "react";
+import { DesktopWidgetApp } from "../features/desktop/DesktopWidgetApp";
 import { DockBar } from "../features/dock/DockBar";
 import { FlyoutApp } from "../features/flyout/FlyoutApp";
 import { HubApp } from "../features/hub/HubApp";
@@ -10,7 +11,7 @@ import { useSettings } from "../services/settingsContext";
 import "../styles/tokens.css";
 import "../styles/base.css";
 
-export type WindowKind = "main" | "hub" | "flyout" | "toast";
+export type WindowKind = "main" | "hub" | "flyout" | "toast" | "desktop";
 
 /** Mirrors the dock's theme, style and skin onto the document so every window matches. */
 function Themed({ kind, children }: { kind: WindowKind; children: ReactNode }) {
@@ -48,7 +49,15 @@ export function App({ kind }: { kind: WindowKind }) {
     <SettingsProvider>
       <LiveDataProvider>
         <Themed kind={kind}>
-          {kind === "hub" ? <HubApp /> : kind === "flyout" ? <FlyoutApp /> : <DockBar />}
+          {kind === "hub" ? (
+            <HubApp />
+          ) : kind === "flyout" ? (
+            <FlyoutApp />
+          ) : kind === "desktop" ? (
+            <DesktopWidgetApp />
+          ) : (
+            <DockBar />
+          )}
         </Themed>
       </LiveDataProvider>
     </SettingsProvider>
