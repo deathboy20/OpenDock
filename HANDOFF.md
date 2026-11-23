@@ -12,7 +12,7 @@ Version 0.3.0 is released. Canonical remote: `origin` = `github.com/deathboy20/O
 
 ## Current state
 
-- Branch `feat/developer-widgets`, cut from `origin/release/0.3.0` at `1fe5078` (Isaac chose this base on 2026-11-23). Not pushed. No PR.
+- Branch `feat/developer-widgets`, cut from `origin/release/0.3.0` at `1fe5078` (Isaac chose this base on 2026-11-23). Pushed to `origin` on 2026-11-23 and opened as PR #11 into `main`: https://github.com/deathboy20/OpenDock/pull/11 (ready for review, not a draft). Before the push every local check passed again and `pnpm build:web` built 11 pages; `pnpm lighthouse:web` was not run. This HANDOFF update is committed locally but not pushed, to save a CI run; it goes up with the next push.
 - Plan agreed with Isaac on 2026-11-23: `C:\Users\Obeng\Documents\AI-Vault\Plans\OpenDock developer widgets and skins.md`. Keep the Windows taskbar (with TranslucentTB) for now; build developer widgets (Phase A), then Rainmeter-style customisation (Phase B); taskbar mode (Phase C) only after A and B work and the restore matrix is recorded.
 
 Done on this branch:
@@ -85,7 +85,7 @@ Phase B live check, 2026-11-23 in `pnpm dev` (taskbar kept, v5 settings backed u
 ## Next steps
 
 1. Isaac to look at the dock in `pnpm dev` (back up `settings.json` first; see Open items) and try Customise on the real app: skins, Undo, islands and chips, a vertical dock, widget looks, scenes, desktop widgets.
-2. Decide: (a) ADR 0006 (update checks on by default) from Proposed to Accepted, (b) `tauri-plugin-updater` with a signing key for in-app installs, (c) a PR for `feat/developer-widgets` into `develop` or `main` on `deathboy20/OpenDock`. Before merging to `main`, run the `security-release-checklist` and `ui-release-checklist` skills; neither has run yet.
+2. Decide: (a) ADR 0006 (update checks on by default) from Proposed to Accepted, (b) `tauri-plugin-updater` with a signing key for in-app installs, (c) review and merge PR #11 (targets `main`; the README's flow would send features to `develop` first). Before merging to `main`, run the `security-release-checklist` and `ui-release-checklist` skills; neither has run yet.
 3. Worth doing next: a "switch scene" automation action (scenes from rules, e.g. Focus at 9:00), more widget looks (Now playing bar with progress, Year progress dots), and a Linux/macOS runtime check before promising those platforms.
 4. Phase C (taskbar mode) waits for Isaac and a recorded `docs/testing-matrix.md` on Windows 10.
 
