@@ -71,6 +71,12 @@ Open the **Widget gallery** from the dock menu to add widgets. Each one shows wh
 
 Open **Customise** from the hub or the dock menu.
 
+### Scenes
+
+A scene is a saved setup: the dock's widgets and their order, size, style, spacing and edge, the theme and skin, and whether quiet hours and automations are on. Set the dock up, type a name such as **Work**, **Focus** or **Present**, and press **Save current setup**. Saving with a name that already exists updates that scene.
+
+Switch scenes from **Customise** or from the dock menu (right-click the dock). The last scene you applied is marked. Scenes never change the Windows taskbar mode, and a scene whose skin you have since deleted falls back to the dock style. You can keep up to 12 scenes.
+
 ### Skins
 
 A skin changes colours, corner radius, blur, shadows, font and motion speed on top of the dock style, in every OpenDock window. Five come built in: **Graphite**, **Paper**, **Dusk**, **Forest** and **High contrast**. Each has dark and light values, and keeps text at 4.5:1 contrast or more. **Dock style** turns skins off.

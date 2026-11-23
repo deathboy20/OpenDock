@@ -27,7 +27,7 @@ This roadmap is a statement of direction, not a promise of dates. Progress is tr
 
 ## Ideas we're exploring
 
-- **Scenes.** One-click profiles (Work, Focus, Present, Evening) that change the layout, quiet hours and active rules together.
+- **Scenes.** One-click profiles (Work, Focus, Present, Evening) that change the layout, quiet hours and automations together. The first version is on the `feat/developer-widgets` branch; switching scenes from a rule is still to come.
 - **Context-aware dock.** Widgets that adapt to the focused app, such as CI status when an editor is active.
 - **Command palette and CLI.** A global hotkey to launch apps, run rules and toggle scenes, plus an `opendock` CLI and `opendock://` links.
 - **Developer widgets.** Pull request reviews, CI status, container lists and a local webhook tile you can update with `curl`.

@@ -3,9 +3,10 @@
 
 [[set]]
 identifier = "dock-core"
-description = "Read and save settings and lay out the dock."
+description = "Read and save settings, switch scenes and lay out the dock."
 permissions = [
   "allow-get-settings",
+  "allow-apply-scene",
   "allow-save-settings",
   "allow-apply-dock-layout-command",
   "allow-set-dock-length",
@@ -62,7 +63,7 @@ permissions = [
 
 [[set]]
 identifier = "widget-config"
-description = "Configure widgets and the shell: city search, calendar feeds, the GitHub token, startup, taskbar status and quitting."
+description = "Configure widgets and the shell: city search, calendar feeds, the GitHub token, scenes, startup, taskbar status and quitting."
 permissions = [
   "allow-search-city",
   "allow-add-calendar",
@@ -72,6 +73,8 @@ permissions = [
   "allow-quit-app",
   "allow-set-github-token",
   "allow-clear-github-token",
+  "allow-save-scene",
+  "allow-delete-scene",
 ]
 
 [[set]]

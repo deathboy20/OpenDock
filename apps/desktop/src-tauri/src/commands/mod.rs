@@ -13,6 +13,7 @@ use crate::dock_layout::{apply_dock_layout, sync_autostart};
 use crate::platform::monitor_id;
 use crate::platform::taskbar::TaskbarStatus;
 use crate::services::Wakers;
+use crate::settings::scenes::{self, Scene};
 use crate::settings::AppSettings;
 use crate::state::AppState;
 
@@ -158,4 +159,44 @@ pub fn set_launch_at_startup(
 #[tauri::command]
 pub fn get_taskbar_status(state: State<'_, AppState>) -> TaskbarStatus {
     state.taskbar.status()
+}
+
+// ---------- scenes ----------
+
+/// Saves the current setup as a scene, replacing one with the same name.
+#[tauri::command]
+pub fn save_scene(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    name: String,
+) -> Result<Scene, String> {
+    if name.chars().count() > 80 {
+        return Err("Give the scene a name of up to 40 characters".into());
+    }
+    let (next, scene) = scenes::save_current(&state.settings(), &name)?;
+    persist_settings(&app, &state, next)?;
+    Ok(scene)
+}
+
+#[tauri::command]
+pub fn apply_scene(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    id: String,
+) -> Result<AppSettings, String> {
+    let settings = state.settings();
+    let scene = settings
+        .scenes
+        .items
+        .iter()
+        .find(|s| s.id == id)
+        .cloned()
+        .ok_or_else(|| "That scene no longer exists".to_string())?;
+    persist_settings(&app, &state, scenes::apply(&settings, &scene))
+}
+
+#[tauri::command]
+pub fn delete_scene(app: AppHandle, state: State<'_, AppState>, id: String) -> Result<(), String> {
+    let next = scenes::delete(&state.settings(), &id);
+    persist_settings(&app, &state, next).map(|_| ())
 }

@@ -1,6 +1,6 @@
 import { removeDockItem, type AppSettings } from "@opendock/config-schema";
 import { useState } from "react";
-import { openHub, quitApp, type HubPage } from "../../services/ipc";
+import { applyScene, errorText, openHub, quitApp, type HubPage } from "../../services/ipc";
 import { useSettings } from "../../services/settingsContext";
 import { StylePicker } from "../dock/StylePicker";
 import { ADD_WIDGET_ID, findWidget } from "../widgets/catalog";
@@ -133,6 +133,24 @@ export function DockMenu({ target, onDone }: { target: string | null; onDone: ()
           onChange={(mode) => change((s) => ({ ...s, taskbar: { mode } }))}
         />
       </section>
+
+      {settings.scenes.items.length > 0 ? (
+        <section className="menu-section">
+          <p className="menu-caption">Scenes</p>
+          {settings.scenes.items.map((scene) => (
+            <MenuItem
+              key={scene.id}
+              icon={scene.id === settings.scenes.active ? "check" : "dock"}
+              label={scene.id === settings.scenes.active ? `${scene.name} (last applied)` : `Switch to ${scene.name}`}
+              onClick={() => {
+                applyScene(scene.id)
+                  .then(() => onDone())
+                  .catch((e) => setError(errorText(e)));
+              }}
+            />
+          ))}
+        </section>
+      ) : null}
 
       <section className="menu-section">
         <MenuItem icon="grid" label="Widget gallery" onClick={() => go("widgets")} />

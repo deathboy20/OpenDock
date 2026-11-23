@@ -1,6 +1,13 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { defaultAppSettings, parseAppSettings, type AppSettings, type Rule, type RuleAction } from "@opendock/config-schema";
+import {
+  defaultAppSettings,
+  parseAppSettings,
+  type AppSettings,
+  type Rule,
+  type RuleAction,
+  type Scene,
+} from "@opendock/config-schema";
 
 // ---------- shapes returned by the Rust side ----------
 
@@ -241,6 +248,9 @@ export const quitApp = () => invoke<void>("quit_app");
 export const setLaunchAtStartup = (enabled: boolean) =>
   invoke<boolean>("set_launch_at_startup", { enabled });
 export const getTaskbarStatus = () => invoke<TaskbarStatus>("get_taskbar_status");
+export const saveScene = (name: string) => invoke<Scene>("save_scene", { name });
+export const applyScene = (id: string) => invoke<AppSettings>("apply_scene", { id });
+export const deleteScene = (id: string) => invoke<void>("delete_scene", { id });
 
 // ---------- widgets ----------
 

@@ -198,3 +198,47 @@
 .skin-io .option-field {
   max-width: none;
 }
+
+/* ---------- scenes ---------- */
+
+.scene-list {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scene-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 6px 6px 6px 12px;
+  border: 1px solid var(--od-border);
+  border-radius: var(--od-radius-sm);
+}
+
+.scene-list li.is-active {
+  border-color: var(--od-accent);
+}
+
+.scene-text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+
+.scene-text strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scene-text .small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
