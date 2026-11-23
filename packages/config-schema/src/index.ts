@@ -4,3 +4,4 @@ export * from "./skins";
 export * from "./scenes";
 export * from "./desktop";
 export * from "./variants";
+export * from "./text";

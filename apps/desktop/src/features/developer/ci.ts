@@ -1,4 +1,4 @@
-import { githubRepoSchema } from "@opendock/config-schema";
+import { githubRepoSchema, trimChars } from "@opendock/config-schema";
 import type { CiRepoStatus, CiSnapshot } from "../../services/ipc";
 
 export type CiState = "passing" | "failing" | "running" | "cancelled" | "none" | "error";
@@ -52,7 +52,8 @@ export function ciHeadline(summary: CiSummary): { text: string; state: CiState }
 
 /** Accepts `owner/name` or a GitHub URL, and returns `owner/name` or null. */
 export function parseRepoInput(input: string): string | null {
-  const trimmed = input.trim().replace(/\.git$/, "").replace(/\/+$/, "");
+  const noSlash = trimChars(input.trim(), "/", "end");
+  const trimmed = noSlash.endsWith(".git") ? noSlash.slice(0, -4) : noSlash;
   const fromUrl = /^(?:https?:\/\/)?(?:www\.)?github\.com\/([^/]+\/[^/]+)/i.exec(trimmed)?.[1];
   const repo = fromUrl ?? trimmed;
   return githubRepoSchema.safeParse(repo).success ? repo : null;
