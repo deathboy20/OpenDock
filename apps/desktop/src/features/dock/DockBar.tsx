@@ -31,7 +31,7 @@ import { ADD_WIDGET_ID, findWidget } from "../widgets/catalog";
 import { TileContent } from "../widgets/tiles";
 import { decideTileClick, flyoutKey, type FlyoutMemory } from "./dockClick";
 import { anchorOf, DockActionsContext } from "./dockActions";
-import { islandEdges, type IslandEdge } from "./islands";
+import { islandEdges, islandStyle, useIslandRects, type IslandEdge } from "./islands";
 import "./dock.css";
 
 const HIGHLIGHT_MS = 4000;
@@ -213,6 +213,12 @@ export function DockBar() {
   };
 
   const islands = islandEdges(dock.itemOrder, dock.layout);
+  const islandRects = useIslandRects(
+    trackRef,
+    vertical,
+    islands !== null,
+    `${dock.itemOrder.join(",")}|${dock.layout}|${dock.size}|${dock.density}|${dock.spacing}`,
+  );
 
   const onShellPointerDown = (event: React.PointerEvent) => {
     if (event.button !== 0 || (event.target as HTMLElement).closest(".dock-item")) return;
@@ -233,6 +239,13 @@ export function DockBar() {
         onMenu(null, vertical ? event.clientY : event.clientX);
       }}
     >
+      {islandRects.length > 0 ? (
+        <div className="dock-islands" aria-hidden>
+          {islandRects.map((rect, i) => (
+            <span key={i} className="dock-island" style={islandStyle(rect)} />
+          ))}
+        </div>
+      ) : null}
       <DockActionsContext.Provider value={{ openPanel: open, vertical }}>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
           <SortableContext

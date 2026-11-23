@@ -213,14 +213,13 @@ fn toast_window(app: &AppHandle) -> Result<WebviewWindow, String> {
         .skip_taskbar(true)
         .resizable(false)
         .focused(false)
+        // Not focusable (WS_EX_NOACTIVATE): showing it never steals focus, and its buttons
+        // still take clicks. A raw ShowWindow would skip the window library's own show step
+        // and draw a native title bar on a fresh toast.
+        .focusable(false)
         .visible(false)
         .build()
         .map_err(|e| e.to_string())?;
-    // The toast is shown with a raw no-activate ShowWindow so it never steals focus, which
-    // skips the window library's own show step. Apply the borderless style now, or a fresh
-    // toast can appear once with a native title bar.
-    let _ = window.set_decorations(false);
-    let _ = window.set_shadow(false);
     Ok(window)
 }
 
@@ -245,7 +244,7 @@ pub fn show_toast(app: &AppHandle, toast: ToastPayload) {
     if !created {
         let _ = window.emit("toast:show", &toast);
     }
-    platform::show_without_focus(&window);
+    let _ = window.show();
 }
 
 pub fn take_pending_toasts(app: &AppHandle) -> Vec<ToastPayload> {
