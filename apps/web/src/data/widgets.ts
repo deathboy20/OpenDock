@@ -143,6 +143,15 @@ export const widgets: Widget[] = [
     summary: "Every git repository in your project folders, with branch, uncommitted changes and ahead or behind. Open one in Cursor, VS Code, a terminal or GitHub Desktop, or read its HANDOFF.md.",
     network: [],
   },
+  {
+    id: "vault",
+    name: "Vault capture",
+    icon: "note",
+    category: "Developer",
+    summary: "Type a thought and it lands as a timestamped line in today's Inbox note in your Obsidian vault. Opens the vault in Obsidian too.",
+    network: [],
+    stores: "Your notes, in your own vault",
+  },
 ];
 
 export function widgetsIn(category: WidgetCategory): Widget[] {

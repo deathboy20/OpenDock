@@ -68,6 +68,9 @@ const COMMANDS: &[&str] = &[
     "refresh_projects",
     "open_project",
     "read_handoff",
+    "get_vault_status",
+    "vault_capture",
+    "open_vault",
 ];
 
 fn main() {

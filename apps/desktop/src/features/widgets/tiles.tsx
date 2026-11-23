@@ -20,7 +20,7 @@ import {
 import { Icon } from "./icons";
 import { Tile, type TileProps } from "./Tile";
 import { Bar, Ring, Sparkline } from "./visuals";
-import { ProjectsTile } from "../developer/DeveloperTiles";
+import { ProjectsTile, VaultTile } from "../developer/DeveloperTiles";
 
 export type { TileProps } from "./Tile";
 
@@ -359,6 +359,8 @@ export function TileContent({ id, size, compact }: { id: string } & TileProps) {
       return <AddTile />;
     case "projects":
       return <ProjectsTile {...props} />;
+    case "vault":
+      return <VaultTile {...props} />;
     default:
       return <UnknownTile id={id} />;
   }

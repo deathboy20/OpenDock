@@ -7,6 +7,7 @@ import type {
   ProjectsSnapshot,
   SystemStats,
   Todo,
+  VaultStatus,
   VolumeState,
   WeatherSnapshot,
   WindowsSnapshot,
@@ -26,6 +27,7 @@ export type LiveData = {
   windows: Loadable<WindowsSnapshot>;
   volume: Loadable<VolumeState | null>;
   projects: Loadable<ProjectsSnapshot | null>;
+  vault: Loadable<VaultStatus>;
 };
 
 export const emptyLive: LiveData = {
@@ -41,6 +43,7 @@ export const emptyLive: LiveData = {
   windows: loading,
   volume: loading,
   projects: loading,
+  vault: loading,
 };
 
 export const LiveContext = createContext<LiveData>(emptyLive);

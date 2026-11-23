@@ -171,6 +171,14 @@ export type ProjectsSnapshot = {
   gitAvailable: boolean;
   scannedAt: number;
 };
+export type VaultStatus = {
+  configured: boolean;
+  exists: boolean;
+  isObsidian: boolean;
+  todayFile: string;
+  todayCount: number;
+  recent: string[];
+};
 export type ProjectTool = "cursor" | "vscode" | "terminal" | "githubDesktop" | "explorer";
 
 export type HubPage =
@@ -183,7 +191,7 @@ export type HubPage =
   | "calendars"
   | "privacy"
   | "developer";
-export type DataTopic = "todos" | "notes" | "calendar" | "rules" | "activity";
+export type DataTopic = "todos" | "notes" | "calendar" | "rules" | "activity" | "vault";
 
 // ---------- settings and dock ----------
 
@@ -294,6 +302,9 @@ export const getProjects = () => invoke<ProjectsSnapshot | null>("get_projects")
 export const refreshProjects = () => invoke<void>("refresh_projects");
 export const openProject = (path: string, tool: ProjectTool) => invoke<void>("open_project", { path, tool });
 export const readHandoff = (path: string) => invoke<string | null>("read_handoff", { path });
+export const getVaultStatus = () => invoke<VaultStatus>("get_vault_status");
+export const vaultCapture = (text: string) => invoke<void>("vault_capture", { text });
+export const openVault = (today: boolean) => invoke<void>("open_vault", { today });
 
 // ---------- events ----------
 

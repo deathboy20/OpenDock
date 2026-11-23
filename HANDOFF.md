@@ -20,6 +20,7 @@ Done on this branch:
 1. Settings version 6 in Rust (`src-tauri/src/settings/types.rs`) and Zod (`packages/config-schema/src/settings.ts`): `widgets.projects.roots`, `widgets.vault.path`, `widgets.localAi.model`, `widgets.ci.{enabled, repos}`. Migration 3/4/5 → 6 in both languages. Fixtures in `packages/config-schema/fixtures/settings.json`.
 2. `net.rs`: `send()` with headers and JSON POST bodies; plain `http://` only for declared loopback hosts. Headers are never logged.
 3. **Projects widget** (`id: projects`). Rust: `services/projects.rs` (scan two levels deep, `git status --porcelain=v2 --branch` with `core.fsmonitor=false`, HANDOFF.md reader capped at 512 KB), `commands/developer.rs` (`get_projects`, `refresh_projects`, `open_project`, `read_handoff`; actions accept only paths from the latest scan), `platform/process.rs` (no-console `git`, open a folder in Cursor, VS Code, Windows Terminal or PowerShell). GitHub Desktop opens via `x-github-client://openLocalRepo/`. UI: `features/developer/` (tile, panel, model, safe Markdown view) and the hub page **Developer widgets** (`features/hub/DeveloperPage.tsx`). The `Tile` helper moved to `features/widgets/Tile.tsx`.
+4. **Vault capture widget** (`id: vault`). Rust `services/vault.rs`: appends `- HH:MM text` to `<vault>/Inbox/YYYY-MM-DD.md`, creates `Inbox` and the note on first use, refuses links and relative paths, 4000-character limit. Commands `get_vault_status`, `vault_capture`, `open_vault` (Obsidian `obsidian://open?path=`). UI `features/developer/VaultPanel.tsx`; vault path on the Developer widgets page.
 
 Verified on 2026-11-23 (Windows 10 Pro, this PC): `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm fmt:check`, `pnpm test:rust` and `cargo clippy --all-targets -- -D warnings` all pass. Rust builds offline from the local cargo cache.
 
@@ -49,7 +50,7 @@ Verified on 2026-11-23 (Windows 10 Pro, this PC): `pnpm lint`, `pnpm typecheck`,
 
 ## Next steps
 
-1. Phase A widgets, one commit each: Vault capture, Local AI (Ollama), CI status (opt-in, token in the keychain).
+1. Phase A widgets, one commit each: Local AI (Ollama), CI status (opt-in, token in the keychain).
 2. Show them in `pnpm dev`, then Phase B: per-widget instance options, JSON skins (token overrides only), desktop widgets layer, Scenes.
 3. Phase C (taskbar mode) waits for Isaac and a recorded `docs/testing-matrix.md` on Windows 10.
 

@@ -273,3 +273,44 @@
     transition: none;
   }
 }
+
+/* ---------- vault capture ---------- */
+
+.vault-form {
+  margin-top: 12px;
+}
+
+.vault-form .text-area {
+  width: 100%;
+  resize: vertical;
+}
+
+.vault-actions {
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.vault-recent {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vault-recent li {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 6px 8px;
+  border-radius: var(--od-radius-sm);
+  background: var(--od-raised);
+  font-size: 12.5px;
+}
+
+.vault-open {
+  margin-top: 14px;
+  flex-wrap: wrap;
+}

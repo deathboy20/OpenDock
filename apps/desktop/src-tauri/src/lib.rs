@@ -189,6 +189,9 @@ pub fn run() {
             commands::developer::refresh_projects,
             commands::developer::open_project,
             commands::developer::read_handoff,
+            commands::developer::get_vault_status,
+            commands::developer::vault_capture,
+            commands::developer::open_vault,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
