@@ -160,7 +160,7 @@ export function LocalAiPanel() {
             {snapshot.loaded.map((m) => (
               <li key={m.name} className="is-loaded">
                 <span className="mono">{m.name}</span>
-                <span className="muted small">{formatBytes(m.sizeVramBytes)} on the GPU</span>
+                <span className="muted small">{m.sizeVramBytes > 0 ? `${formatBytes(m.sizeVramBytes)} on the GPU` : "Running on the CPU"}</span>
               </li>
             ))}
           </ul>

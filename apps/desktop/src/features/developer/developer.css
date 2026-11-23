@@ -384,6 +384,7 @@
   border-radius: var(--od-radius-sm);
   background: var(--od-surface-deep);
   color: var(--od-text);
+  font-family: inherit;
   font-size: 13px;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -497,4 +498,8 @@
   .ci-row {
     transition: none;
   }
+}
+
+.ai-list li .small {
+  flex: none;
 }
