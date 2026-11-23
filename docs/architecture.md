@@ -94,7 +94,7 @@ Tauri capabilities grant each window only what it needs. Command groups are defi
 | `previews`, `power` | | ✓ | | |
 | `apps-setup`, `widget-config`, `automation` | | | ✓ | |
 
-Desktop widget windows (`desk-*`, capability `desktop.json`) get `dock-core`, `widget-read`, `navigation` and `desktop-widget` (`settle_desktop_widget`), plus `core:window:allow-start-dragging`.
+Desktop widget windows (`desk-*`, capability `desktop.json`) only display, so they get read-only sets: `settings-read` (`get_settings`), `widget-read`, `apps-read` and `desktop-widget` (`settle_desktop_widget`), plus `core:window:allow-start-dragging`. They can't save settings, open panels or act on widgets.
 
 ## Background services
 
