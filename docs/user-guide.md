@@ -63,6 +63,7 @@ Open the **Widget gallery** from the dock menu to add widgets. Each one shows wh
 | Weather | Conditions, next hours and week | Open-Meteo |
 | Day progress | How much of the day, week and year has passed | None |
 | Projects | Git repositories in your project folders, with branch and changes | None |
+| Vault capture | A quick note box for your Obsidian vault's Inbox | None |
 
 ## Developer widgets
 
@@ -75,6 +76,12 @@ Add the folders your repositories live in, for example `D:\Gitfiles`. OpenDock l
 Each repository shows its branch, how many files have uncommitted changes, and how far it is ahead of or behind its upstream. Select one to open it in **Cursor**, **VS Code**, a **Terminal** (Windows Terminal if installed, otherwise PowerShell), **GitHub Desktop** or **Files** (File Explorer). If the repository has a `HANDOFF.md`, **HANDOFF.md** shows it in the panel as plain text.
 
 The widget needs Git for Windows. It runs `git status` in each repository and never fetches, so "behind" is measured against the last time you fetched. It only opens or reads folders it found in your project folders.
+
+### Vault capture
+
+Enter your Obsidian vault folder, for example `C:\Users\you\Documents\Vault`. Each capture is added to `Inbox/YYYY-MM-DD.md` in that folder as a list item with the time, such as `- 09:30 Call Ama`; lines after the first are indented under it. The note and the `Inbox` folder are created the first time. OpenDock writes nothing else in the vault, and refuses to write through a link that points outside it.
+
+**Open today's note** and **Open vault in Obsidian** use Obsidian's `obsidian://open` link, so Obsidian must be installed. Ctrl+Enter saves.
 
 ## Calendars
 

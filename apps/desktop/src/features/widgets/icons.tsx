@@ -55,6 +55,7 @@ export type IconName =
   | "terminal"
   | "code"
   | "back"
+  | "inbox"
   | WeatherKind;
 
 const paths: Record<IconName, string> = {
@@ -63,6 +64,7 @@ const paths: Record<IconName, string> = {
   terminal: "M3 5h18v14H3zM7 9.5l3 2.5-3 2.5M12.5 15H17",
   code: "M9 7l-5 5 5 5M15 7l5 5-5 5",
   back: "M15 6l-6 6 6 6",
+  inbox: "M4 13.5h4.5l1.5 2.5h4l1.5-2.5H20M4 13.5L6.5 5h11l2.5 8.5V19H4z",
   start: "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z",
   clock: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2",
   play: "M8 5.5v13l10-6.5z",

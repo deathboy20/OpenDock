@@ -189,6 +189,6 @@ The UI is organised by feature under `apps/desktop/src/features/`. Each feature 
 - `flyout/` — the flyout root and every panel
 - `hub/` — hub pages, Automation Studio and the welcome flow
 - `toast/` — the toast window and its queue
-- `developer/` — the developer widgets (Projects), their models and panels
+- `developer/` — the developer widgets (Projects, Vault capture), their models and panels
 
 Global styles live in `styles/`: `tokens.css` holds every colour, radius, shadow and motion value, and `base.css` holds shared primitives. Feature CSS uses tokens only.

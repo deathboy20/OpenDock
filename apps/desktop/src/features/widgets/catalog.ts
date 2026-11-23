@@ -168,6 +168,17 @@ export const widgetCatalog: WidgetDefinition[] = [
     panel: true,
     configure: "developer",
   },
+  {
+    id: "vault",
+    name: "Vault capture",
+    category: "Developer",
+    description: "A quick note box that adds a timestamped line to today's Inbox note in your Obsidian vault, and opens the vault in Obsidian.",
+    sizes: ["s", "m", "l"],
+    network: [],
+    stores: "Your notes, in Inbox/YYYY-MM-DD.md inside your vault",
+    panel: true,
+    configure: "developer",
+  },
 ];
 
 export const widgetCategories: WidgetCategory[] = ["Essentials", "Productivity", "Developer", "System", "Info"];

@@ -1,5 +1,6 @@
 import { MAX_PROJECT_ROOTS, type AppSettings } from "@opendock/config-schema";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getVaultStatus, type VaultStatus } from "../../services/ipc";
 import { useSettings } from "../../services/settingsContext";
 import { addFolder } from "../developer/projects";
 import { Icon } from "../widgets/icons";
@@ -70,6 +71,63 @@ function ProjectFolders({ settings, change }: { settings: AppSettings; change: C
   );
 }
 
+function VaultFolder({ settings, change }: { settings: AppSettings; change: Change }) {
+  const saved = settings.widgets.vault.path;
+  const [draft, setDraft] = useState(saved);
+  const [seen, setSeen] = useState(saved);
+  const [status, setStatus] = useState<VaultStatus | null>(null);
+  if (saved !== seen) {
+    setSeen(saved);
+    setDraft(saved);
+  }
+  useEffect(() => {
+    let cancelled = false;
+    getVaultStatus()
+      .then((s) => !cancelled && setStatus(s))
+      .catch(() => !cancelled && setStatus(null));
+    return () => {
+      cancelled = true;
+    };
+  }, [saved]);
+  const commit = () => {
+    const path = draft.trim().replace(/[\\/]+$/, "");
+    if (path === saved) return;
+    change((s) => ({ ...s, widgets: { ...s.widgets, vault: { ...s.widgets.vault, path } } }));
+  };
+  const hint = !saved
+    ? "Captures go to Inbox/YYYY-MM-DD.md inside this folder. OpenDock writes nothing else there."
+    : status && !status.exists
+      ? "That folder doesn't exist."
+      : status && !status.isObsidian
+        ? "Found the folder, but it has no .obsidian settings yet. Open it once in Obsidian."
+        : `Captures go to ${status?.todayFile ?? "Inbox/"} inside this folder.`;
+  return (
+    <section className="settings-card">
+      <h2>Vault capture</h2>
+      <form
+        className="folder-add"
+        onSubmit={(e) => {
+          e.preventDefault();
+          commit();
+        }}
+      >
+        <input
+          className="text-input grow"
+          aria-label="Obsidian vault folder"
+          placeholder="C:\Users\you\Documents\Vault"
+          value={draft}
+          maxLength={1024}
+          onChange={(e) => setDraft(e.target.value)}
+        />
+        <button type="submit" className="button" disabled={draft.trim() === saved}>
+          Save
+        </button>
+      </form>
+      <p className={`small ${status && saved && !status.exists ? "text-warn" : "muted"}`}>{hint}</p>
+    </section>
+  );
+}
+
 export function DeveloperPage() {
   const { settings, update } = useSettings();
   const [error, setError] = useState<string | null>(null);
@@ -83,6 +141,7 @@ export function DeveloperPage() {
         </p>
       ) : null}
       <ProjectFolders settings={settings} change={change} />
+      <VaultFolder settings={settings} change={change} />
     </div>
   );
 }

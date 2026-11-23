@@ -6,8 +6,9 @@ use tauri::{AppHandle, Manager, State};
 
 use crate::platform::{self, process::FolderTool};
 use crate::services::projects::{self, ProjectsSnapshot};
+use crate::services::vault::{self, VaultStatus};
 use crate::services::Wakers;
-use crate::state::AppState;
+use crate::state::{notify_changed, AppState};
 
 const MAX_PATH_CHARS: usize = 1024;
 
@@ -75,4 +76,42 @@ pub fn read_handoff(state: State<'_, AppState>, path: String) -> Result<Option<S
         .and_then(|s| projects::known_project(s, &path))
         .ok_or_else(|| "that project is no longer listed".to_string())?;
     projects::read_handoff(project)
+}
+
+// ---------- vault capture ----------
+
+#[tauri::command]
+pub fn get_vault_status(state: State<'_, AppState>) -> VaultStatus {
+    vault::status(&state.settings().widgets.vault.path, &chrono::Local::now())
+}
+
+#[tauri::command]
+pub fn vault_capture(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    text: String,
+) -> Result<(), String> {
+    if text.chars().count() > vault::MAX_CAPTURE_CHARS * 2 {
+        return Err("that note is too long".into());
+    }
+    vault::capture(
+        &state.settings().widgets.vault.path,
+        &text,
+        &chrono::Local::now(),
+    )?;
+    notify_changed(&app, "vault");
+    Ok(())
+}
+
+/// Opens the vault, or today's Inbox note, in Obsidian.
+#[tauri::command]
+pub async fn open_vault(app: AppHandle, today: bool) -> Result<(), String> {
+    let path = app.state::<AppState>().settings().widgets.vault.path;
+    let now = chrono::Local::now();
+    let url = vault::obsidian_url(&path, today.then_some(&now))?;
+    tauri::async_runtime::spawn_blocking(move || {
+        platform::launch_path(&url).map_err(|_| "Obsidian isn't installed".to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }

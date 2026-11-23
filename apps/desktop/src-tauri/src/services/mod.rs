@@ -6,6 +6,7 @@ pub mod automation;
 pub mod calendar;
 pub mod focus;
 pub mod projects;
+pub mod vault;
 pub mod weather;
 pub mod windows;
 

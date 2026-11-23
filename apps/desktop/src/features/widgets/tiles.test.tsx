@@ -10,6 +10,7 @@ import type {
   ProjectsSnapshot,
   SystemStats,
   Todo,
+  VaultStatus,
   WeatherSnapshot,
   WindowsSnapshot,
 } from "../../services/ipc";
@@ -105,6 +106,15 @@ const projects: ProjectsSnapshot = {
   scannedAt: now,
 };
 
+const vault: VaultStatus = {
+  configured: true,
+  exists: true,
+  isObsidian: true,
+  todayFile: "Inbox/2026-11-23.md",
+  todayCount: 2,
+  recent: ["Ship the vault widget", "Call Ama"],
+};
+
 /** Developer widgets only show data once they are set up. */
 const configured: SettingsContextValue = {
   settings: {
@@ -139,6 +149,7 @@ const readyLive: LiveData = {
   windows: ready(windows),
   volume: ready({ level: 40, muted: false }),
   projects: ready(projects),
+  vault: ready(vault),
 };
 
 const emptyData: LiveData = {
@@ -154,6 +165,7 @@ const emptyData: LiveData = {
   windows: ready({ windows: [], active: null }),
   volume: ready(null),
   projects: ready({ ...projects, projects: [] }),
+  vault: ready({ ...vault, configured: false, exists: false, todayCount: 0, recent: [] }),
 };
 
 const errorLive: LiveData = {
@@ -169,6 +181,7 @@ const errorLive: LiveData = {
   windows: failed("enumeration failed"),
   volume: failed("no audio service"),
   projects: failed("scan failed"),
+  vault: failed("vault unreadable"),
 };
 
 const states: [string, LiveData][] = [
@@ -302,6 +315,22 @@ describe("dock tiles", () => {
   it("marks a failed project scan as an error", () => {
     const { container } = render(withData(errorLive, <TileContent id="projects" size="m" compact={false} />));
     expect(container.querySelector(".tile.is-error")).not.toBeNull();
+  });
+
+  it("counts today's vault captures", () => {
+    const { getByText } = render(withData(readyLive, <TileContent id="vault" size="l" compact={false} />));
+    expect(getByText("2 captures")).toBeInTheDocument();
+    expect(getByText("Ship the vault widget")).toBeInTheDocument();
+  });
+
+  it("asks for a vault and flags a missing one", () => {
+    const empty = render(withData(emptyData, <TileContent id="vault" size="m" compact={false} />));
+    expect(empty.getByText("Set your vault")).toBeInTheDocument();
+    empty.unmount();
+    const missing = render(
+      withData({ ...readyLive, vault: ready({ ...vault, exists: false }) }, <TileContent id="vault" size="m" compact={false} />),
+    );
+    expect(missing.container.querySelector(".tile.is-error")).not.toBeNull();
   });
 
   it("warns when the battery is low", () => {

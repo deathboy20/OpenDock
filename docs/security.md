@@ -51,7 +51,7 @@ Hosts contacted today:
 | City search | `geocoding-api.open-meteo.com` | Only while you type in the city search |
 | Calendars | The host of each feed you add | Every 15 minutes, or when you press refresh |
 
-The Projects widget makes no network requests: it runs `git status` (with `core.fsmonitor` turned off and no optional locks) in repositories under the folders you choose, and only opens or reads paths from its latest scan.
+The Projects widget makes no network requests: it runs `git status` (with `core.fsmonitor` turned off and no optional locks) in repositories under the folders you choose, and only opens or reads paths from its latest scan. Vault capture makes no network requests either: it appends to one file, `Inbox/YYYY-MM-DD.md`, inside the vault folder you set, and refuses links that point outside it.
 
 The installed app makes no other network requests. Installing, uninstalling and the first-run setup work offline (on Windows 10, the installer may download the WebView2 runtime from Microsoft if it's missing).
 

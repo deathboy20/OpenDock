@@ -7,6 +7,7 @@ All notable changes to OpenDock are documented here. The format is based on [Kee
 ### Added
 
 - **Projects widget.** Lists the git repositories in the folders you choose, with branch, uncommitted changes and ahead or behind. Open one in Cursor, VS Code, a terminal, GitHub Desktop or File Explorer, or read its `HANDOFF.md` in the panel. A new **Developer widgets** page in the hub holds the folders.
+- **Vault capture widget.** Type a note and it is added, with the time, to `Inbox/YYYY-MM-DD.md` in your Obsidian vault. Open today's note or the vault in Obsidian from the panel.
 
 ### Changed
 

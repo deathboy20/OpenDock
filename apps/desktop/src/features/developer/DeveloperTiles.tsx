@@ -63,3 +63,38 @@ export function ProjectsTile({ size, compact }: TileProps) {
     />
   );
 }
+
+export function VaultTile({ size, compact }: TileProps) {
+  const { vault } = useLive();
+  const icon = <Icon name="inbox" />;
+  if (vault.status !== "ready") {
+    return (
+      <Tile
+        compact={compact}
+        state={vault.status}
+        icon={icon}
+        primary={vault.status === "error" ? "Vault unavailable" : "Vault"}
+        title={vault.status === "error" ? vault.error : undefined}
+      />
+    );
+  }
+  const v = vault.data;
+  if (!v.configured) {
+    return <Tile compact={compact} state="empty" icon={icon} primary="Set your vault" title="Choose your Obsidian vault folder" />;
+  }
+  if (!v.exists) {
+    return <Tile compact={compact} state="error" icon={icon} primary="Vault not found" title="The vault folder is missing" />;
+  }
+  return (
+    <Tile
+      compact={compact}
+      state="ready"
+      icon={icon}
+      title={`${plural(v.todayCount, "capture")} in ${v.todayFile}`}
+      primary={size === "s" ? "Capture" : v.todayCount === 0 ? "Capture a note" : plural(v.todayCount, "capture")}
+      secondary={
+        size === "s" ? undefined : size === "l" && v.recent[0] ? <span className="tile-truncate">{v.recent[0]}</span> : "Inbox today"
+      }
+    />
+  );
+}

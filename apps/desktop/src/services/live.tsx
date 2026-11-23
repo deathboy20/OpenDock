@@ -4,6 +4,7 @@ import {
   getFocusState,
   getMediaState,
   getProjects,
+  getVaultStatus,
   getSystemStats,
   getVolume,
   getWeather,
@@ -19,6 +20,7 @@ import {
   type ProjectsSnapshot,
   type SystemStats,
   type Todo,
+  type VaultStatus,
   type VolumeState,
   type WeatherSnapshot,
   type WindowsSnapshot,
@@ -46,6 +48,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
   const [windows, setWindows] = useState<Loadable<WindowsSnapshot>>(loading);
   const [volume, setVolume] = useState<Loadable<VolumeState | null>>(loading);
   const [projects, setProjects] = useState<Loadable<ProjectsSnapshot | null>>(loading);
+  const [vault, setVault] = useState<Loadable<VaultStatus>>(loading);
 
   useEffect(() => {
     load(listWindows, setWindows);
@@ -58,6 +61,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
     load(listNotes, setNotes);
     load(() => upcomingEvents(72), setEvents);
     load(getProjects, setProjects);
+    load(getVaultStatus, setVault);
 
     const offs = [
       on("media:state", (m) => setMedia(ready(m))),
@@ -71,14 +75,20 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       on("windows:changed", (w) => setWindows(ready(w))),
       on("volume:state", (v) => setVolume(ready(v))),
       on("projects:update", (p) => setProjects(ready(p))),
+      // The vault path lives in settings, and today's file changes at midnight.
+      on("settings:changed", () => load(getVaultStatus, setVault)),
       on("data:changed", (topic) => {
         if (topic === "todos") load(listTodos, setTodos);
         if (topic === "notes") load(listNotes, setNotes);
         if (topic === "calendar") load(() => upcomingEvents(72), setEvents);
+        if (topic === "vault") load(getVaultStatus, setVault);
       }),
     ];
     // Countdowns and "in 5 min" labels need a fresh list as time passes.
-    const timer = window.setInterval(() => load(() => upcomingEvents(72), setEvents), 5 * 60_000);
+    const timer = window.setInterval(() => {
+      load(() => upcomingEvents(72), setEvents);
+      load(getVaultStatus, setVault);
+    }, 5 * 60_000);
     return () => {
       offs.forEach((off) => off());
       window.clearInterval(timer);
@@ -87,7 +97,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
 
   return (
     <LiveContext.Provider
-      value={{ media, stats, cpuHistory, memoryHistory, focus, weather, todos, notes, events, windows, volume, projects }}
+      value={{ media, stats, cpuHistory, memoryHistory, focus, weather, todos, notes, events, windows, volume, projects, vault }}
     >
       {children}
     </LiveContext.Provider>
