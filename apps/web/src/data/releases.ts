@@ -15,19 +15,19 @@ export type Release = {
 };
 
 export const currentRelease: Release = {
-  version: "0.3.0",
-  tag: "v0.3.0",
-  date: "2026-11-07",
+  version: "0.4.0",
+  tag: "v0.4.0",
+  date: "2026-11-23",
   files: [
     {
       kind: "setup",
-      name: "OpenDock_0.3.0_x64-setup.exe",
+      name: "OpenDock_0.4.0_x64-setup.exe",
       label: "Installer (.exe)",
       note: "Recommended. Installs for your account, no admin rights needed.",
     },
     {
       kind: "msi",
-      name: "OpenDock_0.3.0_x64_en-US.msi",
+      name: "OpenDock_0.4.0_x64_en-US.msi",
       label: "Windows Installer (.msi)",
       note: "For deployment with Group Policy, Intune or other management tools.",
     },

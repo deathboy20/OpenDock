@@ -6,9 +6,9 @@
   "permissions": [
     "core:default",
     "core:window:allow-start-dragging",
-    "dock-core",
+    "settings-read",
     "widget-read",
-    "navigation",
+    "apps-read",
     "desktop-widget"
   ]
 }
