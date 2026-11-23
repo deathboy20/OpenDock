@@ -57,6 +57,10 @@ The Projects widget makes no network requests: it runs `git status` (with `core.
 
 The installed app makes no other network requests. Installing, uninstalling and the first-run setup work offline (on Windows 10, the installer may download the WebView2 runtime from Microsoft if it's missing).
 
+## Skins
+
+Skins are user-supplied JSON, so they are treated as untrusted. Rust (`settings/skins.rs`) and Zod (`packages/config-schema/src/skins.ts`) check every skin against the same list of tokens (`skin-tokens.json`). Colours must be `#rrggbb`, `#rrggbbaa` or `rgba()` with numeric channels; lengths and durations are bounded whole numbers; fonts and shadows are chosen from fixed presets. The UI applies them with `style.setProperty` on CSS custom properties only. A skin can't contain CSS, `url()`, `var()`, selectors or scripts, and is refused if it tries.
+
 ## Data at rest
 
 | Data | Location | Notes |

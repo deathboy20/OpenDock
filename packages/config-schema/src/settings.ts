@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { skinSettingsSchema } from "./skins";
 
 export const SETTINGS_VERSION = 7;
 export const MAX_PINNED_APPS = 24;
@@ -164,6 +165,7 @@ export const appSettingsSchema = z.object({
   widgets: widgetSettingsSchema.default({}),
   automation: automationSettingsSchema.default({}),
   apps: appsSettingsSchema.default({}),
+  skins: skinSettingsSchema.default({}),
   /** False until the first-run welcome has been completed or skipped. */
   onboarded: z.boolean().default(false),
 });
