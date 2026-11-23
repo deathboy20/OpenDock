@@ -83,6 +83,7 @@ const COMMANDS: &[&str] = &[
     "apply_scene",
     "delete_scene",
     "settle_desktop_widget",
+    "apply_skin",
 ];
 
 fn main() {

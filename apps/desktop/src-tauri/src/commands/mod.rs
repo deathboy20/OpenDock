@@ -221,3 +221,19 @@ pub fn settle_desktop_widget(
     };
     persist_settings(&app, &state, next).map(|_| ())
 }
+
+// ---------- skins ----------
+
+/// Makes a skin active and copies its layout choices into settings. `None` turns skins off.
+#[tauri::command]
+pub fn apply_skin(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    id: Option<String>,
+) -> Result<AppSettings, String> {
+    if id.as_ref().is_some_and(|i| i.len() > 64) {
+        return Err("That skin no longer exists".into());
+    }
+    let next = crate::settings::skins::apply(&state.settings(), id.as_deref())?;
+    persist_settings(&app, &state, next)
+}

@@ -79,7 +79,19 @@ Switch scenes from **Customise** or from the dock menu (right-click the dock). T
 
 ### Skins
 
-A skin changes colours, corner radius, blur, shadows, font and motion speed on top of the dock style, in every OpenDock window. Five come built in: **Graphite**, **Paper**, **Dusk**, **Forest** and **High contrast**. Each has dark and light values, and keeps text at 4.5:1 contrast or more. **Dock style** turns skins off.
+A skin changes colours, corner radius, blur, shadows, font and motion speed in every OpenDock window. It can also set the dock's shape and how each widget looks (see **Interface** and **Widget options** below); applying the skin copies those choices in, and you can change any of them afterwards. **Dock style** turns skins off and leaves the shape as it is.
+
+Ten come built in. Each has dark and light values, and keeps text at 4.5:1 contrast or more.
+
+| Skin | What it's for |
+| --- | --- |
+| Graphite, Paper, Dusk, Forest | Colour and corner changes on the usual bar |
+| High contrast | Pure black or white, strong borders, no blur, quick motion |
+| Islands | Related widgets in slim capsules with a strong tint, readable on any wallpaper |
+| Daylight | Bright photo wallpapers: opaque chips and dark text |
+| Console | Monospace, square corners, bar meters, a slim strip |
+| Instruments | Dials: analog clock, battery gauge and rings |
+| Float | Separate chips on the wallpaper with compact media and weather |
 
 To share one, choose it under **Your skins** and press **Export**, then **Copy**, and save the text as a `.json` file. To add one, paste its JSON or press **Open a .json file**. If its id is already taken, OpenDock gives it a new one. If its text would be hard to read, OpenDock says which pairs fall short.
 
@@ -93,15 +105,44 @@ A skin file looks like this:
   "name": "Late night",
   "description": "Optional, up to 160 characters",
   "dark": { "accent": "#ff8800", "accentInk": "#1a0d00", "radiusLg": 12, "blur": 0, "font": "segoe", "shadow": "soft" },
-  "light": { "accent": "#a34d00" }
+  "light": { "accent": "#a34d00" },
+  "interface": {
+    "layout": "islands",
+    "density": "slim",
+    "tint": "strong",
+    "style": "glass",
+    "variants": { "battery": "dots", "clock": "analog" }
+  }
 }
 ```
 
+`interface` is optional. `layout` is `bar`, `islands` or `chips`; `density` is `regular` or `slim`; `tint` is `soft`, `medium` or `strong`; `style` is one of the dock styles; `variants` names a look for each widget from the table under **Widget options**.
+
 Skins can only set the tokens listed in `packages/config-schema/src/skin-tokens.json`: colours as `#rrggbb`, `#rrggbbaa` or `rgba(r, g, b, a)`; radii and blur in whole pixels; motion in whole milliseconds; a font from `default`, `segoe`, `system` or `mono`; and a shadow from `none`, `soft` or `deep`. Anything else is refused, so a skin can't run code, add CSS or load files.
+
+### Interface
+
+Choose the dock's shape, with a live preview over a dark, bright or busy sample wallpaper:
+
+- **Layout:** **One bar**, **Islands** (runs of related widgets in their own capsules: Start and Apps together, the developer widgets together, and so on), or **Chips** (a capsule per widget).
+- **Thickness:** **Slim** makes the dock thinner.
+- **Tint:** how see-through the dock is. **Strong** keeps it readable on bright or busy wallpapers.
 
 ### Widget options
 
 Every widget on the dock has its own options. Select a widget to change:
+
+- **Look:** how the widget draws its data, with a live preview of each:
+
+  | Widget | Looks |
+  | --- | --- |
+  | Battery | Standard, Ring, Dots, Gauge |
+  | System | Rings, Bars, Graph |
+  | Clock | Digital, Stacked, Analog |
+  | Day progress | Bar, Ring, Dots |
+  | Now playing | Card, Compact, Mini |
+  | Focus timer | Ring, Bar |
+  | Weather | Standard, Minimal |
 
 - **Label:** the name used in its tooltip and panel title. Leave it empty to keep the widget's name.
 - **Layout:** **Dock size** follows the dock, **Icon only** shows just the icon, and **Detailed** uses the large layout even on a small dock.

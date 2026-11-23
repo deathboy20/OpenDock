@@ -41,3 +41,25 @@ export function effectiveRefresh(id: string, refreshSeconds: number | null): num
   if (!polling) return null;
   return refreshSeconds === null ? polling.defaultSeconds : Math.max(refreshSeconds, polling.minSeconds);
 }
+
+const VARIANT_LABELS: Record<string, string> = {
+  standard: "Standard",
+  ring: "Ring",
+  dots: "Dots",
+  gauge: "Gauge",
+  rings: "Rings",
+  bars: "Bars",
+  graph: "Graph",
+  digital: "Digital",
+  stacked: "Stacked",
+  analog: "Analog",
+  bar: "Bar",
+  card: "Card",
+  compact: "Compact",
+  mini: "Mini",
+  minimal: "Minimal",
+};
+
+export function variantLabel(variant: string): string {
+  return VARIANT_LABELS[variant] ?? variant.charAt(0).toUpperCase() + variant.slice(1);
+}

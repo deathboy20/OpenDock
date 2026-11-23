@@ -198,5 +198,198 @@
       "motionFast": 80,
       "motionSlow": 120
     }
+  },
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "islands",
+    "name": "Islands",
+    "description": "Related widgets in their own slim capsules, tinted so they read on any wallpaper.",
+    "dark": {
+      "surfaceSolid": "#121418",
+      "surfaceDeep": "#0c0d10",
+      "text": "#f1f3f6",
+      "muted": "#b0b6c2",
+      "accent": "#7cf2c8",
+      "accentInk": "#052419",
+      "radiusSm": 10,
+      "radiusMd": 14,
+      "radiusLg": 18,
+      "radiusXl": 22,
+      "blur": 24
+    },
+    "light": {
+      "surfaceSolid": "#ffffff",
+      "text": "#0f1218",
+      "muted": "#4f5868",
+      "accent": "#0b7a5a",
+      "accentInk": "#ffffff"
+    },
+    "interface": {
+      "layout": "islands",
+      "density": "slim",
+      "tint": "strong",
+      "style": "glass"
+    }
+  },
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "daylight",
+    "name": "Daylight",
+    "description": "Made for bright photos: opaque chips, dark text and a deep blue accent.",
+    "dark": {
+      "surfaceSolid": "#1a1d23",
+      "text": "#f4f6f9",
+      "muted": "#b7bdc8",
+      "accent": "#8ab4ff",
+      "accentInk": "#0a1a33"
+    },
+    "light": {
+      "surface": "rgba(255, 255, 255, 0.97)",
+      "surfaceSolid": "#ffffff",
+      "surfaceDeep": "#f1f3f7",
+      "text": "#0d1117",
+      "muted": "#3f4756",
+      "faint": "#5d6676",
+      "border": "rgba(13, 17, 23, 0.16)",
+      "borderStrong": "rgba(13, 17, 23, 0.3)",
+      "accent": "#2558c4",
+      "accentStrong": "#1e4aa8",
+      "accentInk": "#ffffff",
+      "accentSoft": "rgba(37, 88, 196, 0.1)",
+      "shadow": "soft"
+    },
+    "interface": {
+      "layout": "chips",
+      "density": "regular",
+      "tint": "strong",
+      "style": "solid"
+    }
+  },
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "console",
+    "name": "Console",
+    "description": "Monospace numbers, square corners and bar meters, like a status line.",
+    "dark": {
+      "surface": "rgba(14, 14, 12, 0.94)",
+      "surfaceSolid": "#0e0e0c",
+      "surfaceDeep": "#080807",
+      "text": "#ecebe4",
+      "muted": "#bdbab0",
+      "faint": "#8a877d",
+      "accent": "#f2c14e",
+      "accentStrong": "#e5ad2b",
+      "accentInk": "#1f1600",
+      "accentSoft": "rgba(242, 193, 78, 0.14)",
+      "radiusSm": 3,
+      "radiusMd": 4,
+      "radiusLg": 6,
+      "radiusXl": 8,
+      "blur": 0,
+      "font": "mono",
+      "shadow": "none",
+      "motionFast": 100,
+      "motionSlow": 160
+    },
+    "light": {
+      "surfaceSolid": "#fbfaf5",
+      "text": "#15140f",
+      "muted": "#4a473d",
+      "accent": "#7a5200",
+      "accentInk": "#ffffff",
+      "radiusSm": 3,
+      "radiusMd": 4,
+      "radiusLg": 6,
+      "radiusXl": 8,
+      "blur": 0,
+      "font": "mono",
+      "shadow": "none"
+    },
+    "interface": {
+      "layout": "bar",
+      "density": "slim",
+      "tint": "strong",
+      "style": "ink",
+      "variants": {
+        "system": "bars",
+        "battery": "dots",
+        "clock": "stacked",
+        "day-progress": "dots",
+        "focus": "bar"
+      }
+    }
+  },
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "instruments",
+    "name": "Instruments",
+    "description": "Dials everywhere: an analog clock, a battery gauge and rings for the rest.",
+    "dark": {
+      "surfaceSolid": "#141821",
+      "surfaceDeep": "#0d1017",
+      "text": "#eef1f6",
+      "muted": "#adb5c4",
+      "accent": "#ffb86b",
+      "accentStrong": "#ffa64a",
+      "accentInk": "#2b1600",
+      "accentSoft": "rgba(255, 184, 107, 0.14)",
+      "accentGlow": "rgba(255, 184, 107, 0.3)",
+      "radiusLg": 22,
+      "radiusXl": 28
+    },
+    "light": {
+      "accent": "#9a4f00",
+      "accentStrong": "#844300",
+      "accentInk": "#ffffff",
+      "accentSoft": "rgba(154, 79, 0, 0.1)"
+    },
+    "interface": {
+      "layout": "islands",
+      "density": "regular",
+      "tint": "medium",
+      "style": "midnight",
+      "variants": {
+        "clock": "analog",
+        "battery": "gauge",
+        "system": "rings",
+        "day-progress": "ring",
+        "focus": "ring"
+      }
+    }
+  },
+  {
+    "format": "opendock-skin",
+    "version": 1,
+    "id": "float",
+    "name": "Float",
+    "description": "Widgets as separate chips straight on the wallpaper, with compact media and weather.",
+    "dark": {
+      "text": "#ffffff",
+      "muted": "#e3e7ee",
+      "surfaceSolid": "#101318",
+      "accent": "#a8d8ff",
+      "accentInk": "#06243b"
+    },
+    "light": {
+      "text": "#0b0e13",
+      "muted": "#2c3340",
+      "accent": "#1f5fae",
+      "accentInk": "#ffffff"
+    },
+    "interface": {
+      "layout": "chips",
+      "density": "slim",
+      "tint": "medium",
+      "style": "glass",
+      "variants": {
+        "media": "compact",
+        "weather": "minimal",
+        "battery": "ring"
+      }
+    }
   }
 ]

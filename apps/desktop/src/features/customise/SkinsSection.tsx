@@ -8,10 +8,11 @@ import {
   type Skin,
 } from "@opendock/config-schema";
 import { useRef, useState, type CSSProperties } from "react";
+import { applySkin, errorText } from "../../services/ipc";
+import { useSettings } from "../../services/settingsContext";
 import { Icon } from "../widgets/icons";
 import { contrastProblems, previewColors } from "./skinChecks";
 
-type Change = (fn: (s: AppSettings) => AppSettings) => void;
 
 function SkinCard({
   skin,
@@ -48,11 +49,27 @@ function SkinCard({
       </span>
       <strong>{skin?.name ?? "Dock style"}</strong>
       <span className="muted small">{skin?.description || (skin ? "Your skin" : "The colours of the dock style you picked")}</span>
+      {interfaceSummary(skin) ? <span className="chip skin-chip">{interfaceSummary(skin)}</span> : null}
     </button>
   );
 }
 
-export function SkinsSection({ settings, change }: { settings: AppSettings; change: Change }) {
+/** Words for what a skin's interface changes, shown on its card. */
+function interfaceSummary(skin: Skin | undefined): string | null {
+  const i = skin?.interface;
+  if (!i) return null;
+  const parts = [
+    i.layout === "islands" ? "Islands" : i.layout === "chips" ? "Chips" : i.layout === "bar" ? "One bar" : null,
+    i.density === "slim" ? "Slim" : null,
+    i.tint === "strong" ? "Strong tint" : i.tint === "medium" ? "Medium tint" : null,
+    i.variants && Object.keys(i.variants).length > 0 ? `${Object.keys(i.variants).length} widget looks` : null,
+  ].filter(Boolean);
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
+export function SkinsSection({ settings }: { settings: AppSettings }) {
+  const { update } = useSettings();
+  const change = (fn: (s: AppSettings) => AppSettings) => void update(fn);
   const { active, custom } = settings.skins;
   const theme = settings.dock.theme;
   const [importText, setImportText] = useState("");
@@ -60,7 +77,8 @@ export function SkinsSection({ settings, change }: { settings: AppSettings; chan
   const [exported, setExported] = useState<Skin | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const setActive = (id: string | null) => change((s) => ({ ...s, skins: { ...s.skins, active: id } }));
+  const setActive = (id: string | null) =>
+    void applySkin(id).catch((e) => setMessage({ tone: "error", text: errorText(e) }));
 
   const add = (text: string) => {
     if (custom.length >= MAX_CUSTOM_SKINS) {
@@ -73,7 +91,10 @@ export function SkinsSection({ settings, change }: { settings: AppSettings; chan
       return;
     }
     const skin = result.skin;
-    change((s) => ({ ...s, skins: { active: skin.id, custom: [...s.skins.custom, skin] } }));
+    void update((s) => ({ ...s, skins: { ...s.skins, custom: [...s.skins.custom, skin] } })).then((error) => {
+      if (error) setMessage({ tone: "error", text: error });
+      else setActive(skin.id);
+    });
     setImportText("");
     const problems = contrastProblems(skin);
     setMessage(
@@ -98,8 +119,9 @@ export function SkinsSection({ settings, change }: { settings: AppSettings; chan
     <section className="settings-card">
       <h2>Skins</h2>
       <p className="muted small">
-        A skin changes colours, corners, blur, shadows, font and motion on top of the dock style. Skins are JSON files
-        of design tokens only, so they can't run code or load anything from the internet.
+        A skin changes colours, corners, blur, shadows, font and motion, and can set the dock's shape and each widget's
+        look. You can still change any of it afterwards. Skins are JSON files of settings and design tokens only, so they
+        can't run code or load anything from the internet.
       </p>
       <div className="skin-grid" role="radiogroup" aria-label="Skin">
         <SkinCard skin={undefined} theme={theme} active={active === null} onPick={() => setActive(null)} />

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import builtinSkinData from "./builtin-skins.json";
 import skinTokenData from "./skin-tokens.json";
+import { isValidVariant } from "./variants";
 
 /**
  * Skins are packs of design-token overrides. Only the tokens in skin-tokens.json can be set,
@@ -52,6 +53,22 @@ const tokenMapSchema = z
 
 export const skinIdSchema = z.string().regex(/^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/, "use lowercase letters, digits and dashes");
 
+/** Optional layout choices a skin brings. Applying the skin copies them into settings. */
+export const skinInterfaceSchema = z
+  .object({
+    layout: z.enum(["bar", "islands", "chips"]).optional(),
+    density: z.enum(["regular", "slim"]).optional(),
+    tint: z.enum(["soft", "medium", "strong"]).optional(),
+    style: z.enum(["glass", "solid", "midnight", "minimal", "neon", "ink"]).optional(),
+    variants: z
+      .record(z.string(), z.string())
+      .refine((v) => Object.entries(v).every(([id, name]) => isValidVariant(id, name)), "a skin names a widget variant that doesn't exist")
+      .optional(),
+  })
+  .strict();
+
+export type SkinInterface = z.infer<typeof skinInterfaceSchema>;
+
 export const skinSchema = z.object({
   format: z.literal("opendock-skin"),
   version: z.literal(1),
@@ -60,6 +77,7 @@ export const skinSchema = z.object({
   description: z.string().trim().max(160).default(""),
   dark: tokenMapSchema.default({}),
   light: tokenMapSchema.default({}),
+  interface: skinInterfaceSchema.optional(),
 });
 
 export type Skin = z.infer<typeof skinSchema>;
