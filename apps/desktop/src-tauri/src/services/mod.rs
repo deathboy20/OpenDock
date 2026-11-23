@@ -4,6 +4,7 @@
 pub mod apps;
 pub mod automation;
 pub mod calendar;
+pub mod ci;
 pub mod focus;
 pub mod local_ai;
 pub mod projects;
@@ -29,6 +30,7 @@ const WEATHER_INTERVAL: Duration = Duration::from_secs(30 * 60);
 const CALENDAR_INTERVAL: Duration = Duration::from_secs(15 * 60);
 const PROJECTS_INTERVAL: Duration = Duration::from_secs(2 * 60);
 const LOCAL_AI_INTERVAL: Duration = Duration::from_secs(60);
+const CI_INTERVAL: Duration = Duration::from_secs(5 * 60);
 
 /// Lets commands ask a polling service to refresh now.
 pub struct Wakers {
@@ -36,6 +38,7 @@ pub struct Wakers {
     calendar: Mutex<Sender<()>>,
     projects: Mutex<Sender<()>>,
     local_ai: Mutex<Sender<()>>,
+    ci: Mutex<Sender<()>>,
 }
 
 impl Wakers {
@@ -62,6 +65,12 @@ impl Wakers {
             let _ = tx.send(());
         }
     }
+
+    pub fn wake_ci(&self) {
+        if let Ok(tx) = self.ci.lock() {
+            let _ = tx.send(());
+        }
+    }
 }
 
 pub fn emit_focus(app: &AppHandle, state: &AppState) {
@@ -73,11 +82,13 @@ pub fn start_all(app: &AppHandle) {
     let (calendar_tx, calendar_rx) = channel();
     let (projects_tx, projects_rx) = channel();
     let (local_ai_tx, local_ai_rx) = channel();
+    let (ci_tx, ci_rx) = channel();
     app.manage(Wakers {
         weather: Mutex::new(weather_tx),
         calendar: Mutex::new(calendar_tx),
         projects: Mutex::new(projects_tx),
         local_ai: Mutex::new(local_ai_tx),
+        ci: Mutex::new(ci_tx),
     });
     spawn_system(app.clone());
     spawn_media(app.clone());
@@ -90,6 +101,7 @@ pub fn start_all(app: &AppHandle) {
     spawn_calendar(app.clone(), calendar_rx);
     spawn_projects(app.clone(), projects_rx);
     spawn_local_ai(app.clone(), local_ai_rx);
+    spawn_ci(app.clone(), ci_rx);
 }
 
 fn spawn_system(app: AppHandle) {
@@ -360,6 +372,35 @@ fn spawn_local_ai(app: AppHandle, rx: Receiver<()>) {
             let _ = app.emit("localAi:update", &snapshot);
         }
         if !wait_or_wake(&rx, LOCAL_AI_INTERVAL) {
+            break;
+        }
+    });
+}
+
+/// CI status is opt-in: GitHub is contacted only while the widget is turned on in
+/// settings, has repositories, and is on the dock.
+fn spawn_ci(app: AppHandle, rx: Receiver<()>) {
+    thread::spawn(move || loop {
+        let state = app.state::<AppState>();
+        let settings = state.settings();
+        let ci_settings = &settings.widgets.ci;
+        let on_dock = settings.dock.item_order.iter().any(|id| id == ci::WIDGET);
+        let token = ci::token();
+        let snapshot = if ci_settings.enabled && on_dock && !ci_settings.repos.is_empty() {
+            ci::check(&state.db, &ci_settings.repos, token.as_deref())
+        } else {
+            ci::CiSnapshot {
+                enabled: ci_settings.enabled,
+                has_token: token.is_some(),
+                checked_at: crate::store::now_ms(),
+                ..Default::default()
+            }
+        };
+        if let Ok(mut slot) = state.live.ci.lock() {
+            *slot = Some(snapshot.clone());
+        }
+        let _ = app.emit("ci:update", &snapshot);
+        if !wait_or_wake(&rx, CI_INTERVAL) {
             break;
         }
     });

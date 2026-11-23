@@ -5,6 +5,7 @@ use serde::Deserialize;
 use tauri::{AppHandle, Manager, State};
 
 use crate::platform::{self, process::FolderTool};
+use crate::services::ci::{self, CiSnapshot};
 use crate::services::local_ai::{self, LocalAiSnapshot};
 use crate::services::projects::{self, ProjectsSnapshot};
 use crate::services::vault::{self, VaultStatus};
@@ -156,4 +157,58 @@ pub async fn ask_local_ai(app: AppHandle, model: String, prompt: String) -> Resu
     .await
     .map_err(|e| e.to_string())?;
     result
+}
+
+// ---------- CI status ----------
+
+#[tauri::command]
+pub fn get_ci_status(state: State<'_, AppState>) -> Option<CiSnapshot> {
+    state.live.ci.lock().ok().and_then(|s| s.clone())
+}
+
+#[tauri::command]
+pub fn refresh_ci(app: AppHandle) {
+    app.state::<Wakers>().wake_ci();
+}
+
+/// Opens the latest run's page for a repository in the latest check.
+#[tauri::command]
+pub async fn open_ci_run(app: AppHandle, repo: String) -> Result<(), String> {
+    let url = app
+        .state::<AppState>()
+        .live
+        .ci
+        .lock()
+        .ok()
+        .and_then(|s| s.clone())
+        .and_then(|s| s.repos.into_iter().find(|r| r.repo == repo))
+        .and_then(|r| r.run)
+        .map(|run| run.url)
+        .filter(|url| url.starts_with("https://github.com/"))
+        .ok_or_else(|| "There is no run to open for that repository".to_string())?;
+    tauri::async_runtime::spawn_blocking(move || platform::launch_path(&url))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+/// Stores the GitHub token in the OS keychain. It is never sent back to the webview.
+#[tauri::command]
+pub async fn set_github_token(app: AppHandle, token: String) -> Result<(), String> {
+    if token.len() > 512 {
+        return Err("That doesn't look like a GitHub token".into());
+    }
+    tauri::async_runtime::spawn_blocking(move || ci::set_token(&token))
+        .await
+        .map_err(|e| e.to_string())??;
+    app.state::<Wakers>().wake_ci();
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn clear_github_token(app: AppHandle) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(ci::clear_token)
+        .await
+        .map_err(|e| e.to_string())??;
+    app.state::<Wakers>().wake_ci();
+    Ok(())
 }

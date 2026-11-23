@@ -110,6 +110,7 @@ Tauri capabilities grant each window only what it needs. Command groups are defi
 | Calendar | 15 min, or on demand | Upcoming events from iCal feeds; `calendar.event.starting` |
 | Projects | 2 min, or on demand | Git status of the repositories under the project folders (`projects:update`) |
 | Local AI | 1 min while on the dock, or on demand | Ollama models and loaded models from `127.0.0.1:11434` (`localAi:update`) |
+| CI | 5 min while turned on and on the dock, or on demand | Latest GitHub Actions run per repository from `api.github.com` (`ci:update`) |
 
 ## Event bus and automations
 
@@ -140,7 +141,7 @@ The **rule engine** (`engine/rules.rs`) matches events against enabled rules, ch
 | --- | --- | --- |
 | Settings | `%APPDATA%\com.opendock.app\settings.json` | Versioned JSON, validated by Rust types and Zod |
 | Todos, notes, focus sessions, rules, activity, calendars and events, forecast cache, network log | `%APPDATA%\com.opendock.app\opendock.db` | SQLite with append-only migrations |
-| Calendar feed links and other secrets | Windows Credential Manager, service `OpenDock` | OS keychain via the `keyring` crate |
+| Calendar feed links, the GitHub token and other secrets | Windows Credential Manager, service `OpenDock` | OS keychain via the `keyring` crate |
 | Taskbar restore marker | `%APPDATA%\com.opendock.app\taskbar-restore.json` | JSON written before the taskbar is hidden |
 
 **Settings** carry a `version`. On load, older files are migrated step by step (the same migration exists in Rust and TypeScript), then validated. A file that fails validation is moved aside as `settings.invalid-<timestamp>.json` and defaults are used.
@@ -190,6 +191,6 @@ The UI is organised by feature under `apps/desktop/src/features/`. Each feature 
 - `flyout/` — the flyout root and every panel
 - `hub/` — hub pages, Automation Studio and the welcome flow
 - `toast/` — the toast window and its queue
-- `developer/` — the developer widgets (Projects, Vault capture, Local AI), their models and panels
+- `developer/` — the developer widgets (Projects, Vault capture, Local AI, CI status), their models and panels
 
 Global styles live in `styles/`: `tokens.css` holds every colour, radius, shadow and motion value, and `base.css` holds shared primitives. Feature CSS uses tokens only.

@@ -4,6 +4,7 @@ import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type {
   CalendarEvent,
+  CiSnapshot,
   FocusState,
   LocalAiSnapshot,
   MediaState,
@@ -124,6 +125,27 @@ const localAi: LocalAiSnapshot = {
   checkedAt: now,
 };
 
+const ci: CiSnapshot = {
+  enabled: true,
+  hasToken: false,
+  repos: [
+    {
+      repo: "deathboy20/OpenDock",
+      run: {
+        workflow: "CI",
+        branch: "main",
+        event: "push",
+        status: "completed",
+        conclusion: "failure",
+        url: "https://github.com/deathboy20/OpenDock/actions/runs/1",
+        updatedAt: now,
+      },
+      error: null,
+    },
+  ],
+  checkedAt: now,
+};
+
 /** Developer widgets only show data once they are set up. */
 const configured: SettingsContextValue = {
   settings: {
@@ -131,6 +153,7 @@ const configured: SettingsContextValue = {
     widgets: {
       ...defaultAppSettings.widgets,
       projects: { roots: ["D:\\Gitfiles"] },
+      ci: { enabled: true, repos: ["deathboy20/OpenDock"] },
     },
   },
   ready: true,
@@ -160,6 +183,7 @@ const readyLive: LiveData = {
   projects: ready(projects),
   vault: ready(vault),
   localAi: ready(localAi),
+  ci: ready(ci),
 };
 
 const emptyData: LiveData = {
@@ -177,6 +201,7 @@ const emptyData: LiveData = {
   projects: ready({ ...projects, projects: [] }),
   vault: ready({ ...vault, configured: false, exists: false, todayCount: 0, recent: [] }),
   localAi: ready({ ...localAi, running: false, models: [], loaded: [] }),
+  ci: ready({ ...ci, repos: [] }),
 };
 
 const errorLive: LiveData = {
@@ -194,6 +219,7 @@ const errorLive: LiveData = {
   projects: failed("scan failed"),
   vault: failed("vault unreadable"),
   localAi: failed("no ledger"),
+  ci: failed("keychain locked"),
 };
 
 const states: [string, LiveData][] = [
@@ -228,6 +254,7 @@ describe("widget catalog", () => {
     expect(findWidget("local-ai")?.network).toEqual(["127.0.0.1"]);
     expect(findWidget("local-ai")?.network.every(isLoopbackHost)).toBe(true);
     expect(isLoopbackHost("api.github.com")).toBe(false);
+    expect(findWidget("ci")?.network).toEqual(["api.github.com"]);
   });
 
   it("searches by name, description and category", () => {
@@ -362,6 +389,21 @@ describe("dock tiles", () => {
       withData({ ...readyLive, localAi: ready({ ...localAi, error: "bad json" }) }, <TileContent id="local-ai" size="m" compact={false} />),
     );
     expect(failing.container.querySelector(".tile.is-error")).not.toBeNull();
+  });
+
+  it("leads with failing CI runs", () => {
+    const { getByText, container } = render(withData(readyLive, <TileContent id="ci" size="m" compact={false} />));
+    expect(getByText("1 failing")).toBeInTheDocument();
+    expect(container.querySelector(".ci-tile.is-failing")).not.toBeNull();
+  });
+
+  it("keeps CI off until it is turned on", () => {
+    const { getByText } = render(
+      <LiveContext.Provider value={readyLive}>
+        <TileContent id="ci" size="m" compact={false} />
+      </LiveContext.Provider>,
+    );
+    expect(getByText("Turn on CI")).toBeInTheDocument();
   });
 
   it("warns when the battery is low", () => {

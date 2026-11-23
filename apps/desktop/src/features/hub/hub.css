@@ -1145,3 +1145,8 @@
   gap: 8px;
   margin-top: 12px;
 }
+
+.token-form {
+  margin-top: 0;
+  flex-wrap: wrap;
+}

@@ -6,6 +6,7 @@ use tauri::{AppHandle, Emitter};
 use crate::engine::bus::{BusEvent, EventBus};
 use crate::platform::taskbar::TaskbarController;
 use crate::platform::{MediaState, SystemStats, VolumeState, WindowsSnapshot};
+use crate::services::ci::CiSnapshot;
 use crate::services::focus::FocusTimer;
 use crate::services::local_ai::LocalAiSnapshot;
 use crate::services::projects::ProjectsSnapshot;
@@ -26,6 +27,7 @@ pub struct LiveState {
     pub volume: Mutex<Option<VolumeState>>,
     pub projects: Mutex<Option<ProjectsSnapshot>>,
     pub local_ai: Mutex<Option<LocalAiSnapshot>>,
+    pub ci: Mutex<Option<CiSnapshot>>,
 }
 
 pub struct AppState {

@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import {
   errorText,
+  getCiStatus,
   getFocusState,
   getLocalAi,
   getMediaState,
@@ -15,6 +16,7 @@ import {
   on,
   upcomingEvents,
   type CalendarEvent,
+  type CiSnapshot,
   type FocusState,
   type LocalAiSnapshot,
   type MediaState,
@@ -52,6 +54,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Loadable<ProjectsSnapshot | null>>(loading);
   const [vault, setVault] = useState<Loadable<VaultStatus>>(loading);
   const [localAi, setLocalAi] = useState<Loadable<LocalAiSnapshot | null>>(loading);
+  const [ci, setCi] = useState<Loadable<CiSnapshot | null>>(loading);
 
   useEffect(() => {
     load(listWindows, setWindows);
@@ -66,6 +69,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
     load(getProjects, setProjects);
     load(getVaultStatus, setVault);
     load(getLocalAi, setLocalAi);
+    load(getCiStatus, setCi);
 
     const offs = [
       on("media:state", (m) => setMedia(ready(m))),
@@ -80,6 +84,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       on("volume:state", (v) => setVolume(ready(v))),
       on("projects:update", (p) => setProjects(ready(p))),
       on("localAi:update", (a) => setLocalAi(ready(a))),
+      on("ci:update", (c) => setCi(ready(c))),
       // The vault path lives in settings, and today's file changes at midnight.
       on("settings:changed", () => load(getVaultStatus, setVault)),
       on("data:changed", (topic) => {
@@ -102,7 +107,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
 
   return (
     <LiveContext.Provider
-      value={{ media, stats, cpuHistory, memoryHistory, focus, weather, todos, notes, events, windows, volume, projects, vault, localAi }}
+      value={{ media, stats, cpuHistory, memoryHistory, focus, weather, todos, notes, events, windows, volume, projects, vault, localAi, ci }}
     >
       {children}
     </LiveContext.Provider>

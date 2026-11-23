@@ -194,6 +194,17 @@ export type LocalAiSnapshot = {
   error: string | null;
   checkedAt: number;
 };
+export type CiRun = {
+  workflow: string;
+  branch: string;
+  event: string;
+  status: string;
+  conclusion: string | null;
+  url: string;
+  updatedAt: number | null;
+};
+export type CiRepoStatus = { repo: string; run: CiRun | null; error: string | null };
+export type CiSnapshot = { enabled: boolean; hasToken: boolean; repos: CiRepoStatus[]; checkedAt: number };
 export type ProjectTool = "cursor" | "vscode" | "terminal" | "githubDesktop" | "explorer";
 
 export type HubPage =
@@ -323,6 +334,11 @@ export const openVault = (today: boolean) => invoke<void>("open_vault", { today 
 export const getLocalAi = () => invoke<LocalAiSnapshot | null>("get_local_ai");
 export const refreshLocalAi = () => invoke<void>("refresh_local_ai");
 export const askLocalAi = (model: string, prompt: string) => invoke<string>("ask_local_ai", { model, prompt });
+export const getCiStatus = () => invoke<CiSnapshot | null>("get_ci_status");
+export const refreshCi = () => invoke<void>("refresh_ci");
+export const openCiRun = (repo: string) => invoke<void>("open_ci_run", { repo });
+export const setGithubToken = (token: string) => invoke<void>("set_github_token", { token });
+export const clearGithubToken = () => invoke<void>("clear_github_token");
 
 // ---------- events ----------
 
@@ -345,6 +361,7 @@ export type EventMap = {
   "volume:state": VolumeState | null;
   "projects:update": ProjectsSnapshot;
   "localAi:update": LocalAiSnapshot;
+  "ci:update": CiSnapshot;
 };
 
 /** Subscribes to a backend event. Outside Tauri (tests, plain browser) it is a no-op. */

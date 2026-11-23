@@ -22,6 +22,7 @@ Done on this branch:
 3. **Projects widget** (`id: projects`). Rust: `services/projects.rs` (scan two levels deep, `git status --porcelain=v2 --branch` with `core.fsmonitor=false`, HANDOFF.md reader capped at 512 KB), `commands/developer.rs` (`get_projects`, `refresh_projects`, `open_project`, `read_handoff`; actions accept only paths from the latest scan), `platform/process.rs` (no-console `git`, open a folder in Cursor, VS Code, Windows Terminal or PowerShell). GitHub Desktop opens via `x-github-client://openLocalRepo/`. UI: `features/developer/` (tile, panel, model, safe Markdown view) and the hub page **Developer widgets** (`features/hub/DeveloperPage.tsx`). The `Tile` helper moved to `features/widgets/Tile.tsx`.
 4. **Vault capture widget** (`id: vault`). Rust `services/vault.rs`: appends `- HH:MM text` to `<vault>/Inbox/YYYY-MM-DD.md`, creates `Inbox` and the note on first use, refuses links and relative paths, 4000-character limit. Commands `get_vault_status`, `vault_capture`, `open_vault` (Obsidian `obsidian://open?path=`). UI `features/developer/VaultPanel.tsx`; vault path on the Developer widgets page.
 5. **Local AI widget** (`id: local-ai`). Rust `services/local_ai.rs`: `/api/tags` and `/api/ps` on `http://127.0.0.1:11434` through `net.rs` (declared host `127.0.0.1`), polled every 60 s only while `local-ai` is in `dock.itemOrder`; `/api/generate` with `stream: false`, 180 s timeout, one prompt at a time, only to a model from the latest check, `<think>` blocks stripped. Commands `get_local_ai`, `refresh_local_ai`, `ask_local_ai`. The chosen model is `widgets.localAi.model`. UI `features/developer/LocalAiPanel.tsx`.
+6. **CI status widget** (`id: ci`). Rust `services/ci.rs`: `GET https://api.github.com/repos/{repo}/actions/runs?per_page=1` through `net.rs` with `Accept` and `X-GitHub-Api-Version` headers and an optional `Bearer` token from the keychain (`secrets.rs`, account `github:token`). Polls every 5 min only when `widgets.ci.enabled`, repos are listed and `ci` is on the dock. Only `https://github.com/` run links are passed on or opened. Commands `get_ci_status`, `refresh_ci`, `open_ci_run`, and hub-only `set_github_token`, `clear_github_token`. UI `features/developer/CiPanel.tsx`; toggle, repos and token on the Developer widgets page.
 
 Verified on 2026-11-23 (Windows 10 Pro, this PC): `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm fmt:check`, `pnpm test:rust` and `cargo clippy --all-targets -- -D warnings` all pass. Rust builds offline from the local cargo cache.
 
@@ -51,7 +52,7 @@ Verified on 2026-11-23 (Windows 10 Pro, this PC): `pnpm lint`, `pnpm typecheck`,
 
 ## Next steps
 
-1. Phase A widgets, one commit each: Local AI (Ollama), CI status (opt-in, token in the keychain).
+1. Phase A code is complete: Local AI (Ollama), CI status (opt-in, token in the keychain).
 2. Show them in `pnpm dev`, then Phase B: per-widget instance options, JSON skins (token overrides only), desktop widgets layer, Scenes.
 3. Phase C (taskbar mode) waits for Isaac and a recorded `docs/testing-matrix.md` on Windows 10.
 

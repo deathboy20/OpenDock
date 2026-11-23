@@ -188,6 +188,17 @@ export const widgetCatalog: WidgetDefinition[] = [
     network: ["127.0.0.1"],
     panel: true,
   },
+  {
+    id: "ci",
+    name: "CI status",
+    category: "Developer",
+    description: "The latest GitHub Actions run for the repositories you list: passing, failing or running. Off until you turn it on; a token for private repositories stays in the system keychain.",
+    sizes: ["s", "m", "l"],
+    network: ["api.github.com"],
+    stores: "Your repository list (the token goes in the system keychain)",
+    panel: true,
+    configure: "developer",
+  },
 ];
 
 /** Hosts on this PC. A widget that only talks to them never leaves the device. */
