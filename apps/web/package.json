@@ -13,7 +13,7 @@
     "lighthouse": "pnpm build && lhci autorun"
   },
   "dependencies": {
-    "astro": "^5.7.10"
+    "astro": "^7.4.13"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",

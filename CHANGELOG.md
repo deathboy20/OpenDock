@@ -29,6 +29,11 @@ All notable changes to OpenDock are documented here. The format is based on [Kee
 - The notification strip no longer appears with a native title bar. It is now a non-focusable window shown the normal way, so it still never takes focus.
 - App icons that Windows couldn't hand over at first (for example right after sign-in) are asked for again instead of staying as a letter until OpenDock restarts.
 
+### Security
+
+- The settings, rule and skin checks use Zod 4.6.7 (was 3.25.76), which fixes a way to use up memory with an oversized list or map. Settings files, rules and skins that were valid before are still valid. Some messages for an invalid rule or imported skin are worded differently.
+- The website is built with Astro 7.4.13 (was 5.18.2), which brings sharp 0.35.5. This clears the critical and high advisories in both. They affected server rendering, the dev server and image optimisation, not the static pages the site serves, and the rendered pages are unchanged. Building the website now needs Node.js 22.23.4 or later; `.nvmrc` and `apps/web/.node-version` pin 22.23.5.
+
 ## [0.3.0] - 2026-11-07
 
 Live dock settings, a restore-the-taskbar command, experimental Linux and macOS packages, and a dock you can try in the browser.

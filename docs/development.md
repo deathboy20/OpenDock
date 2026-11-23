@@ -9,7 +9,7 @@ This guide gets a Windows or Linux machine ready to build and run OpenDock from 
 | Windows | 10 or 11, 64-bit | OpenDock's shell integration is Windows-only today |
 | [Rust](https://rustup.rs) | Stable, MSVC toolchain | The core; pinned by `rust-toolchain.toml` |
 | Visual Studio 2022 Build Tools | *Desktop development with C++* workload | Linker and Windows SDK for Rust |
-| [Node.js](https://nodejs.org) | 22 (`.nvmrc` and `engines` in `package.json`) | Frontend tooling |
+| [Node.js](https://nodejs.org) | 22.23.4 or later (`.nvmrc` and `engines` in `package.json`) | Frontend tooling |
 | [pnpm](https://pnpm.io) | 10.34.4 (`packageManager` in `package.json`) | Workspace package manager |
 | WebView2 runtime | Evergreen | Renders the UI; preinstalled on Windows 11 |
 

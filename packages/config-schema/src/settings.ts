@@ -157,12 +157,14 @@ export const widgetSettingsSchema = z.object({
       "a widget uses a variant it doesn't have",
     )
     .default({}),
-  weather: weatherSettingsSchema.default({}),
-  focus: focusSettingsSchema.default({}),
-  projects: projectsSettingsSchema.default({}),
-  vault: vaultSettingsSchema.default({}),
-  localAi: localAiSettingsSchema.default({}),
-  ci: ciSettingsSchema.default({}),
+  // `prefault` parses `{}` so the section's own defaults fill in. Zod 4's `.default({})`
+  // would return `{}` unparsed, leaving every field undefined.
+  weather: weatherSettingsSchema.prefault({}),
+  focus: focusSettingsSchema.prefault({}),
+  projects: projectsSettingsSchema.prefault({}),
+  vault: vaultSettingsSchema.prefault({}),
+  localAi: localAiSettingsSchema.prefault({}),
+  ci: ciSettingsSchema.prefault({}),
 });
 
 export const quietHoursSchema = z.object({
@@ -173,25 +175,25 @@ export const quietHoursSchema = z.object({
 
 export const automationSettingsSchema = z.object({
   enabled: z.boolean().default(true),
-  quietHours: quietHoursSchema.default({}),
+  quietHours: quietHoursSchema.prefault({}),
 });
 
 export const appSettingsSchema = z.object({
   version: z.literal(SETTINGS_VERSION),
   dock: dockSettingsSchema,
-  taskbar: taskbarSettingsSchema.default({}),
-  widgets: widgetSettingsSchema.default({}),
-  automation: automationSettingsSchema.default({}),
-  apps: appsSettingsSchema.default({}),
-  skins: skinSettingsSchema.default({}),
-  scenes: sceneSettingsSchema.default({}),
-  desktop: desktopSettingsSchema.default({}),
+  taskbar: taskbarSettingsSchema.prefault({}),
+  widgets: widgetSettingsSchema.prefault({}),
+  automation: automationSettingsSchema.prefault({}),
+  apps: appsSettingsSchema.prefault({}),
+  skins: skinSettingsSchema.prefault({}),
+  scenes: sceneSettingsSchema.prefault({}),
+  desktop: desktopSettingsSchema.prefault({}),
   updates: z
     .object({
       /** Ask GitHub once a day whether a newer OpenDock release exists. Nothing else is sent. */
       check: z.boolean().default(true),
     })
-    .default({}),
+    .prefault({}),
   /** False until the first-run welcome has been completed or skipped. */
   onboarded: z.boolean().default(false),
 });

@@ -62,7 +62,7 @@ pnpm install
 pnpm dev            # desktop app with hot reload
 ```
 
-You need Node.js 22 (`.nvmrc`; `package.json` requires `>=22`), pnpm 10 (`packageManager` is pnpm 10.34.4), Rust stable (MSVC), and the Visual Studio 2022 Build Tools with the C++ workload. Step-by-step setup is in [docs/development.md](docs/development.md).
+You need Node.js 22.23.4 or later (`.nvmrc` pins 22.23.5; the website's Astro build refuses older versions), pnpm 10 (`packageManager` is pnpm 10.34.4), Rust stable (MSVC), and the Visual Studio 2022 Build Tools with the C++ workload. Step-by-step setup is in [docs/development.md](docs/development.md).
 
 ## What is shipped
 

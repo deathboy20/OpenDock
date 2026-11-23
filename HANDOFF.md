@@ -12,6 +12,19 @@ Version 0.3.0 is released. Canonical remote: `origin` = `github.com/deathboy20/O
 
 ## Current state
 
+### Branch `chore/upgrade-astro-zod` (dependency upgrades after 0.4.0)
+
+Cut from `origin/main` at `3568f55` on 2026-11-23 (0.4.0 was not tagged yet). Clears the `pnpm audit --prod` advisories Isaac accepted for 0.4.0 (vault note `Security/OpenDock security checklist 0.4.0 (2026-11-23).md`). Isaac approved the downloads on 2026-11-23: zod 4.6.7, astro 7.4.13 and Node.js 22.23.5. Committed locally, not pushed.
+
+- **Zod 3.25.76 → 4.6.7** (`packages/config-schema`). The only code change: nested object sections use `.prefault({})` instead of `.default({})` in `src/settings.ts`, because Zod 4's `.default()` returns the value without parsing it, so the section's own defaults would not fill in. Records (`widgets.options`, skin token maps, rule `where`) keep `.default({})`. `superRefine`, `.strict()`, `z.record` key schemas, `importSkin` and `validateRule` work unchanged; issue paths are the same, but Zod's built-in messages are worded differently (for example "Required" is now "Invalid input: expected string, received undefined"). Defaults are shallow-cloned per parse in Zod 4, so arrays like `DEFAULT_ITEM_ORDER` are not shared. The shared parity fixtures are unchanged.
+- **Astro 5.18.2 → 7.4.13** (`apps/web`), which brings sharp 0.35.5, Vite 8.3.8 and esbuild 0.28. No site code changed. `compressHTML: true` is set explicitly, so Astro 7's new `'jsx'` default doesn't apply. A build-by-build comparison against Astro 5 (same 11 pages and sitemap) showed identical page text, Markdown output and heading ids; the differences are asset hashes, scoped-style ids, whitespace, and CSS property order from Vite 8's minifier. No inline scripts or styles (CSP `script-src 'self'` still holds). Home, changelog and showcase checked in the browser preview: they render with no console errors.
+- **`@emnapi/runtime` pin:** Astro 7's bundler (rolldown) brings `@emnapi/runtime` 2.0.0-beta.2, and pnpm resolved `@astrojs/astro2tsx`'s missing peer to it, which crashed `astro check` (`this.bridge.setLastError is not a function`). Root `package.json` `pnpm.packageExtensions` gives `@astrojs/astro2tsx@0.1` a direct `@emnapi/runtime ^1.11.3` dependency (already in the store). Remove it when `@astrojs/check` ships a fixed language server.
+- **Node.js 22.23.4+ required:** Astro 7.4.5+ refuses to run on older Node (checked: it exits on 22.22.0). `.nvmrc` and `apps/web/.node-version` now pin `22.23.5`, `engines.node` is `>=22.23.4`, and README, CONTRIBUTING, `docs/development.md` and `docs/website.md` say so.
+
+Verified locally on 2026-11-23 (Windows 10 Pro, this PC, Node 22.23.5): `pnpm audit --prod` reports no known vulnerabilities (was 18: 1 critical, 6 high). `pnpm lint`, `pnpm typecheck`, `pnpm test` (config-schema 130, desktop 214, web 13), `pnpm fmt:check`, `pnpm test:rust` (106, including both parity-fixture tests) and `cargo clippy --all-targets -- -D warnings` all pass; `pnpm build:web` builds 11 pages plus the sitemap; `pnpm install --frozen-lockfile --offline` is clean. `pnpm lighthouse:web` was not run.
+
+### Branch `feat/developer-widgets` (merged as PR #11)
+
 - Branch `feat/developer-widgets`, cut from `origin/release/0.3.0` at `1fe5078` (Isaac chose this base on 2026-11-23). Pushed to `origin` on 2026-11-23 and opened as PR #11 into `main`: https://github.com/deathboy20/OpenDock/pull/11 (ready for review, not a draft). Before the push every local check passed again and `pnpm build:web` built 11 pages; `pnpm lighthouse:web` was not run. This HANDOFF update is committed locally but not pushed, to save a CI run; it goes up with the next push.
 - Plan agreed with Isaac on 2026-11-23: `C:\Users\Obeng\Documents\AI-Vault\Plans\OpenDock developer widgets and skins.md`. Keep the Windows taskbar (with TranslucentTB) for now; build developer widgets (Phase A), then Rainmeter-style customisation (Phase B); taskbar mode (Phase C) only after A and B work and the restore matrix is recorded.
 
@@ -55,6 +68,10 @@ Phase B live check, 2026-11-23 in `pnpm dev` (taskbar kept, v5 settings backed u
 
 ## Open items and known issues
 
+- **Cloudflare Pages `NODE_VERSION` (owner action, before pushing `chore/upgrade-astro-zod`):** the dashboard variable is `22` and overrides `.node-version`. Set it to `22.23.5`, or preview and production builds may fail with "Node.js … is not supported by Astro!". Every pushed branch gets a preview build.
+- **Node on this PC:** Node 22.23.5 is installed with nvm-windows, but the global version is still 22.22.0, because pnpm (via corepack), eas-cli, appwrite-cli, agent-browser and opencode-ai are installed under 22.22.0 only. To build the website here, either `nvm use 22.23.5`, then `corepack enable` and reinstall those globals, or put `%LOCALAPPDATA%\nvm\v22.23.5` first on `PATH` for the session.
+- `chore/upgrade-astro-zod` adds a **Security** section under *Unreleased* in `CHANGELOG.md`. `release/0.4.0` moves *Unreleased* under `[0.4.0]`, so expect a small conflict when either merges; the upgrade entries belong in the release after 0.4.0.
+
 - One settings bump covers each phase: v6 for all four developer widgets, v7 for all of Phase B. Neither has shipped, and each field defaults, so files written by an earlier commit on this branch still load. Decision by the agent; say if you want one bump per feature.
 - Project folders default to an empty list, not `D:\Gitfiles`, because the default ships to every user. Isaac adds `D:\Gitfiles` once in **Developer widgets**.
 - Skin interfaces seen on the real dock on 2026-11-23: islands, slim, strong tint, analog clock and System bars. Islands are drawn as one measured capsule per run (`measureIslands` in `features/dock/islands.ts`) after per-item slices showed seams. Not yet seen: a vertical dock with islands, chips on the real dock, and every widget look on screen (all are covered by tests).
@@ -69,6 +86,7 @@ Phase B live check, 2026-11-23 in `pnpm dev` (taskbar kept, v5 settings backed u
 
 ## How to work here
 
+- Node.js 22.23.4 or later (`.nvmrc` pins 22.23.5); `pnpm build:web` and `astro check` refuse older versions.
 - Install: `pnpm install --offline` (no new downloads without Isaac's OK; no new crate or npm package without his OK).
 - Run: `pnpm dev` (Tauri dev: Vite on port 1420 plus the Rust app).
 - Checks before every commit:
@@ -84,6 +102,7 @@ Phase B live check, 2026-11-23 in `pnpm dev` (taskbar kept, v5 settings backed u
 
 ## Next steps
 
+0. `chore/upgrade-astro-zod`: Isaac sets Cloudflare `NODE_VERSION` to `22.23.5`, then decides when to push it and open a PR into `main` (after 0.4.0 ships). Not pushed yet.
 1. Isaac to look at the dock in `pnpm dev` (back up `settings.json` first; see Open items) and try Customise on the real app: skins, Undo, islands and chips, a vertical dock, widget looks, scenes, desktop widgets.
 2. Decide: (a) ADR 0006 (update checks on by default) from Proposed to Accepted, (b) `tauri-plugin-updater` with a signing key for in-app installs, (c) review and merge PR #11 (targets `main`; the README's flow would send features to `develop` first). Before merging to `main`, run the `security-release-checklist` and `ui-release-checklist` skills; neither has run yet.
 3. Worth doing next: a "switch scene" automation action (scenes from rules, e.g. Focus at 9:00), more widget looks (Now playing bar with progress, Year progress dots), and a Linux/macOS runtime check before promising those platforms.

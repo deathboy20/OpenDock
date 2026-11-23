@@ -47,9 +47,11 @@ Cloudflare Pages builds the site from GitHub.
 | Root directory | `/` (the repository root) |
 | Build command | `corepack enable && corepack prepare pnpm@10.34.4 --activate && pnpm install --frozen-lockfile && pnpm build:web` |
 | Build output directory | `apps/web/dist` |
-| Environment variable | `NODE_VERSION` = `22` |
+| Environment variable | `NODE_VERSION` = `22.23.5` |
 
 The pnpm version in the build command must match the `packageManager` field in the root `package.json`, so the deployed build uses the same pnpm as CI and contributors. Update both together.
+
+Astro 7 refuses to build on Node.js older than 22.23.4. Keep `NODE_VERSION` equal to `.nvmrc` and `apps/web/.node-version`; the dashboard variable wins over the files.
 
 Every push to `main` deploys to production. `staging` and `develop`, and every other branch and pull request, get a preview URL. Security headers come from `public/_headers`.
 
