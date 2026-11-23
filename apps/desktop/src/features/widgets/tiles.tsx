@@ -46,7 +46,7 @@ function ClockTile({ size, compact, variant }: TileProps) {
     return (
       <span className={`tile tile-clock is-ready ${compact ? "is-compact" : ""}`} title={`${time}, ${formatShortDate(date)}`}>
         <span className="tile-stacked-time" aria-label={time}>
-          <span>{hours.toString().padStart(2, "0")}</span>
+          <span>{settings.dock.clock24h ? hours.toString().padStart(2, "0") : hours}</span>
           <span>{date.getMinutes().toString().padStart(2, "0")}</span>
         </span>
         {compact || size === "s" ? null : (
