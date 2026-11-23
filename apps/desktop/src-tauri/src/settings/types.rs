@@ -3,8 +3,10 @@ use serde::{Deserialize, Serialize};
 use crate::engine::rules::{is_valid_id, parse_clock};
 use crate::geometry::{DockMode, DockPosition, DockSize};
 
-pub const SETTINGS_VERSION: u32 = 5;
+pub const SETTINGS_VERSION: u32 = 6;
 pub const MAX_PINNED_APPS: usize = 24;
+pub const MAX_PROJECT_ROOTS: usize = 8;
+pub const MAX_CI_REPOS: usize = 10;
 
 fn default_true() -> bool {
     true
@@ -165,6 +167,35 @@ impl Default for FocusSettings {
     }
 }
 
+/// Folders whose git repositories the Projects widget lists, one or two levels deep.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct ProjectsSettings {
+    pub roots: Vec<String>,
+}
+
+/// The Obsidian vault the capture box writes to. Empty until the user picks one.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct VaultSettings {
+    pub path: String,
+}
+
+/// The Ollama model quick prompts go to. Empty means the first installed model.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct LocalAiSettings {
+    pub model: String,
+}
+
+/// Off by default: CI status is the only developer widget that leaves the device.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "camelCase", default)]
+pub struct CiSettings {
+    pub enabled: bool,
+    pub repos: Vec<String>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct WidgetSettings {
@@ -172,6 +203,38 @@ pub struct WidgetSettings {
     pub weather: WeatherSettings,
     #[serde(default)]
     pub focus: FocusSettings,
+    #[serde(default)]
+    pub projects: ProjectsSettings,
+    #[serde(default)]
+    pub vault: VaultSettings,
+    #[serde(default)]
+    pub local_ai: LocalAiSettings,
+    #[serde(default)]
+    pub ci: CiSettings,
+}
+
+/// `owner/name`, as GitHub allows them. Mirrors `githubRepoSchema`.
+pub fn is_valid_github_repo(repo: &str) -> bool {
+    let Some((owner, name)) = repo.split_once('/') else {
+        return false;
+    };
+    let owner_ok = (1..=39).contains(&owner.len())
+        && owner.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
+        && !owner.starts_with('-');
+    let name_ok = (1..=100).contains(&name.len())
+        && name
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
+        && name != "."
+        && name != "..";
+    owner_ok && name_ok
+}
+
+fn has_duplicates_ignoring_case(values: &[String]) -> bool {
+    values.iter().enumerate().any(|(index, value)| {
+        let key = value.to_lowercase();
+        values[..index].iter().any(|v| v.to_lowercase() == key)
+    })
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -269,8 +332,9 @@ impl AppSettings {
     /// Upgrades an older settings document in place. Returns true if anything changed.
     pub fn migrate(value: &mut serde_json::Value) -> bool {
         let version = value.get("version").and_then(|v| v.as_u64());
-        // Version 4 added dock styles. Version 5 adds spacing, which defaults to even.
-        if matches!(version, Some(3) | Some(4)) {
+        // Version 4 added dock styles, version 5 spacing (even), version 6 the developer
+        // widgets (projects, vault, local AI and CI, all empty or off). Each defaults on load.
+        if matches!(version, Some(3) | Some(4) | Some(5)) {
             value["version"] = serde_json::json!(SETTINGS_VERSION);
             return true;
         }
@@ -333,6 +397,37 @@ impl AppSettings {
         let focus = &self.widgets.focus;
         if !(1..=180).contains(&focus.focus_minutes) || !(1..=60).contains(&focus.break_minutes) {
             return Err("focus lengths out of range".into());
+        }
+        let roots = &self.widgets.projects.roots;
+        if roots.len() > MAX_PROJECT_ROOTS {
+            return Err(format!("at most {MAX_PROJECT_ROOTS} project folders"));
+        }
+        if roots
+            .iter()
+            .any(|r| r.trim().is_empty() || r.chars().count() > 1024)
+        {
+            return Err("project folders must be 1-1024 characters".into());
+        }
+        if has_duplicates_ignoring_case(roots) {
+            return Err("a project folder is listed twice".into());
+        }
+        let vault = &self.widgets.vault.path;
+        if vault.chars().count() > 1024 {
+            return Err("the vault path must be at most 1024 characters".into());
+        }
+        let model = &self.widgets.local_ai.model;
+        if model.chars().count() > 128 {
+            return Err("the local AI model name must be at most 128 characters".into());
+        }
+        let repos = &self.widgets.ci.repos;
+        if repos.len() > MAX_CI_REPOS {
+            return Err(format!("at most {MAX_CI_REPOS} CI repositories"));
+        }
+        if let Some(repo) = repos.iter().find(|r| !is_valid_github_repo(r)) {
+            return Err(format!("{repo} is not an owner/name repository"));
+        }
+        if has_duplicates_ignoring_case(repos) {
+            return Err("a CI repository is listed twice".into());
         }
         let quiet = &self.automation.quiet_hours;
         if parse_clock(&quiet.start).is_none() || parse_clock(&quiet.end).is_none() {
@@ -455,11 +550,11 @@ mod tests {
         let mut value = original.clone();
         assert!(AppSettings::migrate(&mut value));
         let settings = parse(&value).unwrap();
-        assert_eq!(settings.version, 5);
+        assert_eq!(settings.version, SETTINGS_VERSION);
         assert_eq!(settings.dock.style, DockStyle::Midnight);
         assert_eq!(settings.dock.spacing, DockSpacing::Even);
         assert!(!settings.onboarded);
-        original["version"] = serde_json::json!(5);
+        original["version"] = serde_json::json!(SETTINGS_VERSION);
         assert_eq!(value, original);
         assert!(!AppSettings::migrate(&mut value));
     }
@@ -477,11 +572,39 @@ mod tests {
         });
         assert!(AppSettings::migrate(&mut value));
         let settings = parse(&value).unwrap();
-        assert_eq!(settings.version, 5);
+        assert_eq!(settings.version, SETTINGS_VERSION);
         assert_eq!(settings.dock.style, DockStyle::Ink);
         assert_eq!(settings.dock.spacing, DockSpacing::Even);
         assert_eq!(settings.dock.position, crate::geometry::DockPosition::Left);
         assert!(!AppSettings::migrate(&mut value));
+    }
+
+    #[test]
+    fn migrates_version_five_and_leaves_developer_widgets_off() {
+        let mut value = serde_json::to_value(AppSettings::default()).unwrap();
+        value["version"] = serde_json::json!(5);
+        value["widgets"]
+            .as_object_mut()
+            .unwrap()
+            .retain(|key, _| key == "weather" || key == "focus");
+        assert!(AppSettings::migrate(&mut value));
+        let settings = parse(&value).unwrap();
+        assert_eq!(settings.version, SETTINGS_VERSION);
+        assert!(settings.widgets.projects.roots.is_empty());
+        assert!(settings.widgets.vault.path.is_empty());
+        assert!(!settings.widgets.ci.enabled);
+        assert!(!AppSettings::migrate(&mut value));
+    }
+
+    #[test]
+    fn checks_github_repo_names() {
+        assert!(is_valid_github_repo("deathboy20/OpenDock"));
+        assert!(is_valid_github_repo("a-b/c.d_e"));
+        assert!(!is_valid_github_repo("OpenDock"));
+        assert!(!is_valid_github_repo("-x/y"));
+        assert!(!is_valid_github_repo("x/.."));
+        assert!(!is_valid_github_repo("x/y/z"));
+        assert!(!is_valid_github_repo("x/a b"));
     }
 
     #[test]

@@ -1,7 +1,7 @@
 {
   "valid": [
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -33,7 +33,7 @@
       "onboarded": true
     },
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "top",
         "size": "l",
@@ -58,7 +58,7 @@
       "onboarded": false
     },
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "left",
         "size": "s",
@@ -72,7 +72,7 @@
       }
     },
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -86,7 +86,7 @@
       }
     },
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "right",
         "size": "s",
@@ -100,7 +100,7 @@
       }
     },
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "bottom",
         "size": "l",
@@ -112,11 +112,46 @@
         "clock24h": false,
         "launchAtStartup": false
       }
+    },
+    {
+      "version": 6,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": {
+        "projects": { "roots": ["D:\\Gitfiles", "C:\\Users\\me\\code"] },
+        "vault": { "path": "C:\\Users\\me\\Documents\\Vault" },
+        "localAi": { "model": "qwen3:4b" },
+        "ci": { "enabled": true, "repos": ["deathboy20/OpenDock", "octo-org/hello.world_2"] }
+      }
+    },
+    {
+      "version": 6,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "projects": {}, "vault": {}, "localAi": {}, "ci": {} }
     }
   ],
   "invalid": [
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -137,7 +172,7 @@
       "automation": { "enabled": true, "quietHours": { "enabled": false, "start": "22:00", "end": "07:00" } }
     },
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -158,7 +193,7 @@
       "automation": { "enabled": true, "quietHours": { "enabled": false, "start": "22:00", "end": "07:00" } }
     },
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -179,7 +214,7 @@
       "automation": { "enabled": true, "quietHours": { "enabled": false, "start": "22:00", "end": "07:00" } }
     },
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -221,7 +256,7 @@
       "automation": { "enabled": true, "quietHours": { "enabled": false, "start": "22:00", "end": "07:00" } }
     },
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -236,7 +271,7 @@
       }
     },
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -256,7 +291,7 @@
       }
     },
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -271,7 +306,7 @@
       "apps": { "pinned": [{ "name": "", "path": "C:\\Apps\\Nameless.exe", "target": null }] }
     },
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -286,7 +321,7 @@
       "taskbar": { "mode": "vanish" }
     },
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -300,7 +335,7 @@
       }
     },
     {
-      "version": 5,
+      "version": 6,
       "dock": {
         "position": "bottom",
         "size": "m",
@@ -327,6 +362,126 @@
         "clock24h": false,
         "launchAtStartup": false
       }
+    },
+    {
+      "version": 6,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "ci": { "enabled": true, "repos": ["not-a-repo"] } }
+    },
+    {
+      "version": 6,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "ci": { "enabled": true, "repos": ["owner/.."] } }
+    },
+    {
+      "version": 6,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "ci": { "repos": ["Owner/Repo", "owner/repo"] } }
+    },
+    {
+      "version": 6,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "projects": { "roots": ["D:\\Gitfiles", "d:\\gitfiles"] } }
+    },
+    {
+      "version": 6,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "projects": { "roots": [""] } }
+    },
+    {
+      "version": 6,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "projects": { "roots": ["a", "b", "c", "d", "e", "f", "g", "h", "i"] } }
+    },
+    {
+      "version": 6,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "localAi": { "model": "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" } }
+    },
+    {
+      "version": 6,
+      "dock": {
+        "position": "bottom",
+        "size": "m",
+        "mode": "pill",
+        "theme": "dark",
+        "style": "glass",
+        "monitorId": null,
+        "itemOrder": ["projects", "vault", "local-ai", "ci"],
+        "clock24h": false,
+        "launchAtStartup": false
+      },
+      "widgets": { "ci": { "enabled": "yes" } }
     }
   ]
 }
