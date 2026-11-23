@@ -41,6 +41,14 @@ Phase B (code complete; live check partly done, see below):
 
 13. **Update checks** ([ADR 0006](docs/adr/0006-update-checks.md), status Proposed). Rust `services/updates.rs`: `GET https://api.github.com/repos/deathboy20/OpenDock/releases/latest` through `net.rs` (ledger name `updates`), once a day and 90 s after start while `updates.check` is on (default on), or on `check_for_updates`. Semver compare with pre-releases older than their release; only `github.com/deathboy20/OpenDock/releases/` links are opened (`open_update_page`). UI: **Download OpenDock x.y.z** in the dock menu and an Updates section in Dock settings. Installing is still manual.
 
+14. **Undo, reset and first-run look**: switching skins offers Undo, which restores only the look (`features/customise/look.ts`, `restoreLook`); each widget's options have Reset; the welcome flow's Make it yours step offers Islands, Daylight, Float, Graphite and High contrast (`features/hub/WelcomePage.tsx`, applied with `apply_skin`).
+15. **Islands drawn as one capsule per run** (`measureIslands` and `useIslandRects` in `features/dock/islands.ts`, `.dock-islands` in `dock.css`), and the **toast** built with `.focusable(false)` and shown with Tauri's `show()` (no more raw `ShowWindow`).
+16. **Anti-slop checklist** for the branch: `docs/ANTI_SLOP_CHECKLIST.md` (20 checks pass or N/A, with evidence).
+
+Isaac gave full access on 2026-11-23 to build skins and improvements beyond the plan, using the anti-slop skills; items 12-16 come from that.
+
+Live checks in `pnpm dev`, 2026-11-23, second run (Islands skin, islands layout, slim, strong tint, analog clock and System bars written into the dev settings; v5 settings restored afterwards): the real dock showed the islands, slim bar, analog clock and System bars; after the capsule fix the islands are seamless; the title-bar toast did not come back after the toast fix; the two desktop widgets were dragged (by Isaac) and saved snapped to the 16 px grid with `\\.\DISPLAY1`; the Customise page (Interface preview on all three sample wallpapers, Look picker for the clock, skins) was checked in the browser preview at `http://localhost:1420/?window=hub&page=customise`, which has no Rust backend, so widgets there show "unavailable".
+
 Phase B live check, 2026-11-23 in `pnpm dev` (taskbar kept, v5 settings backed up and restored afterwards):
 - Seen: the two desktop widgets (Clock, Projects) open at their saved spots on the desktop; after the icon fix, File Explorer and Edge show real icons; the Customise page with Scenes, Skins and the five skin cards; Dusk, High contrast and Paper applied in the browser preview (`http://localhost:1420/?window=hub&page=customise`, in-memory settings).
 - Not verified: dragging and snapping a desktop widget, a second monitor, saving or switching a scene, importing or exporting a skin, and skins on the real dock. Isaac declined click access to Explorer, which sat in front of the dock, so the real app couldn't be clicked.
@@ -53,6 +61,7 @@ Phase B live check, 2026-11-23 in `pnpm dev` (taskbar kept, v5 settings backed u
 - **In-app install of updates is not built.** Update *checks* are (item 13). Installing in the app needs `tauri-plugin-updater` (new crate and npm package), an update signing key kept as a GitHub secret, and a signed `latest.json` published with each release. It's on the 1.0 roadmap and needs Isaac's OK for the key and the CI change.
 - **Linux and macOS** have build-only experimental packages (see `ROADMAP.md`); nothing runs or is tested there. The new code has non-Windows fallbacks (`platform/process.rs`, keychain via `keyring`, Tauri `always_on_bottom`), but desktop widgets can't place themselves on Wayland and the taskbar features are Windows-only.
 - The toast window (`OpenDock notification`) appeared once with a native title bar after a dev rebuild. Likely cause: it is shown with a raw no-activate `ShowWindow`, which skips the window library's show step. The first fix (re-applying `set_decorations(false)`) did not help: tao keeps the caption style and hides the frame only through its own show path. Now the toast is built with `.focusable(false)` (`WS_EX_NOACTIVATE`) and shown with Tauri's `show()`, and the raw `show_without_focus` / `show_no_activate` helpers are gone. After the change the title-bar toast no longer appeared on restart in `pnpm dev`; it was intermittent before, so keep an eye on it.
+- An untracked `INVENTORY-AND-PLAN.md` (a workstation inventory with personal paths, from another session) sits in the repo root. It is not part of OpenDock; never commit it. Move it to the vault.
 - README links `isaacobenzy/OpenDock` while the canonical remote is `deathboy20/OpenDock`. Not changed.
 - Running `pnpm dev` on this PC uses the installed app's `%APPDATA%\com.opendock.app\settings.json`, which has taskbar mode `replace` and start-with-Windows on. A dev run hides the taskbar and migrates the file to v6, which the installed 0.3.0 would then reject. Back it up first. The 2026-11-23 run used `settings.v5-backup-2026-11-23.json` and `opendock.db.backup-2026-11-23` (same folder); the original v5 settings were copied back afterwards.
 - Projects never fetches, so "behind" is relative to the last fetch. Each `git status` has a 10 s limit; a repo that takes longer shows "git status took too long".
@@ -75,10 +84,9 @@ Phase B live check, 2026-11-23 in `pnpm dev` (taskbar kept, v5 settings backed u
 
 ## Next steps
 
-0. Decide with Isaac: (a) the skin interfaces plan above, (b) adding `tauri-plugin-updater` for auto-update, (c) merging or opening a PR for `feat/developer-widgets`.
-
-1. Phase A code is complete: Local AI (Ollama), CI status (opt-in, token in the keychain).
-2. Phase B (done except the open live checks): per-widget instance options, JSON skins (token overrides only), desktop widgets layer, Scenes.
-3. Phase C (taskbar mode) waits for Isaac and a recorded `docs/testing-matrix.md` on Windows 10.
+1. Isaac to look at the dock in `pnpm dev` (back up `settings.json` first; see Open items) and try Customise on the real app: skins, Undo, islands and chips, a vertical dock, widget looks, scenes, desktop widgets.
+2. Decide: (a) ADR 0006 (update checks on by default) from Proposed to Accepted, (b) `tauri-plugin-updater` with a signing key for in-app installs, (c) a PR for `feat/developer-widgets` into `develop` or `main` on `deathboy20/OpenDock`. Before merging to `main`, run the `security-release-checklist` and `ui-release-checklist` skills; neither has run yet.
+3. Worth doing next: a "switch scene" automation action (scenes from rules, e.g. Focus at 9:00), more widget looks (Now playing bar with progress, Year progress dots), and a Linux/macOS runtime check before promising those platforms.
+4. Phase C (taskbar mode) waits for Isaac and a recorded `docs/testing-matrix.md` on Windows 10.
 
 Last updated: 2026-11-23
