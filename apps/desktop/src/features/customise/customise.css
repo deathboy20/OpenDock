@@ -348,6 +348,14 @@
   pointer-events: none;
 }
 
+.skin-undo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
 .skin-chip {
   justify-self: start;
   margin-top: 2px;

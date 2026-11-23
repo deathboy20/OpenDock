@@ -1,4 +1,4 @@
-import { setWidgetOptions, variantsFor, widgetOptionsFor, type AppSettings } from "@opendock/config-schema";
+import { defaultWidgetOptions, setWidgetOptions, variantsFor, widgetOptionsFor, type AppSettings } from "@opendock/config-schema";
 import { useState } from "react";
 import { useSettings } from "../../services/settingsContext";
 import { Choice } from "../hub/controls";
@@ -147,6 +147,16 @@ function WidgetOptionsRow({ id, settings, change }: { id: string; settings: AppS
               {polling.why ? <span className="muted small">{polling.why}</span> : null}
             </label>
           ) : null}
+          <div>
+            <button
+              type="button"
+              className="button is-ghost"
+              disabled={!settings.widgets.options[id]}
+              onClick={() => change((s) => setWidgetOptions(s, id, defaultWidgetOptions))}
+            >
+              <Icon name="undo" size={14} /> Reset {name}
+            </button>
+          </div>
         </div>
       ) : null}
     </li>

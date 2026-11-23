@@ -81,7 +81,7 @@ Switch scenes from **Customise** or from the dock menu (right-click the dock). T
 
 A skin changes colours, corner radius, blur, shadows, font and motion speed in every OpenDock window. It can also set the dock's shape and how each widget looks (see **Interface** and **Widget options** below); applying the skin copies those choices in, and you can change any of them afterwards. **Dock style** turns skins off and leaves the shape as it is.
 
-Ten come built in. Each has dark and light values, and keeps text at 4.5:1 contrast or more.
+Ten come built in. Each has dark and light values, and keeps text at 4.5:1 contrast or more. After you switch skins, **Undo** puts back the previous look (skin, dock style, layout, thickness, tint and widget looks) without touching anything else. First-run setup also offers a few skins under **Look**.
 
 | Skin | What it's for |
 | --- | --- |
@@ -149,7 +149,7 @@ Every widget on the dock has its own options. Select a widget to change:
 - **Accent:** Theme, Mint, Sky, Amber, Rose or Violet. Each swatch keeps text on it at 4.5:1 contrast or more in both themes.
 - **Check every:** for widgets that poll (Projects, Local AI and CI status). CI status never checks more often than once a minute, because GitHub allows 60 requests an hour without a token.
 
-Right-click a widget and choose **Options for…** to jump here.
+**Reset** puts a widget back to its defaults. Right-click a widget and choose **Options for…** to jump here.
 
 ### Desktop widgets
 
