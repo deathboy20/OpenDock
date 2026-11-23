@@ -68,7 +68,7 @@ Phase B live check, 2026-11-23 in `pnpm dev` (taskbar kept, v5 settings backed u
 
 ## Open items and known issues
 
-- **Cloudflare Pages `NODE_VERSION` (owner action, before pushing `chore/upgrade-astro-zod`):** the dashboard variable is `22` and overrides `.node-version`. Set it to `22.23.5`, or preview and production builds may fail with "Node.js … is not supported by Astro!". Every pushed branch gets a preview build.
+- **Cloudflare Pages `NODE_VERSION`:** Isaac changed it from `22` to `22.23.5` in the dashboard on 2026-11-23 (reported by Isaac; not checked from here, and no build has run with it yet). The dashboard value overrides `.node-version`, so keep the two equal; Astro 7 fails with "Node.js … is not supported by Astro!" on older Node.
 - **Node on this PC:** Node 22.23.5 is installed with nvm-windows, but the global version is still 22.22.0, because pnpm (via corepack), eas-cli, appwrite-cli, agent-browser and opencode-ai are installed under 22.22.0 only. To build the website here, either `nvm use 22.23.5`, then `corepack enable` and reinstall those globals, or put `%LOCALAPPDATA%\nvm\v22.23.5` first on `PATH` for the session.
 - `chore/upgrade-astro-zod` adds a **Security** section under *Unreleased* in `CHANGELOG.md`. `release/0.4.0` moves *Unreleased* under `[0.4.0]`, so expect a small conflict when either merges; the upgrade entries belong in the release after 0.4.0.
 
@@ -102,7 +102,7 @@ Phase B live check, 2026-11-23 in `pnpm dev` (taskbar kept, v5 settings backed u
 
 ## Next steps
 
-0. `chore/upgrade-astro-zod`: Isaac sets Cloudflare `NODE_VERSION` to `22.23.5`, then decides when to push it and open a PR into `main` (after 0.4.0 ships). Not pushed yet.
+0. `chore/upgrade-astro-zod`: Isaac decides when to push it and open a PR into `main` (after 0.4.0 ships). Not pushed yet. The first preview build will confirm the Cloudflare Node version.
 1. Isaac to look at the dock in `pnpm dev` (back up `settings.json` first; see Open items) and try Customise on the real app: skins, Undo, islands and chips, a vertical dock, widget looks, scenes, desktop widgets.
 2. Decide: (a) ADR 0006 (update checks on by default) from Proposed to Accepted, (b) `tauri-plugin-updater` with a signing key for in-app installs, (c) review and merge PR #11 (targets `main`; the README's flow would send features to `develop` first). Before merging to `main`, run the `security-release-checklist` and `ui-release-checklist` skills; neither has run yet.
 3. Worth doing next: a "switch scene" automation action (scenes from rules, e.g. Focus at 9:00), more widget looks (Now playing bar with progress, Year progress dots), and a Linux/macOS runtime check before promising those platforms.
