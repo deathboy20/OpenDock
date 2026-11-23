@@ -99,6 +99,44 @@ pub fn settle(absolute: (i32, i32), size: (i32, i32), monitor: Rect, grid: u32) 
     clamp_inside(snapped.0, snapped.1, size, monitor)
 }
 
+fn overlaps(a: (i32, i32), b: (i32, i32), size: (i32, i32)) -> bool {
+    (a.0 - b.0).abs() < size.0 && (a.1 - b.1).abs() < size.1
+}
+
+/// Moves a dropped widget off any widget already on that monitor: down a grid step at a time,
+/// then to the next column, so two widgets never sit on top of each other.
+pub fn avoid_overlap(
+    spot: (i32, i32),
+    others: &[(i32, i32)],
+    size: (i32, i32),
+    monitor: Rect,
+    grid: u32,
+) -> (i32, i32) {
+    let grid = grid.clamp(MIN_GRID, MAX_GRID) as i32;
+    let free = |p: (i32, i32)| !others.iter().any(|o| overlaps(p, *o, size));
+    if free(spot) {
+        return spot;
+    }
+    let max_y = (monitor[3] - size.1).max(0);
+    let max_x = (monitor[2] - size.0).max(0);
+    let mut x = spot.0;
+    for _ in 0..64 {
+        let mut y = spot.1;
+        while y <= max_y {
+            if free((x, y)) {
+                return (x, y);
+            }
+            y += grid;
+        }
+        x = if x + size.0 + grid <= max_x {
+            x + size.0 + grid
+        } else {
+            0
+        };
+    }
+    spot
+}
+
 /// Where a saved widget goes on screen. A monitor that has shrunk keeps it on screen.
 pub fn screen_position(widget: &DesktopWidget, size: (i32, i32), monitor: Rect) -> (i32, i32) {
     let (x, y) = clamp_inside(widget.x, widget.y, size, monitor);
@@ -142,6 +180,19 @@ mod tests {
             screen_position(&widget, (252, 76), [0, 0, 300, 200]),
             (48, 124)
         );
+    }
+
+    #[test]
+    fn moves_a_dropped_widget_off_another() {
+        let monitor = [0, 0, 1366, 768];
+        let size = (WIDGET_WIDTH, WIDGET_HEIGHT);
+        assert_eq!(avoid_overlap((32, 32), &[], size, monitor, 16), (32, 32));
+        let below = avoid_overlap((1104, 80), &[(1024, 64)], size, monitor, 16);
+        assert!(!overlaps(below, (1024, 64), size));
+        assert_eq!(below, (1104, 144));
+        let crowded: Vec<(i32, i32)> = (0..10).map(|i| (32, i * 76)).collect();
+        let next = avoid_overlap((32, 0), &crowded, size, monitor, 16);
+        assert!(crowded.iter().all(|o| !overlaps(next, *o, size)));
     }
 
     #[test]

@@ -153,7 +153,7 @@ Every widget on the dock has its own options. Select a widget to change:
 
 ### Desktop widgets
 
-Turn on any widget under **Desktop widgets** to put it on the desktop in its own small window, behind your other windows. Drag it to move it. When you let go it snaps to the grid (**Fine** 8 px, **Even** 16 px or **Wide** 32 px), and OpenDock saves where it sits relative to that monitor. If that monitor isn't connected next time, the widget goes to the main monitor and stays on screen. The Start, Apps, Quick actions, Volume and add buttons stay on the dock. You can place up to 12 widgets. A desktop widget uses its widget options (label, accent, icon-only layout) and the active skin; its panel opens from the dock.
+Turn on any widget under **Desktop widgets** to put it on the desktop in its own small window, behind your other windows. Drag it to move it. When you let go it snaps to the grid (**Fine** 8 px, **Even** 16 px or **Wide** 32 px), moves to the nearest free spot if you dropped it on another widget, and OpenDock saves where it sits relative to that monitor. If that monitor isn't connected next time, the widget goes to the main monitor and stays on screen. The Start, Apps, Quick actions, Volume and add buttons stay on the dock. You can place up to 12 widgets. A desktop widget uses its widget options (label, accent, icon-only layout) and the active skin; its panel opens from the dock.
 
 ## Updates
 
