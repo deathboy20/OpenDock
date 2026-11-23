@@ -25,6 +25,7 @@ All notable changes to OpenDock are documented here. The format is based on [Kee
 
 ### Fixed
 
+- A new notification strip applies its borderless style before it is first shown, so it no longer flashes a native title bar.
 - App icons that Windows couldn't hand over at first (for example right after sign-in) are asked for again instead of staying as a letter until OpenDock restarts.
 
 ## [0.3.0] - 2026-11-07
