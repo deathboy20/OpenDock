@@ -79,6 +79,9 @@ const COMMANDS: &[&str] = &[
     "open_ci_run",
     "set_github_token",
     "clear_github_token",
+    "save_scene",
+    "apply_scene",
+    "delete_scene",
 ];
 
 fn main() {
