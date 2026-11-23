@@ -8,12 +8,12 @@
 
 OpenDock replaces the Windows taskbar with a dock that shows your apps and windows, live widgets and automations that act for you. It runs entirely on your PC: no account, no telemetry, no license keys.
 
-[![CI](https://github.com/isaacobenzy/OpenDock/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/isaacobenzy/OpenDock/actions/workflows/ci.yml)
-[![Latest release](https://img.shields.io/github/v/release/isaacobenzy/OpenDock?include_prereleases&sort=semver)](https://github.com/isaacobenzy/OpenDock/releases)
+[![CI](https://github.com/deathboy20/OpenDock/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/deathboy20/OpenDock/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/deathboy20/OpenDock?include_prereleases&sort=semver)](https://github.com/deathboy20/OpenDock/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-2dd4bf.svg)](LICENSE)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-7cf2c8.svg)](CONTRIBUTING.md)
 
-[Website](https://opendock.pages.dev) · [Download](https://github.com/isaacobenzy/OpenDock/releases/latest) · [Documentation](docs/README.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
+[Website](https://opendock.pages.dev) · [Download](https://github.com/deathboy20/OpenDock/releases/latest) · [Documentation](docs/README.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
 
 <img src="apps/web/public/screenshots/dock-windows.png" alt="OpenDock running on Windows, with pinned apps, open windows, volume, the clock and CPU and memory." width="960" />
 
@@ -25,15 +25,20 @@ OpenDock replaces the Windows taskbar with a dock that shows your apps and windo
 
 - **A real taskbar replacement.** Pinned apps and every open window, grouped by app with live window previews. OpenDock reserves the screen edge so maximised windows never sit underneath it. The taskbar is restored on quit, by a guard process after a crash, before power actions from the launcher, on the next start, and by the uninstaller. If Windows kills OpenDock and the guard together, auto-hide can stay on until the next launch. **Restore the Windows taskbar** is in the dock menu and the quick-actions tray.
 - **Start launcher.** Instant search across installed apps, pinning, and lock, sleep, sign out, restart and shut down.
-- **Fourteen built-in widgets.** Apps, Start, Volume, Quick actions, Clock, Now playing, Focus timer, Todos, Notes, Next event (iCal), System, Battery, Weather and Day progress. Each one renders in three sizes with proper loading, empty and error states.
+- **Eighteen built-in widgets.** Apps, Start, Volume, Quick actions, Clock, Now playing, Focus timer, Todos, Notes, Next event (iCal), System, Battery, Weather and Day progress, plus four developer widgets. Each one renders in three sizes with proper loading, empty and error states.
+- **Developer widgets.** Projects lists the git repositories in your folders with branch and uncommitted changes, and opens one in Cursor, VS Code or a terminal. Vault capture adds a timed note to today's page in your Obsidian vault's Inbox. Local AI asks a model running in Ollama on your PC. CI status shows your latest GitHub Actions runs (off by default).
+- **Make it yours.** Ten built-in skins, plus your own, imported and exported as JSON. Skins restyle every window and can change the dock's shape: one bar, islands of related widgets or a chip per widget, slim or regular, with a stronger tint for busy wallpapers. Each widget gets its own label, accent, layout and look, such as an analog clock or a battery ring.
+- **Desktop widgets and scenes.** Put widgets on the desktop behind your windows; they snap to a grid and remember their place on each monitor. Save the dock's widgets, look, quiet hours and automations as a scene and switch between scenes from the dock menu.
 - **Automation Studio.** Rules are plain data: *when* an event happens, *unless* a condition holds, *then* run actions. Ships with recipes such as Meeting mode, Sunset dark mode and Pause music for calls, plus dry runs, an activity log and Undo.
-- **Privacy you can audit.** Every network request goes through one gate that only allows hosts a widget declared, and each request is written to a local Privacy Ledger you can inspect. Secrets live in the OS keychain.
+- **Privacy you can audit.** Every network request goes through one gate that only allows hosts a widget declared, and each request is written to a local Privacy Ledger you can inspect. Secrets live in the OS keychain. Apart from what your widgets need, the only request is an anonymous daily check for a new release, which you can turn off in Dock settings.
 
 ## Install
 
-1. Download `OpenDock_<version>_x64-setup.exe` from the [latest release](https://github.com/isaacobenzy/OpenDock/releases/latest).
+1. Download `OpenDock_<version>_x64-setup.exe` from the [latest release](https://github.com/deathboy20/OpenDock/releases/latest).
 2. Verify it against `SHA256SUMS.txt` from the same release (optional, recommended).
 3. Run the installer. On first launch, OpenDock asks how it should treat the Windows taskbar.
+
+When a newer release is out, the dock menu and Dock settings offer the download. Installing it is still a manual step.
 
 Requirements: Windows 10 or 11, 64-bit, with the Microsoft Edge WebView2 runtime (preinstalled on Windows 11).
 
@@ -56,7 +61,7 @@ Linux and macOS artifacts are experimental build outputs. Their UI and runtime b
 ## Build from source
 
 ```powershell
-git clone https://github.com/isaacobenzy/OpenDock.git
+git clone https://github.com/deathboy20/OpenDock.git
 cd OpenDock
 pnpm install
 pnpm dev            # desktop app with hot reload
@@ -70,8 +75,9 @@ You need Node.js 22 (`.nvmrc`; `package.json` requires `>=22`), pnpm 10 (`packag
 | --- | --- |
 | Windows taskbar replacement, apps, live previews, 14 widgets, Automation Studio, Privacy Ledger | Shipped in 0.2.0 |
 | Taskbar restore on quit, crash, launcher power actions, next start, and uninstall | Shipped in code. Automated tests cover the marker file and which power actions restore first. The [manual matrix](docs/testing-matrix.md) has not been recorded against an installed build. |
-| Restore command in the dock menu and quick-actions tray | Shipped |
-| Code signing, winget, Scoop, auto-update | Planned for 1.0 |
+| Live dock settings, the restore-the-taskbar command, and a dock you can try on the website | Shipped in 0.3.0 |
+| Developer widgets, skins that change the dock's shape and widget looks, desktop widgets, scenes, daily update checks | Shipped in 0.4.0 |
+| Code signing, winget, Scoop, installing updates from inside the app | Planned for 1.0 |
 | Widget SDK | Planned |
 | Linux and macOS installers | Experimental build-only artifacts; runtime behavior is not verified |
 
@@ -100,7 +106,7 @@ A tour of every module is in [docs/project-structure.md](docs/project-structure.
 
 ## Contributing
 
-Contributions of every size are welcome: bug reports, widgets, translations, docs and code. Start with [CONTRIBUTING.md](CONTRIBUTING.md), and look for issues labelled [`good first issue`](https://github.com/isaacobenzy/OpenDock/labels/good%20first%20issue). Feature branches merge into `develop`, release candidates sit on `staging`, and `main` is what ships. The engineering rules every change follows are in [AGENTS.md](AGENTS.md).
+Contributions of every size are welcome: bug reports, widgets, translations, docs and code. Start with [CONTRIBUTING.md](CONTRIBUTING.md), and look for issues labelled [`good first issue`](https://github.com/deathboy20/OpenDock/labels/good%20first%20issue). Feature branches merge into `develop`, release candidates sit on `staging`, and `main` is what ships. The engineering rules every change follows are in [AGENTS.md](AGENTS.md).
 
 Please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Report security issues privately as described in [SECURITY.md](SECURITY.md), not in public issues.
 
