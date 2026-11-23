@@ -160,6 +160,15 @@ export const widgets: Widget[] = [
     summary: "Whether Ollama is running, your models and what is loaded in memory, plus a quick question box. It only talks to Ollama on your own PC.",
     network: [],
   },
+  {
+    id: "ci",
+    name: "CI status",
+    icon: "check",
+    category: "Developer",
+    summary: "The latest GitHub Actions run for the repositories you list. Off until you turn it on; an optional token stays in the system keychain.",
+    network: ["api.github.com"],
+    stores: "Your repository list",
+  },
 ];
 
 export function widgetsIn(category: WidgetCategory): Widget[] {

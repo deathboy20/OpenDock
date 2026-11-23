@@ -57,6 +57,7 @@ export type IconName =
   | "back"
   | "inbox"
   | "chip"
+  | "pipeline"
   | WeatherKind;
 
 const paths: Record<IconName, string> = {
@@ -65,6 +66,7 @@ const paths: Record<IconName, string> = {
   terminal: "M3 5h18v14H3zM7 9.5l3 2.5-3 2.5M12.5 15H17",
   code: "M9 7l-5 5 5 5M15 7l5 5-5 5",
   back: "M15 6l-6 6 6 6",
+  pipeline: "M6 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM18 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM6 7v3a3 3 0 0 0 3 3h6a3 3 0 0 1 3 3v1",
   chip: "M8 8h8v8H8zM5 5h14v14H5zM9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3",
   inbox: "M4 13.5h4.5l1.5 2.5h4l1.5-2.5H20M4 13.5L6.5 5h11l2.5 8.5V19H4z",
   start: "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z",

@@ -195,6 +195,11 @@ pub fn run() {
             commands::developer::get_local_ai,
             commands::developer::refresh_local_ai,
             commands::developer::ask_local_ai,
+            commands::developer::get_ci_status,
+            commands::developer::refresh_ci,
+            commands::developer::open_ci_run,
+            commands::developer::set_github_token,
+            commands::developer::clear_github_token,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

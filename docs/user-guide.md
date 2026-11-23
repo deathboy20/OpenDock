@@ -65,6 +65,7 @@ Open the **Widget gallery** from the dock menu to add widgets. Each one shows wh
 | Projects | Git repositories in your project folders, with branch and changes | None |
 | Vault capture | A quick note box for your Obsidian vault's Inbox | None |
 | Local AI | Ollama status, models and a quick prompt | Only Ollama on this PC (`127.0.0.1`) |
+| CI status | The latest GitHub Actions run per repository (off until you turn it on) | GitHub (`api.github.com`) |
 
 ## Developer widgets
 
@@ -89,6 +90,12 @@ Enter your Obsidian vault folder, for example `C:\Users\you\Documents\Vault`. Ea
 Shows whether [Ollama](https://ollama.com) is running on this PC, the models you have pulled, and the ones loaded in memory with how much GPU memory they use. Pick a model, type a question and press **Ask**; the answer appears in the panel. The first answer from a model that isn't loaded takes longer while Ollama loads it.
 
 OpenDock talks only to `http://127.0.0.1:11434`, the address Ollama listens on, and only while the Local AI widget is on the dock (every minute, or when you press **Check again**). Each check shows in the Privacy Ledger under `local-ai`. Prompts and answers are not saved.
+
+### CI status
+
+CI status is off until you turn on **Check GitHub Actions** and add repositories as `owner/name` (you can paste a GitHub link). While it is on and the widget is on the dock, OpenDock asks `api.github.com` for the latest Actions run of each repository every five minutes. Each repository shows **Passing**, **Failing**, **Running**, **Cancelled** or **No runs yet**, with the workflow, branch and time. Select one to open the run on github.com.
+
+Without a token GitHub allows 60 requests an hour and shows public repositories only. For private repositories, create a fine-grained token with read-only access to Actions and paste it under **GitHub token**. It is stored in Windows Credential Manager (service `OpenDock`, account `github:token`), sent only to `api.github.com`, and never shown again. **Remove** deletes it.
 
 ## Calendars
 

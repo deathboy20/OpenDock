@@ -76,6 +76,11 @@ pub fn persist_settings(
     if previous.dock.item_order != settings.dock.item_order {
         app.state::<Wakers>().wake_local_ai();
     }
+    if previous.widgets.ci != settings.widgets.ci
+        || previous.dock.item_order != settings.dock.item_order
+    {
+        app.state::<Wakers>().wake_ci();
+    }
     let _ = app.emit("settings:changed", &settings);
     Ok(settings)
 }

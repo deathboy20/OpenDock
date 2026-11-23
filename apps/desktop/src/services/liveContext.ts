@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type {
   CalendarEvent,
+  CiSnapshot,
   FocusState,
   LocalAiSnapshot,
   MediaState,
@@ -30,6 +31,7 @@ export type LiveData = {
   projects: Loadable<ProjectsSnapshot | null>;
   vault: Loadable<VaultStatus>;
   localAi: Loadable<LocalAiSnapshot | null>;
+  ci: Loadable<CiSnapshot | null>;
 };
 
 export const emptyLive: LiveData = {
@@ -47,6 +49,7 @@ export const emptyLive: LiveData = {
   projects: loading,
   vault: loading,
   localAi: loading,
+  ci: loading,
 };
 
 export const LiveContext = createContext<LiveData>(emptyLive);

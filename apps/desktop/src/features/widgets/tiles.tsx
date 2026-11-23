@@ -20,7 +20,7 @@ import {
 import { Icon } from "./icons";
 import { Tile, type TileProps } from "./Tile";
 import { Bar, Ring, Sparkline } from "./visuals";
-import { LocalAiTile, ProjectsTile, VaultTile } from "../developer/DeveloperTiles";
+import { CiTile, LocalAiTile, ProjectsTile, VaultTile } from "../developer/DeveloperTiles";
 
 export type { TileProps } from "./Tile";
 
@@ -363,6 +363,8 @@ export function TileContent({ id, size, compact }: { id: string } & TileProps) {
       return <VaultTile {...props} />;
     case "local-ai":
       return <LocalAiTile {...props} />;
+    case "ci":
+      return <CiTile {...props} />;
     default:
       return <UnknownTile id={id} />;
   }

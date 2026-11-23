@@ -51,6 +51,7 @@ Hosts contacted today:
 | City search | `geocoding-api.open-meteo.com` | Only while you type in the city search |
 | Calendars | The host of each feed you add | Every 15 minutes, or when you press refresh |
 | Local AI | `127.0.0.1` (Ollama on this PC, plain HTTP on port 11434) | Every minute while the widget is on the dock, and for each question you ask |
+| CI status | `api.github.com` | Off by default. When turned on, every 5 minutes per listed repository while the widget is on the dock |
 
 The Projects widget makes no network requests: it runs `git status` (with `core.fsmonitor` turned off and no optional locks) in repositories under the folders you choose, and only opens or reads paths from its latest scan. Vault capture makes no network requests either: it appends to one file, `Inbox/YYYY-MM-DD.md`, inside the vault folder you set, and refuses links that point outside it.
 
@@ -63,6 +64,7 @@ The installed app makes no other network requests. Installing, uninstalling and 
 | Settings | `%APPDATA%\com.opendock.app\settings.json` | No secrets |
 | Todos, notes, focus history, rules, activity, calendar events, forecast cache, network log | `%APPDATA%\com.opendock.app\opendock.db` | SQLite, readable by your user account only (standard profile permissions) |
 | Calendar feed links | Windows Credential Manager | Service `OpenDock` |
+| GitHub token for CI status (optional) | Windows Credential Manager | Service `OpenDock`, account `github:token`; never returned to the UI |
 
 OpenDock doesn't encrypt the database itself; it relies on Windows profile permissions, like most desktop apps. Window titles are kept in memory and not saved, unless a user-written rule puts one in its message; rule messages are stored in the activity log, which the user can clear.
 

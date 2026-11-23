@@ -74,6 +74,11 @@ const COMMANDS: &[&str] = &[
     "get_local_ai",
     "refresh_local_ai",
     "ask_local_ai",
+    "get_ci_status",
+    "refresh_ci",
+    "open_ci_run",
+    "set_github_token",
+    "clear_github_token",
 ];
 
 fn main() {

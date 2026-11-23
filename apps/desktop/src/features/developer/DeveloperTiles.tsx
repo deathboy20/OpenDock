@@ -2,6 +2,7 @@ import { useLive } from "../../services/liveContext";
 import { useSettings } from "../../services/settingsContext";
 import { Icon } from "../widgets/icons";
 import { Tile, type TileProps } from "../widgets/Tile";
+import { ciHeadline, summarizeCi } from "./ci";
 import { localAiHeadline } from "./localAi";
 import { plural, projectsHeadline, summarizeProjects } from "./projects";
 import "./developer.css";
@@ -148,6 +149,56 @@ export function LocalAiTile({ size, compact }: TileProps) {
       secondary={
         size === "s" ? undefined : size === "l" && loaded ? <span className="tile-truncate">{loaded}</span> : plural(snapshot.models.length, "model")
       }
+    />
+  );
+}
+
+export function CiTile({ size, compact }: TileProps) {
+  const { ci } = useLive();
+  const { settings } = useSettings();
+  const icon = <Icon name="pipeline" />;
+  if (ci.status !== "ready") {
+    return (
+      <Tile
+        compact={compact}
+        state={ci.status}
+        icon={icon}
+        primary={ci.status === "error" ? "CI unavailable" : "CI"}
+        title={ci.status === "error" ? ci.error : undefined}
+      />
+    );
+  }
+  const config = settings.widgets.ci;
+  if (!config.enabled || config.repos.length === 0) {
+    return (
+      <Tile
+        compact={compact}
+        state="empty"
+        icon={icon}
+        primary={config.enabled ? "Add a repository" : "Turn on CI"}
+        title="CI status is off until you set it up in Developer widgets"
+      />
+    );
+  }
+  const snapshot = ci.data;
+  if (!snapshot || snapshot.repos.length === 0) {
+    return <Tile compact={compact} state="loading" icon={icon} primary="CI" />;
+  }
+  const summary = summarizeCi(snapshot);
+  const headline = ciHeadline(summary);
+  return (
+    <Tile
+      compact={compact}
+      state={headline.state === "error" ? "error" : "ready"}
+      title={`${headline.text} across ${plural(summary.total, "repository", "repositories")}`}
+      icon={
+        <span className={`tile-badge-wrap ci-tile is-${headline.state}`}>
+          {icon}
+          {headline.state === "failing" || headline.state === "running" ? <span className="tile-live-dot" aria-hidden /> : null}
+        </span>
+      }
+      primary={size === "s" ? (headline.state === "passing" ? "CI" : headline.text) : headline.text}
+      secondary={size === "s" ? undefined : plural(summary.total, "repo")}
     />
   );
 }
