@@ -192,6 +192,9 @@ pub fn run() {
             commands::developer::get_vault_status,
             commands::developer::vault_capture,
             commands::developer::open_vault,
+            commands::developer::get_local_ai,
+            commands::developer::refresh_local_ai,
+            commands::developer::ask_local_ai,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

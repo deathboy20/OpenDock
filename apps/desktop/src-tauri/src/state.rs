@@ -7,6 +7,7 @@ use crate::engine::bus::{BusEvent, EventBus};
 use crate::platform::taskbar::TaskbarController;
 use crate::platform::{MediaState, SystemStats, VolumeState, WindowsSnapshot};
 use crate::services::focus::FocusTimer;
+use crate::services::local_ai::LocalAiSnapshot;
 use crate::services::projects::ProjectsSnapshot;
 use crate::services::weather::WeatherSnapshot;
 use crate::settings::{AppSettings, SettingsStore};
@@ -24,6 +25,7 @@ pub struct LiveState {
     pub windows: Mutex<WindowsSnapshot>,
     pub volume: Mutex<Option<VolumeState>>,
     pub projects: Mutex<Option<ProjectsSnapshot>>,
+    pub local_ai: Mutex<Option<LocalAiSnapshot>>,
 }
 
 pub struct AppState {

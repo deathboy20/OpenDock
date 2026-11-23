@@ -14,7 +14,7 @@ permissions = [
 
 [[set]]
 identifier = "widget-read"
-description = "Read local widget data: media, system stats, focus, todos, notes, weather, calendar events, projects and their handoff notes, and today's vault captures."
+description = "Read local widget data: media, system stats, focus, todos, notes, weather, calendar events, projects and their handoff notes, today's vault captures and the local AI status."
 permissions = [
   "allow-get-media-state",
   "allow-get-system-stats",
@@ -27,11 +27,12 @@ permissions = [
   "allow-get-projects",
   "allow-read-handoff",
   "allow-get-vault-status",
+  "allow-get-local-ai",
 ]
 
 [[set]]
 identifier = "widget-control"
-description = "Act on widgets: media keys, Start, focus rounds, todos, notes, refreshes and opening a listed project in an editor or terminal, and capturing a note to the vault Inbox."
+description = "Act on widgets: media keys, Start, focus rounds, todos, notes, refreshes and opening a listed project in an editor or terminal, and capturing a note to the vault Inbox, and prompting a local Ollama model."
 permissions = [
   "allow-media-control",
   "allow-open-start-menu",
@@ -52,6 +53,8 @@ permissions = [
   "allow-open-project",
   "allow-vault-capture",
   "allow-open-vault",
+  "allow-refresh-local-ai",
+  "allow-ask-local-ai",
 ]
 
 [[set]]

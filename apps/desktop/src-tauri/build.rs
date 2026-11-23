@@ -71,6 +71,9 @@ const COMMANDS: &[&str] = &[
     "get_vault_status",
     "vault_capture",
     "open_vault",
+    "get_local_ai",
+    "refresh_local_ai",
+    "ask_local_ai",
 ];
 
 fn main() {

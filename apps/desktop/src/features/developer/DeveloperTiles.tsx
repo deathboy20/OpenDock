@@ -2,6 +2,7 @@ import { useLive } from "../../services/liveContext";
 import { useSettings } from "../../services/settingsContext";
 import { Icon } from "../widgets/icons";
 import { Tile, type TileProps } from "../widgets/Tile";
+import { localAiHeadline } from "./localAi";
 import { plural, projectsHeadline, summarizeProjects } from "./projects";
 import "./developer.css";
 
@@ -94,6 +95,58 @@ export function VaultTile({ size, compact }: TileProps) {
       primary={size === "s" ? "Capture" : v.todayCount === 0 ? "Capture a note" : plural(v.todayCount, "capture")}
       secondary={
         size === "s" ? undefined : size === "l" && v.recent[0] ? <span className="tile-truncate">{v.recent[0]}</span> : "Inbox today"
+      }
+    />
+  );
+}
+
+export function LocalAiTile({ size, compact }: TileProps) {
+  const { localAi } = useLive();
+  const icon = <Icon name="chip" />;
+  if (localAi.status !== "ready") {
+    return (
+      <Tile
+        compact={compact}
+        state={localAi.status}
+        icon={icon}
+        primary={localAi.status === "error" ? "Local AI unavailable" : "Local AI"}
+        title={localAi.status === "error" ? localAi.error : undefined}
+      />
+    );
+  }
+  const snapshot = localAi.data;
+  if (!snapshot) {
+    return <Tile compact={compact} state="loading" icon={icon} primary="Local AI" />;
+  }
+  if (snapshot.error) {
+    return <Tile compact={compact} state="error" icon={icon} primary="Ollama error" title={snapshot.error} />;
+  }
+  if (!snapshot.running || snapshot.models.length === 0) {
+    return (
+      <Tile
+        compact={compact}
+        state="empty"
+        icon={icon}
+        primary={localAiHeadline(snapshot)}
+        title={snapshot.running ? "Pull a model with ollama pull" : "Start Ollama to use local models"}
+      />
+    );
+  }
+  const loaded = snapshot.loaded[0]?.name;
+  return (
+    <Tile
+      compact={compact}
+      state="ready"
+      icon={
+        <span className="tile-badge-wrap">
+          {icon}
+          {snapshot.loaded.length > 0 ? <span className="tile-live-dot" aria-hidden /> : null}
+        </span>
+      }
+      title={loaded ? `${loaded} is loaded` : `${plural(snapshot.models.length, "model")} ready`}
+      primary={size === "s" ? "AI" : localAiHeadline(snapshot)}
+      secondary={
+        size === "s" ? undefined : size === "l" && loaded ? <span className="tile-truncate">{loaded}</span> : plural(snapshot.models.length, "model")
       }
     />
   );

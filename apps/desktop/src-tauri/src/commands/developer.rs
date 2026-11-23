@@ -5,6 +5,7 @@ use serde::Deserialize;
 use tauri::{AppHandle, Manager, State};
 
 use crate::platform::{self, process::FolderTool};
+use crate::services::local_ai::{self, LocalAiSnapshot};
 use crate::services::projects::{self, ProjectsSnapshot};
 use crate::services::vault::{self, VaultStatus};
 use crate::services::Wakers;
@@ -114,4 +115,45 @@ pub async fn open_vault(app: AppHandle, today: bool) -> Result<(), String> {
     })
     .await
     .map_err(|e| e.to_string())?
+}
+
+// ---------- local AI ----------
+
+#[tauri::command]
+pub fn get_local_ai(state: State<'_, AppState>) -> Option<LocalAiSnapshot> {
+    state.live.local_ai.lock().ok().and_then(|s| s.clone())
+}
+
+#[tauri::command]
+pub fn refresh_local_ai(app: AppHandle) {
+    app.state::<Wakers>().wake_local_ai();
+}
+
+/// Sends one prompt to a model Ollama listed in the latest check.
+#[tauri::command]
+pub async fn ask_local_ai(app: AppHandle, model: String, prompt: String) -> Result<String, String> {
+    if prompt.chars().count() > local_ai::MAX_PROMPT_CHARS * 2 || model.len() > 128 {
+        return Err("that prompt is too long".into());
+    }
+    let known = app
+        .state::<AppState>()
+        .live
+        .local_ai
+        .lock()
+        .ok()
+        .and_then(|s| s.clone())
+        .is_some_and(|s| s.models.iter().any(|m| m.name == model));
+    if !known {
+        return Err(format!("{model} isn't one of your Ollama models"));
+    }
+    let result = tauri::async_runtime::spawn_blocking(move || {
+        let state = app.state::<AppState>();
+        let answer = local_ai::ask(&state.db, &model, &prompt);
+        // A prompt loads the model; show that straight away.
+        app.state::<Wakers>().wake_local_ai();
+        answer
+    })
+    .await
+    .map_err(|e| e.to_string())?;
+    result
 }

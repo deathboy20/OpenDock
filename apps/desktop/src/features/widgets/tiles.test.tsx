@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import type {
   CalendarEvent,
   FocusState,
+  LocalAiSnapshot,
   MediaState,
   Note,
   ProjectsSnapshot,
@@ -17,7 +18,7 @@ import type {
 import { emptyLive, LiveContext, type LiveData } from "../../services/liveContext";
 import { failed, ready } from "../../services/loadable";
 import { SettingsContext, type SettingsContextValue } from "../../services/settingsContext";
-import { ADD_WIDGET_ID, findWidget, searchWidgets, widgetCatalog } from "./catalog";
+import { ADD_WIDGET_ID, findWidget, isLoopbackHost, searchWidgets, widgetCatalog } from "./catalog";
 import { TileContent } from "./tiles";
 
 const now = Date.now();
@@ -115,6 +116,14 @@ const vault: VaultStatus = {
   recent: ["Ship the vault widget", "Call Ama"],
 };
 
+const localAi: LocalAiSnapshot = {
+  running: true,
+  models: [{ name: "qwen3:4b", sizeBytes: 2_497_281_474, family: "qwen3", parameterSize: "4.0B", quantization: "Q4_K_M" }],
+  loaded: [{ name: "qwen3:4b", sizeVramBytes: 3_000_000_000, expiresAt: null }],
+  error: null,
+  checkedAt: now,
+};
+
 /** Developer widgets only show data once they are set up. */
 const configured: SettingsContextValue = {
   settings: {
@@ -150,6 +159,7 @@ const readyLive: LiveData = {
   volume: ready({ level: 40, muted: false }),
   projects: ready(projects),
   vault: ready(vault),
+  localAi: ready(localAi),
 };
 
 const emptyData: LiveData = {
@@ -166,6 +176,7 @@ const emptyData: LiveData = {
   volume: ready(null),
   projects: ready({ ...projects, projects: [] }),
   vault: ready({ ...vault, configured: false, exists: false, todayCount: 0, recent: [] }),
+  localAi: ready({ ...localAi, running: false, models: [], loaded: [] }),
 };
 
 const errorLive: LiveData = {
@@ -182,6 +193,7 @@ const errorLive: LiveData = {
   volume: failed("no audio service"),
   projects: failed("scan failed"),
   vault: failed("vault unreadable"),
+  localAi: failed("no ledger"),
 };
 
 const states: [string, LiveData][] = [
@@ -213,6 +225,9 @@ describe("widget catalog", () => {
   it("declares hosts for every widget that uses the network", () => {
     expect(findWidget("weather")?.network).toContain("api.open-meteo.com");
     expect(findWidget("todos")?.network).toEqual([]);
+    expect(findWidget("local-ai")?.network).toEqual(["127.0.0.1"]);
+    expect(findWidget("local-ai")?.network.every(isLoopbackHost)).toBe(true);
+    expect(isLoopbackHost("api.github.com")).toBe(false);
   });
 
   it("searches by name, description and category", () => {
@@ -331,6 +346,22 @@ describe("dock tiles", () => {
       withData({ ...readyLive, vault: ready({ ...vault, exists: false }) }, <TileContent id="vault" size="m" compact={false} />),
     );
     expect(missing.container.querySelector(".tile.is-error")).not.toBeNull();
+  });
+
+  it("shows the loaded local model", () => {
+    const { getByText } = render(withData(readyLive, <TileContent id="local-ai" size="l" compact={false} />));
+    expect(getByText("1 loaded")).toBeInTheDocument();
+    expect(getByText("qwen3:4b")).toBeInTheDocument();
+  });
+
+  it("says when Ollama is stopped or failing", () => {
+    const stopped = render(withData(emptyData, <TileContent id="local-ai" size="m" compact={false} />));
+    expect(stopped.getByText("Ollama stopped")).toBeInTheDocument();
+    stopped.unmount();
+    const failing = render(
+      withData({ ...readyLive, localAi: ready({ ...localAi, error: "bad json" }) }, <TileContent id="local-ai" size="m" compact={false} />),
+    );
+    expect(failing.container.querySelector(".tile.is-error")).not.toBeNull();
   });
 
   it("warns when the battery is low", () => {

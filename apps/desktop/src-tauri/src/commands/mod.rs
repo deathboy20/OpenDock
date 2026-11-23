@@ -73,6 +73,9 @@ pub fn persist_settings(
     if previous.widgets.projects != settings.widgets.projects {
         app.state::<Wakers>().wake_projects();
     }
+    if previous.dock.item_order != settings.dock.item_order {
+        app.state::<Wakers>().wake_local_ai();
+    }
     let _ = app.emit("settings:changed", &settings);
     Ok(settings)
 }

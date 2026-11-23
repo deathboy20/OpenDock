@@ -152,6 +152,14 @@ export const widgets: Widget[] = [
     network: [],
     stores: "Your notes, in your own vault",
   },
+  {
+    id: "local-ai",
+    name: "Local AI",
+    icon: "spark",
+    category: "Developer",
+    summary: "Whether Ollama is running, your models and what is loaded in memory, plus a quick question box. It only talks to Ollama on your own PC.",
+    network: [],
+  },
 ];
 
 export function widgetsIn(category: WidgetCategory): Widget[] {
