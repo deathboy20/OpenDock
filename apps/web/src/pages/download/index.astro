@@ -1,129 +1,259 @@
 ---
 import Icon from "../../components/Icon.astro";
 import PageHead from "../../components/PageHead.astro";
+import PlatformDownload from "../../components/PlatformDownload.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import {
   checksumsFile,
   currentRelease,
   downloadUrl,
+  filesFor,
   formatReleaseDate,
+  platforms,
+  primaryFile,
   releasePageUrl,
 } from "../../data/releases";
 import { repoLinks, site } from "../../data/site";
 
-const setup = currentRelease.files.find((file) => file.kind === "setup")!;
-const rows = [
-  ...currentRelease.files.map((file) => ({ label: file.label, name: file.name, note: file.note })),
-  {
-    label: "Checksums",
-    name: checksumsFile,
-    note: "You want to confirm your download is exactly the file we published.",
-  },
-];
+const setup = primaryFile(currentRelease, "windows");
+const dmg = primaryFile(currentRelease, "macos");
+const appImage = primaryFile(currentRelease, "linux");
+const statusWord = { supported: "Supported", experimental: "Experimental" } as const;
 ---
 
 <BaseLayout
   title="Download"
-  description={`Download OpenDock ${currentRelease.version} for Windows 10 and 11. Free, open source, and verified with published SHA-256 checksums.`}
+  description={`Download OpenDock ${currentRelease.version} for Windows 10 and 11, with experimental builds for macOS and Linux. Free, open source, and verified with published SHA-256 checksums.`}
 >
   <PageHead
     eyebrow={`Version ${currentRelease.version} · ${formatReleaseDate(currentRelease.date)}`}
     title="Download OpenDock"
-    lead="For Windows 10 and Windows 11, 64-bit. Installs for your account in about a minute, without admin rights."
+    lead="Free and open source. Windows 10 and 11 get the full dock. macOS and Linux builds are experimental: the release pipeline makes them, but nobody has tested them on a real desktop yet."
   >
     <div class="hero-actions">
-      <a class="btn btn-primary" href={downloadUrl(currentRelease, setup.name)}>
-        <Icon name="download" size={18} />
-        Download installer
-      </a>
+      <PlatformDownload target="file" />
       <a class="btn btn-secondary" href={releasePageUrl(currentRelease)}>What's new in {currentRelease.version}</a>
     </div>
   </PageHead>
 
-  <section class="section" aria-labelledby="files-title">
-    <div class="container"><div class="prose">
-      <h2 id="files-title">Files</h2>
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">File</th>
-              <th scope="col">Use it when</th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              rows.map((row) => (
-                <tr>
-                  <td>
-                    <a href={downloadUrl(currentRelease, row.name)}>{row.label}</a>
-                    <br />
-                    <code>{row.name}</code>
-                  </td>
-                  <td>{row.note}</td>
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
-      </div>
+  <section class="section section--tight" aria-labelledby="platforms-title">
+    <div class="container">
+      <h2 class="sr-only" id="platforms-title">Choose your system</h2>
+      <ul class="platform-grid">
+        {
+          platforms.map((platform) => {
+            const file = primaryFile(currentRelease, platform.id);
+            return (
+              <li class="platform-card" data-for={platform.id}>
+                <p class="platform-detected">Your system</p>
+                <h3>{platform.name}</h3>
+                <p class:list={["status-word", `is-${platform.status}`]}>{statusWord[platform.status]}</p>
+                <p class="platform-req">{platform.requirement}</p>
+                <p class="platform-summary">{platform.summary}</p>
+                <a class="link-arrow" href={`#${platform.id}`}>
+                  {platform.id === "linux" ? "Choose a package" : file.label}
+                  <Icon name="arrow" size={16} />
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </div>
+  </section>
 
-      <h2>Install</h2>
-      <ol>
-        <li>Run <code>{setup.name}</code>.</li>
-        <li>
-          OpenDock isn't code-signed yet, so Windows SmartScreen may say <em>Windows protected your PC</em>. Once
-          you've checked the download, choose <strong>More info</strong>, then <strong>Run anyway</strong>.
-        </li>
-        <li>
-          The welcome setup asks how to treat the taskbar (replace it, auto-hide it or keep it), offers to bring over
-          your pinned apps, and lets you pick a style.
-        </li>
-      </ol>
-      <div class="notice">
-        <Icon name="shield" size={18} />
-        <div>
+  <section class="section dl-section" id="windows" aria-labelledby="windows-title">
+    <div class="container dl-layout">
+      <header class="dl-head">
+        <p class="status-word is-supported">Supported</p>
+        <h2 class="title" id="windows-title">Windows</h2>
+        <p class="muted">Windows 10 or 11, 64-bit. Installs for your account in about a minute, without admin rights.</p>
+      </header>
+      <div class="prose">
+        <ul class="file-list-dl">
+          {
+            filesFor(currentRelease, "windows").map((file) => (
+              <li>
+                <a class="file-link" href={downloadUrl(currentRelease, file.name)}>
+                  <Icon name="download" size={16} />
+                  {file.label}
+                </a>
+                <code>{file.name}</code>
+                <span class="muted">{file.note}</span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <h3>Install</h3>
+        <ol>
+          <li>Run <code>{setup.name}</code>.</li>
+          <li>
+            OpenDock isn't code-signed yet, so Windows SmartScreen may say <em>Windows protected your PC</em>. Once
+            you've checked the download, choose <strong>More info</strong>, then <strong>Run anyway</strong>.
+          </li>
+          <li>
+            The welcome setup asks how to treat the taskbar (replace it, auto-hide it or keep it), offers to bring
+            over your pinned apps, and lets you pick a style.
+          </li>
+        </ol>
+        <div class="notice">
+          <Icon name="shield" size={18} />
           <p>
             <strong>Why the warning?</strong> SmartScreen trusts apps with a paid code-signing certificate and a
-            download history. Signing is planned before 1.0. Until then, the checksum below proves the file came from
-            us unchanged.
+            download history. Signing is planned before 1.0. Until then, the checksum proves the file came from us
+            unchanged.
           </p>
         </div>
+
+        <h3>Check the file</h3>
+        <p>Open PowerShell in your Downloads folder and run:</p>
+        <pre><code>Get-FileHash .\{setup.name} -Algorithm SHA256</code></pre>
+        <p>
+          The hash must match the line for that file in <a href={downloadUrl(currentRelease, checksumsFile)}
+            >{checksumsFile}</a
+          >. Letter case doesn't matter.
+        </p>
+
+        <h3>Requirements</h3>
+        <ul>
+          <li>Windows 10 or Windows 11, 64-bit</li>
+          <li>
+            Microsoft Edge WebView2. It's built into Windows 11; on Windows 10 the installer downloads it from
+            Microsoft if it's missing.
+          </li>
+          <li>No account. The internet is only used by the widgets that say so, and by a daily update check you can turn off.</li>
+        </ul>
+
+        <h3>Update and uninstall</h3>
+        <p>
+          OpenDock checks for a new version once a day. When there is one, the dock menu offers to download it;
+          install it over the old one and your settings and data are kept. To uninstall, use <strong>Settings → Apps → Installed apps</strong>. The
+          uninstaller restores the Windows taskbar and removes OpenDock from startup. If the taskbar ever stays
+          hidden, follow the
+          <a href={`${repoLinks.docs("installation.md")}#recovering-the-windows-taskbar`}>recovery steps</a>.
+        </p>
       </div>
+    </div>
+  </section>
 
-      <h2 id="verify">Verify your download</h2>
-      <p>Open PowerShell in your Downloads folder and run:</p>
-      <pre><code>Get-FileHash .\{setup.name} -Algorithm SHA256</code></pre>
-      <p>
-        The hash must match the line for that file in <a href={downloadUrl(currentRelease, checksumsFile)}
-          >{checksumsFile}</a
-        >. Letter case doesn't matter.
-      </p>
+  <section class="section dl-section" id="macos" aria-labelledby="macos-title">
+    <div class="container dl-layout">
+      <header class="dl-head">
+        <p class="status-word is-experimental">Experimental</p>
+        <h2 class="title" id="macos-title">macOS</h2>
+        <p class="muted">One universal build for Apple silicon and Intel Macs.</p>
+      </header>
+      <div class="prose">
+        <div class="notice notice--caution">
+          <Icon name="bell" size={18} />
+          <p>
+            <strong>Try it, but expect rough edges.</strong> The release pipeline builds this disk image, but nobody
+            has tested it on a Mac yet. The taskbar features are Windows-only. Please
+            <a href={repoLinks.newBug}>report what you find</a>.
+          </p>
+        </div>
+        <ul class="file-list-dl">
+          {
+            filesFor(currentRelease, "macos").map((file) => (
+              <li>
+                <a class="file-link" href={downloadUrl(currentRelease, file.name)}>
+                  <Icon name="download" size={16} />
+                  {file.label}
+                </a>
+                <code>{file.name}</code>
+                <span class="muted">{file.note}</span>
+              </li>
+            ))
+          }
+        </ul>
 
-      <h2>Requirements</h2>
-      <ul>
-        <li>Windows 10 or Windows 11, 64-bit</li>
-        <li>
-          Microsoft Edge WebView2. It's built into Windows 11; on Windows 10 the installer downloads it from Microsoft
-          if it's missing.
-        </li>
-        <li>No account and no internet connection needed, except for the weather and calendar widgets</li>
-      </ul>
+        <h3>Install</h3>
+        <ol>
+          <li>Open <code>{dmg.name}</code> and drag OpenDock to <strong>Applications</strong>.</li>
+          <li>
+            The app isn't signed or notarised, so macOS may refuse to open it. Control-click OpenDock in Applications
+            and choose <strong>Open</strong>.
+          </li>
+          <li>
+            If macOS still blocks it, and you've checked the file, run this in Terminal:
+            <pre><code>xattr -dr com.apple.quarantine /Applications/OpenDock.app</code></pre>
+          </li>
+        </ol>
 
-      <h2>Update and uninstall</h2>
-      <p>
-        To update, install the new version over the old one; your settings and data are kept. To uninstall, use
-        <strong>Settings → Apps → Installed apps</strong>. The uninstaller restores the Windows taskbar and removes
-        OpenDock from startup. If the taskbar ever stays hidden, follow the
-        <a href={`${repoLinks.docs("installation.md")}#recovering-the-windows-taskbar`}>recovery steps</a>.
-      </p>
+        <h3>Check the file</h3>
+        <p>In Terminal, in your Downloads folder:</p>
+        <pre><code>shasum -a 256 {dmg.name}</code></pre>
+        <p>The hash must match the line for that file in <a href={downloadUrl(currentRelease, checksumsFile)}>{checksumsFile}</a>.</p>
+      </div>
+    </div>
+  </section>
 
-      <h2>Other platforms</h2>
-      <p>
-        Linux and macOS versions are planned; see the <a href="/roadmap/">roadmap</a>. You can also
-        <a href={repoLinks.docs("development.md")}>build OpenDock from source</a>, or browse
-        <a href={repoLinks.releases}>all releases</a> on <a href={site.repo}>GitHub</a>.
-      </p>
-    </div></div>
+  <section class="section dl-section" id="linux" aria-labelledby="linux-title">
+    <div class="container dl-layout">
+      <header class="dl-head">
+        <p class="status-word is-experimental">Experimental</p>
+        <h2 class="title" id="linux-title">Linux</h2>
+        <p class="muted">x64 and arm64 packages for glibc-based distributions. Not sure which? Pick the AppImage.</p>
+      </header>
+      <div class="prose">
+        <div class="notice notice--caution">
+          <Icon name="bell" size={18} />
+          <p>
+            <strong>Try it, but expect rough edges.</strong> CI checks that these packages install, but nobody has
+            tested them on a real desktop session yet, under X11 or Wayland. The taskbar features are Windows-only. Please
+            <a href={repoLinks.newBug}>report your distribution and desktop</a> with what you find.
+          </p>
+        </div>
+        <ul class="file-list-dl">
+          {
+            filesFor(currentRelease, "linux").map((file) => (
+              <li>
+                <a class="file-link" href={downloadUrl(currentRelease, file.name)}>
+                  <Icon name="download" size={16} />
+                  {file.label}
+                </a>
+                <code>{file.name}</code>
+                <span class="muted">{file.note}</span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <h3>Install</h3>
+        <ul>
+          <li>AppImage: <code>chmod +x ./{appImage.name}</code>, then run <code>./{appImage.name}</code>.</li>
+          <li>Debian, Ubuntu or Mint: <code>sudo apt install ./OpenDock_*.deb</code></li>
+          <li>Fedora, RHEL or openSUSE: <code>sudo dnf install ./OpenDock-*.rpm</code>, or your distribution's package manager.</li>
+        </ul>
+        <p>
+          Your system needs WebKitGTK 4.1. The <a href={repoLinks.docs("linux.md")}>Linux notes</a> list what's been
+          checked so far. There's no Flatpak yet.
+        </p>
+
+        <h3>Check the file</h3>
+        <pre><code>sha256sum {appImage.name}</code></pre>
+        <p>The hash must match the line for that file in <a href={downloadUrl(currentRelease, checksumsFile)}>{checksumsFile}</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="more-title">
+    <div class="container dl-layout">
+      <header class="dl-head">
+        <h2 class="title" id="more-title">Something else</h2>
+      </header>
+      <div class="prose">
+        <ul>
+          <li>
+            <a href={downloadUrl(currentRelease, checksumsFile)}>{checksumsFile}</a> lists a SHA-256 hash for every file
+            in this release.
+          </li>
+          <li><a href={repoLinks.docs("development.md")}>Build OpenDock from source</a> with Node 22, pnpm 10 and Rust.</li>
+          <li>Browse <a href={repoLinks.releases}>every release</a> on <a href={site.repo}>GitHub</a>.</li>
+          <li>See what's next for macOS and Linux on the <a href="/roadmap/">roadmap</a>.</li>
+        </ul>
+      </div>
+    </div>
   </section>
 </BaseLayout>

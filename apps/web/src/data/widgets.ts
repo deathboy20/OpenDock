@@ -176,3 +176,6 @@ export function widgetsIn(category: WidgetCategory): Widget[] {
 }
 
 export const offlineWidgetCount = widgets.filter((widget) => widget.network.length === 0).length;
+
+/** Widgets that contact a host on the internet, in catalog order. */
+export const onlineWidgets = widgets.filter((widget) => widget.network.length > 0);

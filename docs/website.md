@@ -17,7 +17,19 @@ apps/web/
 └── lighthouserc.cjs     # Lighthouse CI budgets
 ```
 
-Pages read their content from `src/data/`, so facts such as the current version, download links and the widget list live in one place. When you release, update `src/data/releases.ts`; when you add a widget to the app, add it to `src/data/widgets.ts`.
+Pages read their content from `src/data/`, so facts such as the current version, download links and the widget list live in one place. When you release, update `src/data/releases.ts` with every package in the release; `product.test.ts` checks the list against the formats `scripts/collect-packages.mjs` builds. When you add a widget to the app, add it to `src/data/widgets.ts`.
+
+## Design system
+
+The tokens at the top of `src/styles/global.css` are the only source of colours, type sizes, radii, shadows and motion. Product mockups in `src/styles/demo.css` use the `--glass-*`, `--mint` and `--tile-*` tokens so they match the desktop app's dark theme.
+
+- **The header is a dock.** It floats as a glass capsule like OpenDock's own dock, and marks the current page with the dock's running dot. Keep it the only floating bar on the page.
+- **Borders, not shadows.** Cards and lists use a border or a top rule. Only things that float over the page (the header, menus, product mockups) get `--shadow-float` or `--shadow-artifact`.
+- **Status in words.** Platform and feature status is always a word (*Supported*, *Experimental*, *Shipped*), with colour only repeating it. `--caution` marks experimental things.
+- **Type.** `--text-xs` to `--text-display`, with system fonts only: Segoe UI Variable on Windows, San Francisco on macOS.
+- **Motion.** `--dur-fast` and `--dur` with `--ease`, on `transform`, `opacity` and colours only. Everything stops under `prefers-reduced-motion`.
+
+The download buttons (`src/components/PlatformDownload.astro`) start as *Download for Windows*. A small script guesses the visitor's system with `src/data/platform.ts`, switches the button to macOS or Linux with an *Experimental* tag, and sets `data-platform` on the page so the matching platform column is marked *Your system*. Without JavaScript, everything still links to the download page.
 
 ## Local development
 

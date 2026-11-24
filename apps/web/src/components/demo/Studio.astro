@@ -2,7 +2,7 @@
 import NowPlayingPanel from "./NowPlayingPanel.astro";
 import Icon from "../Icon.astro";
 import { previewTrack } from "../../data/track";
-import { dockSkins, studioApps, studioWidgets } from "../../data/studio";
+import { dockLayouts, dockSkins, studioApps, studioWallpapers, studioWidgets } from "../../data/studio";
 
 const files = [
   { name: "Documents", meta: "Folder" },
@@ -12,7 +12,7 @@ const files = [
 
 const hints = {
   dock: "Click Now playing on the dock. Previous and next switch tracks.",
-  skins: "Pick a skin. The same six styles ship in the Windows app.",
+  look: "Pick a style, a layout and a wallpaper. Islands keep the dock readable on bright photos.",
   widgets: "Turn widgets on and off. The Start button and your apps stay.",
 };
 ---
@@ -27,8 +27,8 @@ const hints = {
       <button type="button" role="tab" id="tab-dock" aria-selected="true" aria-controls="studio-stage" data-tab="dock">
         Live dock
       </button>
-      <button type="button" role="tab" id="tab-skins" aria-selected="false" aria-controls="studio-stage" data-tab="skins">
-        Skins
+      <button type="button" role="tab" id="tab-look" aria-selected="false" aria-controls="studio-stage" data-tab="look">
+        Look
       </button>
       <button type="button" role="tab" id="tab-widgets" aria-selected="false" aria-controls="studio-stage" data-tab="widgets">
         Widgets
@@ -37,7 +37,7 @@ const hints = {
   </div>
   <p class="studio-hint" data-hint aria-live="polite">{hints.dock}</p>
 
-  <div class="stage" id="studio-stage" data-stage data-mode="keep" data-skin="glass" data-active="files">
+  <div class="stage" id="studio-stage" data-stage data-mode="keep" data-skin="glass" data-layout="bar" data-wall="evening" data-active="files">
     <div class="wallpaper" aria-hidden="true"></div>
 
     <div class="win win--front stage-win" data-window="files">
@@ -94,10 +94,13 @@ const hints = {
 
     <div class="stage-dock">
       <div class="dock dock--pill" data-dock role="group" aria-label="OpenDock, try it here">
+        <span class="dk-group" data-group="start">
         <button type="button" class="dk-cell dk-start" data-flyout="studio-start" aria-expanded="false" aria-controls="studio-start" aria-label="Start">
           <img class="dk-logo" src="/favicon.svg" alt="" width="24" height="24" />
         </button>
+        </span>
         <span class="dk-divider" aria-hidden="true"></span>
+        <span class="dk-group" data-group="apps">
         {
           studioApps.map((app, index) => (
             <button
@@ -112,7 +115,9 @@ const hints = {
             </button>
           ))
         }
+        </span>
         <span class="dk-divider" aria-hidden="true"></span>
+        <span class="dk-group" data-group="widgets">
         <button type="button" class="dk-cell dk-media" data-widget="media" data-now-chip data-flyout="studio-now" aria-expanded="false" aria-controls="studio-now" aria-label={`Now playing, ${previewTrack.title} by ${previewTrack.artist}`}>
           <span class="dk-art"></span>
           <span class="dk-text"><strong data-now-title>{previewTrack.title}</strong><small data-now-artist>{previewTrack.artist}</small></span>
@@ -136,6 +141,7 @@ const hints = {
           <strong>09:41</strong>
           <small>Wed 21 Oct</small>
         </button>
+        </span>
       </div>
     </div>
 
@@ -191,18 +197,44 @@ const hints = {
     </div>
     <p>Keep leaves the Windows taskbar in place. Replace hides it and the dock takes the edge.</p>
   </div>
-  <div class="studio-tray" data-tray="skins" hidden>
-    <span class="studio-tray-label">Skin</span>
-    <div class="studio-choices" role="group" aria-label="Dock skin">
-      {
-        dockSkins.map((skin) => (
-          <button type="button" data-skin={skin.id} aria-pressed={skin.id === "glass"} title={skin.description}>
-            {skin.label}
-          </button>
-        ))
-      }
+  <div class="studio-tray studio-tray--look" data-tray="look" hidden>
+    <div class="studio-row">
+      <span class="studio-tray-label" id="look-style">Style</span>
+      <div class="studio-choices" role="group" aria-labelledby="look-style">
+        {
+          dockSkins.map((skin) => (
+            <button type="button" data-skin={skin.id} aria-pressed={skin.id === "glass"} title={skin.description}>
+              {skin.label}
+            </button>
+          ))
+        }
+      </div>
     </div>
-    <p data-skin-note>{dockSkins[0].description}</p>
+    <div class="studio-row">
+      <span class="studio-tray-label" id="look-layout">Layout</span>
+      <div class="studio-choices" role="group" aria-labelledby="look-layout">
+        {
+          dockLayouts.map((layout) => (
+            <button type="button" data-layout={layout.id} aria-pressed={layout.id === "bar"} title={layout.description}>
+              {layout.label}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+    <div class="studio-row">
+      <span class="studio-tray-label" id="look-wall">Wallpaper</span>
+      <div class="studio-choices" role="group" aria-labelledby="look-wall">
+        {
+          studioWallpapers.map((wall) => (
+            <button type="button" data-wall={wall.id} aria-pressed={wall.id === "evening"} title={wall.description}>
+              {wall.label}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+    <p data-look-note aria-live="polite">{dockSkins[0].description}. {dockLayouts[0].description}.</p>
   </div>
   <div class="studio-tray" data-tray="widgets" hidden>
     <span class="studio-tray-label">On the dock</span>
@@ -220,11 +252,11 @@ const hints = {
 
 <script>
   import { mountPreview, releasePreview } from "../../scripts/now-playing";
-  import { dockSkins, filterApps, nextFrontApp, studioApps } from "../../data/studio";
+  import { dockLayouts, dockSkins, filterApps, nextFrontApp, studioApps, studioWallpapers } from "../../data/studio";
 
   const hints: Record<string, string> = {
     dock: "Click Now playing on the dock. Previous and next switch tracks.",
-    skins: "Pick a skin. The same six styles ship in the Windows app.",
+    look: "Pick a style, a layout and a wallpaper. Islands keep the dock readable on bright photos.",
     widgets: "Turn widgets on and off. The Start button and your apps stay.",
   };
 
@@ -344,16 +376,24 @@ const hints = {
       });
     }
 
-    const skinNote = root.querySelector<HTMLElement>("[data-skin-note]");
-    for (const button of root.querySelectorAll<HTMLButtonElement>("[data-skin]")) {
-      button.addEventListener("click", () => {
-        const id = button.dataset.skin ?? "glass";
-        stage.dataset.skin = id;
-        for (const other of root.querySelectorAll<HTMLButtonElement>("[data-skin]")) {
-          other.setAttribute("aria-pressed", other === button ? "true" : "false");
-        }
-        if (skinNote) skinNote.textContent = dockSkins.find((skin) => skin.id === id)?.description ?? "";
-      });
+    // Style, layout and wallpaper each set one attribute on the stage; the note says what was picked.
+    const lookNote = root.querySelector<HTMLElement>("[data-look-note]");
+    const lookChoices = [
+      { key: "skin", options: dockSkins },
+      { key: "layout", options: dockLayouts },
+      { key: "wall", options: studioWallpapers },
+    ] as const;
+    for (const { key, options } of lookChoices) {
+      const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>(`button[data-${key}]`));
+      for (const button of buttons) {
+        button.addEventListener("click", () => {
+          const id = button.dataset[key] ?? options[0].id;
+          stage.dataset[key] = id;
+          for (const other of buttons) other.setAttribute("aria-pressed", other === button ? "true" : "false");
+          const picked = options.find((option) => option.id === id);
+          if (lookNote && picked) lookNote.textContent = `${picked.label}: ${picked.description}.`;
+        });
+      }
     }
 
     for (const button of root.querySelectorAll<HTMLButtonElement>("[data-toggle]")) {

@@ -8,9 +8,17 @@ OpenDock: a local-first dock and taskbar replacement for Windows. Tauri 2 (Rust 
 - `apps/web`: the Astro website (opendock.pages.dev). Its widget list must match the app's catalog (`apps/web/src/data/product.test.ts`).
 - `packages/config-schema`: Zod schemas, migrations and shared fixtures that the Rust tests also load.
 
-Version 0.4.0 is the latest release (published 2026-11-23). Canonical remote: `origin` = `github.com/deathboy20/OpenDock` (Isaac confirmed 2026-11-23). The README links the canonical repository; the website's `apps/web/src/data/site.ts` still uses `isaacobenzy/OpenDock`, which GitHub redirects (301) to `deathboy20/OpenDock`.
+Version 0.4.0 is the latest release (published 2026-11-23). Canonical remote: `origin` = `github.com/deathboy20/OpenDock` (Isaac confirmed 2026-11-23). The README and, on branch `feat/website-0.4.0`, the website link the canonical repository. Other docs (`CONTRIBUTING.md`, `docs/installation.md`, issue templates, CHANGELOG compare links) still use `isaacobenzy/OpenDock`, which GitHub redirects (301) to `deathboy20/OpenDock`.
 
 ## Current state
+
+**Website redesign for 0.4.0** on branch `feat/website-0.4.0` (cut from `origin/main` at `66fdb50`; committed locally, not pushed, no PR). Isaac asked on 2026-11-24 for a more professional site and a download page that covers macOS and Linux.
+- Download page (`apps/web/src/pages/download/index.astro`): sections for Windows (supported), macOS and Linux (both labelled *Experimental*, with what was and wasn't tested), each with its files, install steps and a checksum command. `src/data/releases.ts` lists all nine 0.4.0 packages with platform and architecture; `product.test.ts` checks the list against `scripts/collect-packages.mjs`.
+- Download buttons (`src/components/PlatformDownload.astro`) guess the visitor's system with `src/data/platform.ts` (tested) and switch to macOS or Linux with an *Experimental* tag; without JavaScript they stay *Download for Windows*.
+- Design: the header is a floating glass capsule drawn like the dock, with the running dot on the current page; cards use borders, only floating things get shadows; new `--text-*`, `--dur-*`, `--caution` and `--shadow-float` tokens. Documented in `docs/website.md` (Design system).
+- Home page: the live dock sits under the headline; new sections for what's new in 0.4.0 (with the real screenshot), Customise (desktop widgets and scenes mockup), Developer widgets (Projects and CI mockup) and platforms. The live dock's **Look** tab tries one bar, islands and chips on evening, bright and busy wallpapers. Privacy copy names the three online widgets and the update check.
+- Also: `site.ts`, `llms.txt`, `llms-full.txt` (was still 0.2.0) and `ROADMAP.md` (0.3 and 0.4 rows, scenes and developer-widget ideas) updated; CHANGELOG *Unreleased* has the website entries.
+- Verified locally on 2026-11-24: `pnpm lint`, `pnpm typecheck`, `pnpm test` (web 19, schema 130, desktop 214), `pnpm fmt:check`, `pnpm test:rust` (107), clippy `-D warnings`, `pnpm build:web` (11 pages). In the browser at 360, 768 and 1280 px, light and dark: no sideways scroll on the home and download pages, header focus ring visible. Anti-slop: passes (`docs/ANTI_SLOP_CHECKLIST.md`, website section). Not run: `pnpm lighthouse:web`, a real Mac or Linux visit (detection is covered by unit tests and a simulated swap in the browser).
 
 **Release 0.4.0 is out** (2026-11-23). PR #12 merged `release/0.4.0` into `main` as `2c468b1`; CI and CodeQL passed on `main`. At Isaac's request the dry run was skipped: tag `v0.4.0` (annotated, on `2c468b1`) was pushed and the Release build (run 45248809238) passed every job (guard, verify, Windows/Linux/macOS packages, Debian and Fedora install smoke on x64 and arm64, checksums, publish). Isaac asked to publish the draft, so "OpenDock 0.4.0" is public and marked Latest: https://github.com/deathboy20/OpenDock/releases/tag/v0.4.0 (10 files: setup `.exe`, `.msi`, universal `.dmg`, `.deb`/`.rpm`/`.AppImage` for x64 and arm64, `SHA256SUMS.txt`). The website's download link for the setup `.exe` resolves. Not done: downloading and checking the published installers against `SHA256SUMS.txt`, and the manual Windows matrix on an installed 0.4.0 build.
 
@@ -74,7 +82,7 @@ Phase B live check, 2026-11-23 in `pnpm dev` (taskbar kept, v5 settings backed u
 - **Linux and macOS** have build-only experimental packages (see `ROADMAP.md`); nothing runs or is tested there. The new code has non-Windows fallbacks (`platform/process.rs`, keychain via `keyring`, Tauri `always_on_bottom`), but desktop widgets can't place themselves on Wayland and the taskbar features are Windows-only.
 - The toast window (`OpenDock notification`) appeared once with a native title bar after a dev rebuild. Likely cause: it is shown with a raw no-activate `ShowWindow`, which skips the window library's show step. The first fix (re-applying `set_decorations(false)`) did not help: tao keeps the caption style and hides the frame only through its own show path. Now the toast is built with `.focusable(false)` (`WS_EX_NOACTIVATE`) and shown with Tauri's `show()`, and the raw `show_without_focus` / `show_no_activate` helpers are gone. After the change the title-bar toast no longer appeared on restart in `pnpm dev`; it was intermittent before, so keep an eye on it.
 - An untracked `INVENTORY-AND-PLAN.md` (a workstation inventory with personal paths, from another session) sits in the repo root. It is not part of OpenDock; never commit it. Move it to the vault.
-- The website (`apps/web/src/data/site.ts`) links `isaacobenzy/OpenDock`, which redirects to the canonical `deathboy20/OpenDock`. The README was switched to the canonical links on `docs/readme-0.4.0`.
+- The Privacy Ledger in the app shows the update check's raw id `updates` instead of a name, because `PrivacyPage.tsx` looks names up in the widget catalog only.
 - Running `pnpm dev` on this PC uses the installed app's `%APPDATA%\com.opendock.app\settings.json`, which has taskbar mode `replace` and start-with-Windows on. A dev run hides the taskbar and migrates the file to v6, which the installed 0.3.0 would then reject. Back it up first. The 2026-11-23 run used `settings.v5-backup-2026-11-23.json` and `opendock.db.backup-2026-11-23` (same folder); the original v5 settings were copied back afterwards.
 - Projects never fetches, so "behind" is relative to the last fetch. Each `git status` has a 10 s limit; a repo that takes longer shows "git status took too long".
 - Local `main` is behind `origin/release/0.3.0` by the two CI release fixes.
@@ -96,6 +104,7 @@ Phase B live check, 2026-11-23 in `pnpm dev` (taskbar kept, v5 settings backed u
 
 ## Next steps
 
+0a. Website: Isaac to look at `feat/website-0.4.0` (`pnpm dev:web`), then push and open a PR into `main` when he's happy. Merging deploys the site.
 0. After 0.4.0: download the published Windows installer, check it against `SHA256SUMS.txt`, and run the manual Windows matrix on it. Isaac still needs to turn on Dependabot alerts and secret scanning and decide on the three UI checklist items.
 1. Isaac to look at the dock in `pnpm dev` (back up `settings.json` first; see Open items) and try Customise on the real app: skins, Undo, islands and chips, a vertical dock, widget looks, scenes, desktop widgets.
 2. Decide: (a) ADR 0006 (update checks on by default) from Proposed to Accepted, (b) `tauri-plugin-updater` with a signing key for in-app installs.
@@ -103,4 +112,4 @@ Phase B live check, 2026-11-23 in `pnpm dev` (taskbar kept, v5 settings backed u
 4. Worth doing next: a "switch scene" automation action (scenes from rules, e.g. Focus at 9:00), more widget looks (Now playing bar with progress, Year progress dots), and a Linux/macOS runtime check before promising those platforms.
 5. Phase C (taskbar mode) waits for Isaac and a recorded `docs/testing-matrix.md` on Windows 10.
 
-Last updated: 2026-11-23
+Last updated: 2026-11-24

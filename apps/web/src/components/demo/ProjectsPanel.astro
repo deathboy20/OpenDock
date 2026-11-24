@@ -1,0 +1,59 @@
+---
+import Icon from "../Icon.astro";
+
+// Sample repositories. The real panel lists the folders you choose.
+const repos = [
+  { name: "website", branch: "main", state: "Clean", tone: "clean" },
+  { name: "api-server", branch: "feature/search", state: "3 changed", tone: "changed" },
+  { name: "notes-cli", branch: "main", state: "2 behind", tone: "behind" },
+];
+
+// The widget lists failing runs first.
+const runs = [
+  { repo: "api-server", workflow: "Tests", result: "Failed", when: "12 min ago", tone: "fail" },
+  { repo: "website", workflow: "Build", result: "Passed", when: "4 min ago", tone: "pass" },
+];
+---
+
+<figure class="panel panel--projects">
+  <header class="panel-head">
+    <span class="panel-btn is-on"><Icon name="code" size={16} /></span>
+    <span class="panel-title">
+      <strong>Projects</strong>
+      <small>3 repos · 1 with changes · checked just now</small>
+    </span>
+  </header>
+  <ul class="repo-list">
+    {
+      repos.map((repo) => (
+        <li class={`is-${repo.tone}`}>
+          <strong class="repo-name">{repo.name}</strong>
+          <span class="repo-branch">
+            <Icon name="branch" size={13} />
+            {repo.branch}
+          </span>
+          <span class="repo-state">{repo.state}</span>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="panel-label">CI status</p>
+  <ul class="ci-list">
+    {
+      runs.map((run) => (
+        <li>
+          <span class={`ci-dot is-${run.tone}`} aria-hidden="true" />
+          <span class="ci-name">
+            <strong>{run.repo}</strong> · {run.workflow}
+          </span>
+          <span class={`ci-result is-${run.tone}`}>{run.result}</span>
+          <small>{run.when}</small>
+        </li>
+      ))
+    }
+  </ul>
+  <figcaption class="panel-foot">
+    <Icon name="cpu" size={14} />
+    Local AI: Ollama is running on this PC with 2 models
+  </figcaption>
+</figure>

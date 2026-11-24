@@ -1,17 +1,29 @@
 ---
 import AppsPanel from "../components/demo/AppsPanel.astro";
+import DeskPanel from "../components/demo/DeskPanel.astro";
 import Studio from "../components/demo/Studio.astro";
 import LauncherPanel from "../components/demo/LauncherPanel.astro";
 import LedgerPanel from "../components/demo/LedgerPanel.astro";
+import ProjectsPanel from "../components/demo/ProjectsPanel.astro";
 import RuleCard from "../components/demo/RuleCard.astro";
 import Icon from "../components/Icon.astro";
+import PlatformDownload from "../components/PlatformDownload.astro";
 import StatusBadge from "../components/StatusBadge.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { currentRelease, downloadUrl, releasePageUrl } from "../data/releases";
+import { currentRelease, downloadUrl, formatReleaseDate, platforms, primaryFile, releasePageUrl } from "../data/releases";
 import { repoLinks, site } from "../data/site";
-import { widgetCategories, widgets, widgetsIn } from "../data/widgets";
+import { onlineWidgets, widgetCategories, widgets, widgetsIn } from "../data/widgets";
 
-const setup = currentRelease.files.find((file) => file.kind === "setup")!;
+const setup = primaryFile(currentRelease, "windows");
+const statusWord = { supported: "Supported", experimental: "Experimental" } as const;
+
+const whatsNew = [
+  { title: "Skins that change the shape", text: "Ten built-in skins, and layouts that split the dock into islands or chips. Import and share skins as JSON." },
+  { title: "Widget looks", text: "Pick how each widget draws: a digital, stacked or analog clock, battery as a ring or dots, and more." },
+  { title: "Desktop widgets", text: "Place widgets on the desktop itself, behind your windows. They snap to a grid and remember each monitor." },
+  { title: "Scenes", text: "Save the dock, its look and its automations as a scene, then switch from the dock menu." },
+  { title: "Developer widgets", text: "Projects, Vault capture, Local AI and CI status, for the folders and repositories you choose." },
+];
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -20,7 +32,7 @@ const structuredData = {
   description: site.description,
   url: site.url,
   applicationCategory: "UtilitiesApplication",
-  operatingSystem: "Windows 10, Windows 11",
+  operatingSystem: "Windows 10, Windows 11, macOS, Linux",
   softwareVersion: currentRelease.version,
   downloadUrl: downloadUrl(currentRelease, setup.name),
   license: repoLinks.license,
@@ -53,7 +65,12 @@ function networkNote(network: string[]): string {
     <div class="container">
       <div class="hero-copy">
         <div class="stack">
-          <p class="eyebrow">Version {currentRelease.version} · Free and open source</p>
+          <a class="eyebrow-link" href="#whats-new">
+            <strong>Version {currentRelease.version}</strong>
+            <span class="eyebrow-detail">Skins, desktop widgets, scenes and developer widgets</span>
+            <span class="eyebrow-short">What's new</span>
+            <Icon name="arrow" size={14} />
+          </a>
           <h1 class="display">The Windows taskbar, rebuilt in the open.</h1>
         </div>
         <div class="hero-side">
@@ -62,10 +79,7 @@ function networkNote(network: string[]): string {
             you. It runs entirely on your PC: no account, no telemetry.
           </p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="/download/">
-              <Icon name="download" size={18} />
-              Download for Windows
-            </a>
+            <PlatformDownload />
             <a class="btn btn-secondary" href={site.repo}>
               <Icon name="github" size={18} />
               View source
@@ -75,19 +89,46 @@ function networkNote(network: string[]): string {
             <li><Icon name="check" size={16} />MIT licensed</li>
             <li><Icon name="check" size={16} />Works offline</li>
             <li><Icon name="check" size={16} />Taskbar restored on uninstall</li>
+            <li><Icon name="check" size={16} />Experimental macOS and Linux builds</li>
           </ul>
         </div>
       </div>
-      <figure class="product-shot">
+      <Studio />
+    </div>
+  </section>
+
+  <section class="section section--tight" id="whats-new" aria-labelledby="new-title">
+    <div class="container release-strip">
+      <header class="release-strip-head">
+        <div>
+          <h2 id="new-title">New in {currentRelease.version}</h2>
+          <p class="muted">Released {formatReleaseDate(currentRelease.date)}</p>
+        </div>
+        <a class="link-arrow" href="/changelog/">
+          Full changelog
+          <Icon name="arrow" size={16} />
+        </a>
+      </header>
+      <ul class="release-list">
+        {
+          whatsNew.map((item) => (
+            <li>
+              <strong>{item.title}</strong>
+              <span>{item.text}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <figure class="real-shot">
         <img
           src="/screenshots/dock-windows.png"
           width="1280"
           height="280"
+          loading="lazy"
           alt="OpenDock running on Windows, with pinned apps, open windows, volume, the clock and CPU and memory."
         />
-        <figcaption>OpenDock on a Windows desktop, with that PC's own apps and widgets.</figcaption>
+        <figcaption>A real screenshot: OpenDock on a Windows desktop, with that PC's own apps and widgets.</figcaption>
       </figure>
-      <Studio />
     </div>
   </section>
 
@@ -98,6 +139,8 @@ function networkNote(network: string[]): string {
         <h2 class="title" id="features-title">Everything the taskbar did, then the things it never could.</h2>
       </header>
 
+      <div class="feature-group">
+      <div class="chapter"><span class="chapter-index">01</span><h3>Your apps</h3></div>
       <article class="feature">
         <div class="feature-copy">
           <p class="eyebrow"><Icon name="window" size={14} />Apps widget <StatusBadge status="shipped" /></p>
@@ -138,6 +181,58 @@ function networkNote(network: string[]): string {
           <LauncherPanel />
         </div>
       </article>
+      </div>
+
+      <div class="feature-group">
+      <div class="chapter"><span class="chapter-index">02</span><h3>Make it yours</h3></div>
+      <article class="feature">
+        <div class="feature-copy">
+          <p class="eyebrow"><Icon name="palette" size={14} />Customise <StatusBadge status="shipped" /></p>
+          <h3>A dock that fits your wallpaper, and widgets that leave it</h3>
+          <p class="muted">
+            Skins restyle every OpenDock window and can change the dock's shape. Widgets can live on the desktop too,
+            and a scene brings back a whole setup in one click.
+          </p>
+          <ul class="checks">
+            <li>Ten built-in skins, each checked for contrast in light and dark</li>
+            <li>One bar, islands or chips, with a tint for bright or busy wallpapers</li>
+            <li>Desktop widgets that snap to a grid and remember each monitor</li>
+            <li>Scenes never touch the taskbar setting</li>
+          </ul>
+        </div>
+        <div class="artifact">
+          <div class="wallpaper" aria-hidden="true"></div>
+          <DeskPanel />
+        </div>
+      </article>
+      </div>
+
+      <div class="feature-group">
+      <div class="chapter"><span class="chapter-index">03</span><h3>For developers</h3></div>
+      <article class="feature is-flipped">
+        <div class="feature-copy">
+          <p class="eyebrow"><Icon name="code" size={14} />Developer widgets <StatusBadge status="shipped" /></p>
+          <h3>Your repositories, builds and local models, one glance away</h3>
+          <p class="muted">
+            Projects finds the git repositories in the folders you choose. CI status shows the latest GitHub Actions
+            runs, failures first. Local AI talks to Ollama on your own PC, and Vault capture drops a thought into
+            today's Obsidian note.
+          </p>
+          <ul class="checks">
+            <li>Branch, uncommitted changes, and ahead or behind for every repository</li>
+            <li>Open a project in Cursor, VS Code, a terminal or GitHub Desktop</li>
+            <li>CI status is off until you turn it on; a token stays in the system keychain</li>
+          </ul>
+        </div>
+        <div class="artifact">
+          <div class="wallpaper" aria-hidden="true"></div>
+          <ProjectsPanel />
+        </div>
+      </article>
+      </div>
+
+      <div class="feature-group">
+      <div class="chapter"><span class="chapter-index">04</span><h3>Automation and privacy</h3></div>
 
       <article class="feature">
         <div class="feature-copy">
@@ -165,12 +260,14 @@ function networkNote(network: string[]): string {
           <p class="eyebrow"><Icon name="shield" size={14} />Privacy Ledger <StatusBadge status="shipped" /></p>
           <h3>See every request it makes</h3>
           <p class="muted">
-            OpenDock has no servers and sends no telemetry. The two widgets that need the internet, weather and
-            calendars, can only reach the hosts they declare, and every request is listed in the Privacy Ledger.
+            OpenDock has no servers and sends no telemetry. The {onlineWidgets.length} widgets that go online
+            ({onlineWidgets.map((widget) => widget.name).join(", ")}) can only reach the hosts they declare. The
+            daily update check is the only other request, and you can turn it off. Every one is listed in the Privacy
+            Ledger.
           </p>
           <ul class="checks">
             <li>No account, ever</li>
-            <li>Calendar links kept in Windows Credential Manager</li>
+            <li>Calendar links and tokens kept in the system keychain</li>
             <li>Everything else stays in a local database on your PC</li>
           </ul>
         </div>
@@ -179,6 +276,7 @@ function networkNote(network: string[]): string {
           <LedgerPanel />
         </div>
       </article>
+      </div>
     </div>
   </section>
 
@@ -214,6 +312,36 @@ function networkNote(network: string[]): string {
       <p class="section-foot">
         <a class="link-arrow" href="/widgets/">Browse all widgets <Icon name="arrow" size={16} /></a>
       </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="platforms-title">
+    <div class="container">
+      <header class="section-head">
+        <p class="eyebrow">Platforms</p>
+        <h2 class="title" id="platforms-title">Made for Windows, with macOS and Linux on the way.</h2>
+        <p class="lead">
+          The taskbar replacement is Windows-only. The macOS and Linux builds come from the same release and are there
+          to try, with the caveats on the download page.
+        </p>
+      </header>
+      <ul class="platform-grid">
+        {
+          platforms.map((platform) => (
+            <li class="platform-card" data-for={platform.id}>
+              <p class="platform-detected">Your system</p>
+              <h3>{platform.name}</h3>
+              <p class:list={["status-word", `is-${platform.status}`]}>{statusWord[platform.status]}</p>
+              <p class="platform-req">{platform.requirement}</p>
+              <p class="platform-summary">{platform.summary}</p>
+              <a class="link-arrow" href={`/download/#${platform.id}`}>
+                {platform.name} downloads
+                <Icon name="arrow" size={16} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
     </div>
   </section>
 
@@ -285,15 +413,12 @@ function networkNote(network: string[]): string {
       </div>
       <div class="stack">
         <div class="hero-actions">
-          <a class="btn btn-primary" href="/download/">
-            <Icon name="download" size={18} />
-            Download {currentRelease.version}
-          </a>
+          <PlatformDownload />
           <a class="btn btn-secondary" href={releasePageUrl(currentRelease)}>Release notes</a>
         </div>
         <p class="band-note">
-          Windows 10 and 11, 64-bit. <a href="/download/#verify">Verify your download</a> with the published SHA-256
-          checksums.
+          Version {currentRelease.version} for Windows 10 and 11, 64-bit, with experimental macOS and Linux builds.
+          Every file has a published <a href="/download/#windows">SHA-256 checksum</a>.
         </p>
       </div>
     </div>

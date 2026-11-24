@@ -1,11 +1,11 @@
 # OpenDock
 
-> OpenDock is a free, open-source (MIT) dock and taskbar replacement for Windows 10 and 11. It shows pinned apps and open windows with live previews, a Start launcher, and widgets such as clock, media, weather, calendar and focus timer. Local automation rules can act on events. It has no account, no backend and no telemetry, and it always restores the Windows taskbar on quit, crash or uninstall.
+> OpenDock is a free, open-source (MIT) dock and taskbar replacement for Windows 10 and 11, with experimental macOS and Linux builds. It shows pinned apps and open windows with live previews, a Start launcher, and widgets such as clock, media, weather, calendar, focus timer and developer widgets for git repositories and CI. Skins, layouts, desktop widgets and scenes change how it looks. Local automation rules can act on events. It has no account, no backend and no telemetry, and it restores the Windows taskbar on quit, crash and uninstall.
 
 ## Pages
 
 - [Home](https://opendock.pages.dev/): What OpenDock does and how it protects your privacy
-- [Download](https://opendock.pages.dev/download/): The current Windows installers, requirements and checksum verification
+- [Download](https://opendock.pages.dev/download/): The current Windows installers, experimental macOS and Linux packages, requirements and checksum verification
 - [Widgets](https://opendock.pages.dev/widgets/): Every built-in widget, with what it stores and which hosts it contacts
 - [Documentation](https://opendock.pages.dev/docs/): Installation, user guide, security model and contributor guides
 - [Roadmap](https://opendock.pages.dev/roadmap/): 1.0 for Windows, the widget SDK, Linux and macOS
@@ -14,7 +14,7 @@
 
 ## Source
 
-- [GitHub repository](https://github.com/isaacobenzy/OpenDock): Source code, issues, discussions and releases
+- [GitHub repository](https://github.com/deathboy20/OpenDock): Source code, issues, discussions and releases
 
 ## Optional
 

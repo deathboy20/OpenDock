@@ -4,6 +4,12 @@ All notable changes to OpenDock are documented here. The format is based on [Kee
 
 ## [Unreleased]
 
+### Changed
+
+- **Website.** The download page offers every package in the release: the Windows installers, the universal macOS disk image, and AppImage, DEB and RPM packages for x64 and arm64 Linux, each with install and checksum steps. macOS and Linux are clearly marked experimental. Download buttons suggest the visitor's own system.
+- **Website.** A redesigned home page: the header floats like the dock, the live dock sits right under the headline, and new sections cover what's new in 0.4.0, Customise (skins, desktop widgets and scenes), the developer widgets and the three platforms. The live dock's **Look** tab tries islands and chips layouts on bright and busy wallpapers.
+- **Website.** Links point at the canonical repository, `github.com/deathboy20/OpenDock`, and the privacy copy names every widget that goes online.
+
 ## [0.4.0] - 2026-11-23
 
 Developer widgets, skins that can change the dock's shape and each widget's look, desktop widgets, scenes, and a daily check for new versions.
