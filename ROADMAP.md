@@ -8,7 +8,7 @@ Three principles guide every decision:
 2. **Acting, not just showing.** The dock pauses music before a meeting, warns before a limit, and always offers Undo.
 3. **Auditable.** Open source, a privacy ledger, and no accounts, telemetry or license keys.
 
-This roadmap is a statement of direction, not a promise of dates. Progress is tracked in [GitHub milestones](https://github.com/isaacobenzy/OpenDock/milestones), and anything here is open for discussion.
+This roadmap is a statement of direction, not a promise of dates. Progress is tracked in [GitHub milestones](https://github.com/deathboy20/OpenDock/milestones), and anything here is open for discussion.
 
 ## Where we are
 
@@ -19,19 +19,21 @@ This roadmap is a statement of direction, not a promise of dates. Progress is tr
 | Data layer | SQLite store and migrations, event bus, first-party widgets | Done (0.2) |
 | Automations | Rule engine, Automation Studio, recipes, activity log and Undo | Done (0.2) |
 | Windows shell integration | Taskbar replacement, screen-edge reservation, live window previews, restore on the exits OpenDock can see | Shipped in 0.2. A session end that kills OpenDock and the guard together can leave auto-hide on until the next launch. The manual restore rows are not yet recorded. |
+| Live settings and packages | Live dock settings, a restore-the-taskbar command, experimental Linux and macOS packages, a dock to try on the website | Done (0.3) |
+| Developer widgets and personalisation | Projects, Vault capture, Local AI and CI status widgets; skins that change the dock's shape, per-widget looks and options, desktop widgets, scenes, a daily update check | Done (0.4) |
 | **1.0 for Windows** | Code-signed installer, auto-updater, winget package, accessibility audit, localisation framework, per-monitor layouts | **Next** |
 | Widget SDK | `widget.json` manifest, sandboxed widget webviews, permission broker, starter template | Planned |
 | Linux | x64/arm64 AppImage, DEB and RPM build pipeline; runtime acceptance and shell integration are not verified | Experimental (build only) |
 | macOS | Universal DMG build pipeline; runtime behavior and shell integration are not verified | Experimental (build only) |
-| Ecosystem | Community widget index, scenes, shareable recipes | Planned |
+| Ecosystem | Community widget index, a shared skin gallery, shareable recipes and scenes | Planned |
 
 ## Ideas we're exploring
 
-- **Scenes.** One-click profiles (Work, Focus, Present, Evening) that change the layout, quiet hours and automations together. The first version is on the `feat/developer-widgets` branch; switching scenes from a rule is still to come.
+- **Scenes from rules.** Scenes shipped in 0.4. Next: let a rule switch scenes, for example to Present when a meeting starts.
 - **Context-aware dock.** Widgets that adapt to the focused app, such as CI status when an editor is active.
 - **Command palette and CLI.** A global hotkey to launch apps, run rules and toggle scenes, plus an `opendock` CLI and `opendock://` links.
-- **Developer widgets.** Pull request reviews, CI status, container lists and a local webhook tile you can update with `curl`.
-- **Personalisation.** Theme packs, widget stacks, and layout export and import.
+- **More developer widgets.** CI status shipped in 0.4. Still open: pull request reviews, container lists and a local webhook tile you can update with `curl`.
+- **Personalisation.** Skins with import and export shipped in 0.4. Still open: widget stacks, and exporting a whole layout.
 
 ## Platform notes
 
@@ -48,4 +50,4 @@ The dock sits at the operating system's shell boundary, so each platform has its
 
 ## Have an idea?
 
-Open a [feature request](https://github.com/isaacobenzy/OpenDock/issues/new?template=feature_request.yml) or start a thread in [Discussions](https://github.com/isaacobenzy/OpenDock/discussions).
+Open a [feature request](https://github.com/deathboy20/OpenDock/issues/new?template=feature_request.yml) or start a thread in [Discussions](https://github.com/deathboy20/OpenDock/discussions).

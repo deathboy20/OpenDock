@@ -1,6 +1,7 @@
 ---
 import Icon from "../../components/Icon.astro";
 import PageHead from "../../components/PageHead.astro";
+import PlatformDownload from "../../components/PlatformDownload.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { repoLinks, site } from "../../data/site";
 
@@ -27,10 +28,7 @@ const included = [
         <ul class="checks">
           {included.map((item) => <li>{item}</li>)}
         </ul>
-        <a class="btn btn-primary" href="/download/">
-          <Icon name="download" size={18} />
-          Download for Windows
-        </a>
+        <PlatformDownload />
       </div>
       <div class="stack">
         <h2>How it's sustained</h2>

@@ -1,0 +1,38 @@
+---
+import Icon from "../Icon.astro";
+
+// Example scene names; people name their own.
+const scenes = ["Work", "Focus", "Evening"];
+---
+
+<figure class="desk">
+  <div class="desk-tile desk-clock">
+    <strong><span>09</span><span>41</span></strong>
+    <small>Wednesday 21 October</small>
+  </div>
+  <div class="desk-tile desk-system">
+    <span class="desk-meter">
+      <span class="dk-ring" style="--p: 23"><Icon name="cpu" size={12} /></span>
+      <span><strong>23%</strong><small>CPU</small></span>
+    </span>
+    <span class="desk-meter">
+      <span class="dk-ring is-memory" style="--p: 61"><Icon name="grid" size={12} /></span>
+      <span><strong>61%</strong><small>Memory</small></span>
+    </span>
+  </div>
+  <div class="desk-tile desk-day">
+    <span class="desk-day-head"><strong>Day</strong><small>38% gone</small></span>
+    <span class="desk-bar" style="--p: 38"></span>
+  </div>
+  <figcaption class="desk-scenes">
+    <span class="desk-scenes-label">Scene</span>
+    {
+      scenes.map((scene) => (
+        <span class:list={["token", { "is-on": scene === "Focus" }]}>
+          {scene === "Focus" ? <Icon name="check" size={12} /> : null}
+          {scene}
+        </span>
+      ))
+    }
+  </figcaption>
+</figure>

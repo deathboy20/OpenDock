@@ -1,7 +1,7 @@
 export const site = {
   name: "OpenDock",
   url: "https://opendock.pages.dev",
-  repo: "https://github.com/isaacobenzy/OpenDock",
+  repo: "https://github.com/deathboy20/OpenDock",
   tagline: "The Windows taskbar, rebuilt in the open",
   description:
     "OpenDock replaces the Windows taskbar with a dock of your apps, live window previews and widgets that act for you. No account, no telemetry, MIT licensed.",

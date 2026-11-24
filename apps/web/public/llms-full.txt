@@ -1,31 +1,32 @@
 # OpenDock: extended context
 
-OpenDock is a free, open-source dock and taskbar replacement for Windows 10 and 11, licensed under MIT. Current version: 0.2.0.
+OpenDock is a free, open-source dock and taskbar replacement for Windows 10 and 11, licensed under MIT. Current version: 0.4.0. Experimental macOS (universal DMG) and Linux (AppImage, DEB and RPM for x64 and arm64) builds are published with each release; they are built and package-checked but not yet tested on a real desktop, and the taskbar features are Windows-only.
 
 ## What it does
 
 - Replaces the Windows taskbar: pinned apps and open windows grouped by app, live window previews on right-click, and a screen-edge reservation so maximised windows stop at the dock.
 - Start launcher with instant search over installed apps, pinning, and power actions that confirm before ending a session.
-- 14 widgets: Start, Apps, Volume, Quick actions, Clock, Now playing, Focus timer, Todos, Notes, Next event (iCal calendars), System, Battery, Weather and Day progress.
+- 18 widgets: Start, Apps, Clock, Now playing, Focus timer, Todos, Notes, Next event (iCal calendars), Volume, Quick actions, System, Battery, Weather, Day progress, and the developer widgets Projects (git repositories), Vault capture (Obsidian), Local AI (Ollama on this PC) and CI status (GitHub Actions).
+- Personalisation: ten built-in skins, skins imported or exported as JSON, dock layouts (one bar, islands or chips), per-widget looks and options, desktop widgets in their own windows behind other windows, and scenes that save and restore a whole setup.
 - Automation Studio: rules made of an event, optional conditions and actions (for example, pause media before a meeting). Rules are JSON data, not scripts, with dry runs, an activity log, cooldowns, rate limits and Undo.
 - Privacy Ledger: a local record of every network request.
 
 ## Privacy and security
 
 - No account, backend, telemetry or remote configuration.
-- Only the Weather widget (api.open-meteo.com, geocoding-api.open-meteo.com) and calendar feeds the user adds make network requests, through a host allow-list.
-- Data is stored locally in %APPDATA%\com.opendock.app; calendar feed links are stored in Windows Credential Manager.
-- The taskbar is restored on quit, crash (via a guard process), power actions, next start and uninstall.
+- Network requests come only from Weather (api.open-meteo.com, geocoding-api.open-meteo.com), Next event (the calendar hosts the user adds), CI status (api.github.com, off by default) and an anonymous daily update check (api.github.com) that can be turned off. Local AI talks only to Ollama on 127.0.0.1. Every request goes through a host allow-list and is listed in the Privacy Ledger.
+- Data is stored locally in %APPDATA%\com.opendock.app; calendar feed links and the optional GitHub token are stored in Windows Credential Manager.
+- The taskbar is restored on quit, crash (via a guard process), power actions, the next start and uninstall.
 
 ## Technology
 
 - Desktop app: Tauri 2 with a Rust core and a React 19 + TypeScript UI (apps/desktop).
 - Shared schemas: Zod and Rust validators tested against shared fixtures (packages/config-schema).
-- Storage: SQLite with migrations; settings in JSON.
+- Storage: SQLite with migrations; settings in versioned JSON.
 - Website: static Astro site on Cloudflare Pages (apps/web).
 
 ## Links
 
-- Source and releases: https://github.com/isaacobenzy/OpenDock
-- Documentation: https://github.com/isaacobenzy/OpenDock/tree/main/docs
-- License: https://github.com/isaacobenzy/OpenDock/blob/main/LICENSE
+- Source and releases: https://github.com/deathboy20/OpenDock
+- Documentation: https://github.com/deathboy20/OpenDock/tree/main/docs
+- License: https://github.com/deathboy20/OpenDock/blob/main/LICENSE

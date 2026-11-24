@@ -1,0 +1,59 @@
+---
+import Icon from "./Icon.astro";
+import { currentRelease, downloadUrl, platforms, primaryFile } from "../data/releases";
+
+type Props = {
+  /** "file" downloads the Windows installer or the macOS disk image straight away; "page" opens the download page. */
+  target?: "file" | "page";
+  label?: string;
+};
+
+const { target = "page", label } = Astro.props;
+
+// Linux has six packages and the browser can't tell x64 from arm64 reliably, so it always goes to the list.
+const choices = Object.fromEntries(
+  platforms.map((platform) => {
+    const direct = target === "file" && platform.id !== "linux";
+    const href = direct
+      ? downloadUrl(currentRelease, primaryFile(currentRelease, platform.id).name)
+      : platform.id === "windows" && target === "page"
+        ? "/download/"
+        : `/download/#${platform.id}`;
+    return [platform.id, { href, label: label ?? `Download for ${platform.name}`, experimental: platform.status === "experimental" }];
+  }),
+);
+const windows = choices.windows!;
+---
+
+<a class="btn btn-primary" href={windows.href} data-platform-download data-choices={JSON.stringify(choices)}>
+  <Icon name="download" size={18} />
+  <span data-platform-label>{windows.label}</span>
+  <span class="btn-tag" data-platform-tag hidden>Experimental</span>
+</a>
+
+<script>
+  import { detectPlatform } from "../data/platform";
+
+  type Choice = { href: string; label: string; experimental: boolean };
+  const nav = navigator as Navigator & { userAgentData?: { platform?: string } };
+  const detected = detectPlatform({
+    uaPlatform: nav.userAgentData?.platform,
+    platform: nav.platform,
+    userAgent: nav.userAgent,
+    touchPoints: nav.maxTouchPoints,
+  });
+
+  if (detected !== "other" && detected !== "windows") {
+    for (const link of document.querySelectorAll<HTMLAnchorElement>("[data-platform-download]")) {
+      const choices = JSON.parse(link.dataset.choices ?? "{}") as Record<string, Choice | undefined>;
+      const choice = choices[detected];
+      if (!choice) continue;
+      link.href = choice.href;
+      const label = link.querySelector("[data-platform-label]");
+      if (label) label.textContent = choice.label;
+      const tag = link.querySelector<HTMLElement>("[data-platform-tag]");
+      if (tag) tag.hidden = !choice.experimental;
+    }
+  }
+  document.documentElement.dataset.platform = detected;
+</script>

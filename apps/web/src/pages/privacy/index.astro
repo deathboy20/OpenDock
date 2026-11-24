@@ -2,9 +2,7 @@
 import PageHead from "../../components/PageHead.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { repoLinks } from "../../data/site";
-import { widgets } from "../../data/widgets";
-
-const online = widgets.filter((widget) => widget.network.length > 0);
+import { onlineWidgets as online } from "../../data/widgets";
 ---
 
 <BaseLayout

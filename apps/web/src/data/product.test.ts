@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { currentRelease } from "./releases";
+import { currentRelease, filesFor, platforms, primaryFile } from "./releases";
 import { widgets } from "./widgets";
 
 const repoFile = (path: string) => readFileSync(new URL(`../../../../${path}`, import.meta.url), "utf8");
@@ -25,8 +25,23 @@ describe("website facts match the product", () => {
     expect(currentRelease.version).toBe(tauri.version);
     expect(currentRelease.tag).toBe(`v${tauri.version}`);
     for (const file of currentRelease.files) {
-      expect(file.name).toContain(`_${tauri.version}_`);
+      // The same version marker scripts/collect-packages.mjs requires: RPM names use dashes.
+      expect(file.name).toContain(file.kind === "rpm" ? `-${tauri.version}-` : `_${tauri.version}_`);
     }
+  });
+
+  it("offers every package the release workflow builds", () => {
+    const collector = repoFile("scripts/collect-packages.mjs");
+    const built = [...collector.matchAll(/^\s+'(windows|linux|macos)-(\w+)': \[(.*)\],$/gm)].flatMap(
+      ([, os, arch, list]) => [...list.matchAll(/\['(\w+)'/g)].map(([, kind]) => `${os} ${arch} ${kind}`),
+    );
+    const offered = currentRelease.files.map(
+      (file) => `${file.platform} ${file.arch} ${file.kind === "setup" ? "nsis" : file.kind}`,
+    );
+    expect(built.length).toBe(9);
+    expect(offered.sort()).toEqual(built.sort());
+    for (const platform of platforms) expect(filesFor(currentRelease, platform.id).length).toBeGreaterThan(0);
+    for (const platform of platforms) expect(() => primaryFile(currentRelease, platform.id)).not.toThrow();
   });
 
   it("has a changelog entry for the advertised version", () => {

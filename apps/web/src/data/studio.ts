@@ -3,6 +3,14 @@ import type { IconName } from "./icons";
 /** Dock styles, in the same order as the desktop style picker. */
 export type StudioSkin = "glass" | "solid" | "midnight" | "minimal" | "neon" | "ink";
 
+/** Dock layouts, matching `dock.layout` in the desktop app's settings. */
+export type StudioLayout = "bar" | "islands" | "chips";
+
+/** Sample wallpapers, so the dock can be judged on a bright or busy desktop too. */
+export type StudioWallpaper = "evening" | "bright" | "busy";
+
+export type StudioChoice<T extends string> = { id: T; label: string; description: string };
+
 export type StudioApp = {
   id: string;
   name: string;
@@ -39,6 +47,18 @@ export const dockSkins: readonly StudioSkinOption[] = [
   { id: "minimal", label: "Minimal", description: "No bar, so items float on the wallpaper" },
   { id: "neon", label: "Neon", description: "Dark with a glowing accent outline" },
   { id: "ink", label: "Ink", description: "Opaque and high contrast" },
+];
+
+export const dockLayouts: readonly StudioChoice<StudioLayout>[] = [
+  { id: "bar", label: "One bar", description: "Everything in one bar, like a taskbar" },
+  { id: "islands", label: "Islands", description: "Start, your apps and your widgets in separate capsules" },
+  { id: "chips", label: "Chips", description: "Every item in its own capsule, floating on the wallpaper" },
+];
+
+export const studioWallpapers: readonly StudioChoice<StudioWallpaper>[] = [
+  { id: "evening", label: "Evening", description: "A calm, darker desktop" },
+  { id: "bright", label: "Bright", description: "A sunny photo, where glass docks get hard to read" },
+  { id: "busy", label: "Busy", description: "Strong shapes and colours behind the dock" },
 ];
 
 export const studioWidgets: readonly StudioWidget[] = [
